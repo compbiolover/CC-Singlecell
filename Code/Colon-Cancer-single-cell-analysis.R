@@ -29,47 +29,84 @@ setwd("~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/")
 
 #Copying in the functions that are helpful from the Li et al. paper. ----
 
-geneRank <- function(ranking1 = NULL,
-                    ranking2  = NULL,
-                    a1        = 1,
-                    a2        = 0){
-  gns = c(names(ranking1),names(ranking2))
+# geneRank <- function(ranking1 = NULL,
+#                     ranking2  = NULL,
+#                     a1        = 1,
+#                     a2        = 0){
+#   gns = c(names(ranking1),names(ranking2))
+#   gns = unique(gns)
+#   res = rep(0, length(gns))
+#   names(res) = gns
+#   for(i in names(res)) {
+#     res[i] = getRank(ranking1, i)*a1+getRank(ranking2, i)*a2
+#   }
+#   #res=res/sum(res) 
+#   res = res[order(res, decreasing = T)]
+#   res
+# }
+
+# getRank <- function(ranking = NULL,
+#                    gn      = NULL){
+#   if (gn %in% names(ranking)) {
+#     return(ranking[gn])
+#   }
+#   else return(0.0)
+# }
+
+# Ranking genes by three measurements
+geneRank <- function(ranking1 = NULL, ranking2 = NULL, ranking3 = NULL, a1 = 1,
+                     a2 = 0, a3 = 0){
+  gns = c(names(ranking1),names(ranking2),names(ranking3))
   gns = unique(gns)
   res = rep(0, length(gns))
   names(res) = gns
   for(i in names(res)) {
-    res[i] = getRank(ranking1, i)*a1+getRank(ranking2, i)*a2
+    res[i] = getRank(ranking1, i)*a1+getRank(ranking2, i)*a2+getRank(ranking3, i)*a3
   }
   #res=res/sum(res) 
   res = res[order(res, decreasing = T)]
   res
 }
 
-getRank <- function(ranking = NULL,
-                   gn      = NULL){
+getRank <- function(ranking = NULL, gn = NULL){
   if (gn %in% names(ranking)) {
     return(ranking[gn])
   }
   else return(0.0)
 }
+# grid.search <- function(ranking1 = NULL,
+#                        ranking2 = NULL,
+#                        N        = 50){
+#   res = NULL
+#   for(a1 in seq(0,1)){
+#     for(a2 in seq(0,1-a1)){
+#       ranking = geneRank(ranking1, ranking2,a1,a2)
+#       temp = benchdb(ranking, N)
+#       View(temp)
+#       View(res)
+#       if(is.null(res)) res = temp
+#       else res = cbind(res, temp)
+#     }
+#   }
+#   res
+#   View(res)
+# }
 
-grid.search <- function(ranking1 = NULL,
-                       ranking2 = NULL,
-                       N        = 50){
+
+grid.search <- function(ranking1 = NULL, ranking2 = NULL, ranking3 = NULL, N = 50){
   res = NULL
-  for(a1 in seq(0,1)){
-    for(a2 in seq(0,1-a1)){
-      ranking = geneRank(ranking1, ranking2,a1,a2)
+  for(a1 in seq(0,1,0.1)){
+    for(a2 in seq(0,1-a1,0.1)){
+      a3 = 1 - (a1+a2)
+      ranking = geneRank(ranking1, ranking2, ranking3,a1,a2,a3)
       temp = benchdb(ranking, N)
-      View(temp)
-      View(res)
       if(is.null(res)) res = temp
       else res = cbind(res, temp)
     }
   }
   res
-  View(res)
 }
+
 
 makeCVDataSets <- function(dd  = NULL,
                           pd   = NULL,
@@ -290,47 +327,27 @@ my_miRNA <- as.vector(my_miRNA)
 my_miRNA <- trimws(my_miRNA)
 
 
-#Reading in the HMMD V3.2 file
-hmdd <- read.csv("Data/miRNA-data/hmdd-3-2-all-data.txt", sep = '\t')
+#miRNAs from dbDEMC version 2.0----
+dbDEMC_high <- read.csv(file = "Data/miRNA-data/List-of-dbDEMC-2-0-miRNAs/dbDEMC-2.0-high.txt", sep = '\t')
+dbDEMC_low <- read.csv(file = "Data/miRNA-data/List-of-dbDEMC-2-0-miRNAs/dbDEMC-2.0-low.txt", sep = '\t')
+colnames(dbDEMC_low)[1] <- "miRNA.ID"
 
-#Reading in the miRNA similarity score information
-library(readxl)
-miRNA_similarity_names <- read_excel("Data/miRNA-data/miRNA-similarity-data/microRNA name.xls", col_names = FALSE)
-colnames(miRNA_similarity_names) <- "miRNAs"
-rownames(miRNA_similarity_names) <- miRNA_similarity_names$miRNAs
-miRNA_similarity <- read.csv("Data/miRNA-data/miRNA-similarity-data/miRNA similarity matrix.txt", sep = '\t')
-for (x in seq(1:length(colnames(miRNA_similarity)))){
-  colnames(miRNA_similarity)[x] <- rownames(miRNA_similarity_names)[x]
-}
+#Filtering to just the miRNAs associated with colorectal or colon cancer. 
+dbDEMC_high <- filter(dbDEMC_high, Cancer.Type=="colorectal cancer" | Cancer.Type=="colon cancer")
+dbDEMC_high_miRNAs <- subset(dbDEMC_high, select = miRBase.Update.ID)
+dbDEMC_high_miRNAs <- as.vector(dbDEMC_high_miRNAs)
 
-#This next section will be dedicated to getting the disease similarity part setup
+#miRNAs from miRmap----
+miRmap_transcripts <- read.csv(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homsap_transcripts.csv", sep = ',')
+#f <- function(x, pos) print(pos)
+#miRmap_targets <- read_csv_chunked(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homsap_targets.csv", chunk_size = 1000, callback = DataFrameCallback$new(f))
 
-
-# Using the hoardeR package targetScan() function to get the miRNA targets.
+#Now submitting these miRNAs to TargetScan to get genes to make a gene list for the third metric----
 my_num <- 1
-remove <- c("miR-451", "miR-21", "miR-221", "miR-154-3p/487-3p", "miR-487a")
 miRNA_targets <- list()
-my_miRNA[1] <- "let-7-5p/98-5p"
-my_miRNA[4] <- "miR-15a-3p"
-my_miRNA[5] <- "miR-15-5p"
-my_miRNA[12] <- "miR-30-5p"
-my_miRNA[14] <- "miR-25-3p/32-5p/92-3p/363-3p/367-3p"
-my_miRNA[16] <- "miR-34-5p/449-5p"
-my_miRNA[41] <- "miR-15-5p/16-5p/195-5p/424-5p/497-5p"
-my_miRNA[45] <- "miR-204-5p/211-5p"
-my_miRNA[52] <- "miR-302-3p/372-3p/373-3p/520-3p"
-my_miRNA[56] <- "miR-302-3p/372-3p/373-3p/520-3p"
-my_miRNA[77] <- "miR-96-5p/1271-5p"
-my_miRNA[80] <- "miR-96-5p/1271-5p"
-my_miRNA[86] <- "miR-21-5p/590-5p"
-
-
-my_miRNA <- setdiff(my_miRNA, remove)
-my_miRNA <- trimws(my_miRNA)
-
-for (m in my_miRNA[1:121]) {
+for (m in dbDEMC_high_miRNAs[1:500,]) {
   print(m)
-  current_target <- targetScan(mirna=my_miRNA[my_num], species="Human", release="7.2", maxOut= 50)
+  current_target <- targetScan(mirna=dbDEMC_high_miRNAs[my_num,], species="Human", release="7.2", maxOut= 10)
   miRNA_name <- m
   miRNA_name_final <- rep(miRNA_name, times=length(current_target$Ortholog))
   current_target <- cbind(current_target,miRNA_name_final)
@@ -338,10 +355,78 @@ for (m in my_miRNA[1:121]) {
   my_num <- my_num + 1
   print(my_num)
 }
-all_miRNA_targets <- do.call(rbind, miRNA_targets)
+
+all_miRNA_genes <- list()
+counter <- 1
+for (t in seq(1:length(miRNA_targets))){
+  current_miRNA <- miRNA_targets[[t]]
+  common_genes_from_single_miRNA <- intersect(current_miRNA$Ortholog, miRmap_transcripts$gene_name)
+  all_miRNA_genes[[counter]] <- common_genes_from_single_miRNA
+  counter <- counter + 1 
+}
+
+for (x in seq(1:50)){
+  current_list <- all_miRNA_genes[[x]]
+  
+}
+all_miRNA_targets <- do.call(rbind, all_miRNA_genes)
 all_miRNA_targets <- arrange(all_miRNA_targets, desc(consSites))
-miRNA_gene_intersect <- intersect(all_miRNA_targets$Ortholog, genes_in_bulk_RNA)
+miRNA_gene_intersect <- intersect(all_miRNA_targets$Ortholog, miRmap_transcripts$gene_name)
 miRNA_gene_intersect
+
+#Reading in the HMMD V3.2 file
+# hmdd <- read.csv("Data/miRNA-data/hmdd-3-2-all-data.txt", sep = '\t')
+
+#All of this code is on hiatus until a further date----
+# #Reading in the miRNA similarity score information
+# library(readxl)
+# miRNA_similarity_names <- read_excel("Data/miRNA-data/miRNA-similarity-data/microRNA name.xls", col_names = FALSE)
+# colnames(miRNA_similarity_names) <- "miRNAs"
+# rownames(miRNA_similarity_names) <- miRNA_similarity_names$miRNAs
+# miRNA_similarity <- read.csv("Data/miRNA-data/miRNA-similarity-data/miRNA similarity matrix.txt", sep = '\t')
+# for (x in seq(1:length(colnames(miRNA_similarity)))){
+#   colnames(miRNA_similarity)[x] <- rownames(miRNA_similarity_names)[x]
+# }
+# 
+# #This next section will be dedicated to getting the disease similarity part setup
+# 
+# 
+# # Using the hoardeR package targetScan() function to get the miRNA targets.
+# my_num <- 1
+# remove <- c("miR-451", "miR-21", "miR-221", "miR-154-3p/487-3p", "miR-487a")
+# miRNA_targets <- list()
+# my_miRNA[1] <- "let-7-5p/98-5p"
+# my_miRNA[4] <- "miR-15a-3p"
+# my_miRNA[5] <- "miR-15-5p"
+# my_miRNA[12] <- "miR-30-5p"
+# my_miRNA[14] <- "miR-25-3p/32-5p/92-3p/363-3p/367-3p"
+# my_miRNA[16] <- "miR-34-5p/449-5p"
+# my_miRNA[41] <- "miR-15-5p/16-5p/195-5p/424-5p/497-5p"
+# my_miRNA[45] <- "miR-204-5p/211-5p"
+# my_miRNA[52] <- "miR-302-3p/372-3p/373-3p/520-3p"
+# my_miRNA[56] <- "miR-302-3p/372-3p/373-3p/520-3p"
+# my_miRNA[77] <- "miR-96-5p/1271-5p"
+# my_miRNA[80] <- "miR-96-5p/1271-5p"
+# my_miRNA[86] <- "miR-21-5p/590-5p"
+# 
+# 
+# my_miRNA <- setdiff(my_miRNA, remove)
+# my_miRNA <- trimws(my_miRNA)
+# 
+# for (m in my_miRNA[1:121]) {
+#   print(m)
+#   current_target <- targetScan(mirna=my_miRNA[my_num], species="Human", release="7.2", maxOut= 50)
+#   miRNA_name <- m
+#   miRNA_name_final <- rep(miRNA_name, times=length(current_target$Ortholog))
+#   current_target <- cbind(current_target,miRNA_name_final)
+#   miRNA_targets[[m]] <- current_target
+#   my_num <- my_num + 1
+#   print(my_num)
+# }
+# all_miRNA_targets <- do.call(rbind, miRNA_targets)
+# all_miRNA_targets <- arrange(all_miRNA_targets, desc(consSites))
+# miRNA_gene_intersect <- intersect(all_miRNA_targets$Ortholog, genes_in_bulk_RNA)
+# miRNA_gene_intersect
 
 #Now doing the grid search of optimal values for the linear, integrated model----
 #Currently just two metrics (MAD and SDE).
@@ -548,6 +633,12 @@ all_active_coefs_merged <- do.call(rbind, all_active_coefs)
 #colnames(test_preds)[1] <- "Predicted C-index on Test data"
 # write.csv(all_active_coefs_merged, file = my.filename, row.names = TRUE, quote = FALSE)
 
+
+
+#Doing heatmap of weights for linear model with the color shading indicating what the c-index value is----
+for (x in cox_models){
+  print(x)
+}
 
 
 #With random genes selected of the same size as our N significant ones ----
