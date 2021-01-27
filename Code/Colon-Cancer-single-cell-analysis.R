@@ -339,15 +339,22 @@ dbDEMC_high_miRNAs <- as.vector(dbDEMC_high_miRNAs)
 
 #miRNAs from miRmap----
 miRmap_transcripts <- read.csv(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homsap_transcripts.csv", sep = ',')
+miRmap_mirnas <- read.csv(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homsap_mirnas.csv", sep = ',')
+
 #f <- function(x, pos) print(pos)
 #miRmap_targets <- read_csv_chunked(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homsap_targets.csv", chunk_size = 1000, callback = DataFrameCallback$new(f))
+
+
+#Common miRNAs between databases----
+#Intersection between the miRNAs of the two databases
+common_mirnas <- intersect(miRmap_mirnas$mature_name, dbDEMC_high_miRNAs$miRBase.Update.ID)
 
 #Now submitting these miRNAs to TargetScan to get genes to make a gene list for the third metric----
 my_num <- 1
 miRNA_targets <- list()
-for (m in dbDEMC_high_miRNAs[1:500,]) {
+for (m in common_mirnas[1:50]) {
   print(m)
-  current_target <- targetScan(mirna=dbDEMC_high_miRNAs[my_num,], species="Human", release="7.2", maxOut= 10)
+  current_target <- targetScan(mirna=common_mirnas[my_num], species="Human", release="7.2", maxOut= NULL)
   miRNA_name <- m
   miRNA_name_final <- rep(miRNA_name, times=length(current_target$Ortholog))
   current_target <- cbind(current_target,miRNA_name_final)
@@ -356,19 +363,50 @@ for (m in dbDEMC_high_miRNAs[1:500,]) {
   print(my_num)
 }
 
-all_miRNA_genes <- list()
 counter <- 1
-for (t in seq(1:length(miRNA_targets))){
-  current_miRNA <- miRNA_targets[[t]]
-  common_genes_from_single_miRNA <- intersect(current_miRNA$Ortholog, miRmap_transcripts$gene_name)
-  all_miRNA_genes[[counter]] <- common_genes_from_single_miRNA
-  counter <- counter + 1 
+total_list <- list()
+for (i in miRNA_targets){
+  current_df <- i
+  gene_list <- current_df$Ortholog
+  mirna_list <- current_df$miRNA_name_final
+  simple_list <- cbind(gene_list,mirna_list)
+  total_list[[counter]] <- simple_list
+  counter <- counter + 1
 }
 
-for (x in seq(1:50)){
-  current_list <- all_miRNA_genes[[x]]
-  
+counter <- 1
+all_miRs_for_score <- list()
+all_genes_for_score <- list()
+for (l in total_list){
+  current_df <- l
+  current_miRs <- current_df[,'mirna_list']
+  all_miRs_for_score[[counter]] <- unique(current_miRs)
+  current_genes <- current_df[,'gene_list']
+  all_genes_for_score[[counter]] <- current_genes
+  counter <- counter + 1
 }
+
+all_miRs_for_score <- unlist(all_miRs_for_score)
+all_genes_for_score <-unlist(all_genes_for_score)
+all_genes_for_score_unique <- unique(all_genes_for_score)
+
+miRNA_score <- matrix(data = 0, nrow = length(all_genes_for_score_unique), ncol = length(all_miRs_for_score), dimnames = list(all_genes_for_score_unique, all_miRs_for_score))
+miRNA_score <- as.data.frame(miRNA_score)
+
+#Checking to see for each miRNA (colname) if it interacts with a particular row.
+#If it does it get a plus one to that cell. If it does not it moves to next cell
+for (i in rownames(miRNA_score)){
+  for (x in miRNA_targets){
+    current_df <- x
+    if (i %in% current_df$Ortholog){
+      miRNA_to_add <- unique(current_df$miRNA_name_final)
+      miRNA_score[i,miRNA_to_add]<- miRNA_score[i, miRNA_to_add] + 1
+    }
+    
+  }
+}
+
+
 all_miRNA_targets <- do.call(rbind, all_miRNA_genes)
 all_miRNA_targets <- arrange(all_miRNA_targets, desc(consSites))
 miRNA_gene_intersect <- intersect(all_miRNA_targets$Ortholog, miRmap_transcripts$gene_name)
