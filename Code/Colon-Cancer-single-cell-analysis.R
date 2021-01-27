@@ -194,6 +194,7 @@ all_tumor_cells_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_tumor_all_c
 #geo_ega_id_match <- read.csv("Data/Single-cell-data/GSE81861_GEO_EGA_ID_match.csv")
 
 
+
 #Loading the bulk RNA seq files. ----
 #Define query.
 colon_query <- GDCquery(project       = "TCGA-COAD",
@@ -262,7 +263,17 @@ colnames(tumor_gene_names)[1] <- "gene_short_name"
 rownames(tumor_gene_names) <- tumor_gene_names$gene_short_name
 all_tumor_cells_fpkm_denoised <- as.matrix(all_tumor_cells_fpkm_denoised)
 
+#Doing some pre-processing of the rownames to make stuff cleaner----
+current_rowname_split <- strsplit(rownames(all_tumor_cells_fpkm_denoised), "_")
 
+finished_gene_list <- c()
+current_list <- current_rowname_split
+for (y in seq(1:length(current_list))){
+  #print(current_list[[y]][2])
+  finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
+  }
+
+finished_gene_list <- unique(finished_gene_list)
 
 
 #Moncole3 steps ----
@@ -272,8 +283,8 @@ all_tumor_cells_fpkm_denoised <- as.matrix(all_tumor_cells_fpkm_denoised)
 #PCA and UMAP to help cluster the cells and learn their order orientation in space. I plot the VIM and CDH1 expression levels to
 #understand where to set the start point of the pseudotime calculation. I then plot the graph with the pseudotime calculated
 #to get a view of what it looks like. 
-vim_genes <- c("chr10:17256237-17279592_VIM_ENSG00000026025.9", "chr15:101811021-101817705_VIMP_ENSG00000131871.10", "chr6:126923501-126924795_VIMP1_ENSG00000220548.3", "chr10:17256237-17279592_VIM-AS1_ENSG00000229124.2")
-cdh1_genes <- c("chr5:141232937-141258811_PCDH1_ENSG00000156453.9", "chr16:68771127-68869451_CDH1_ENSG00000039068.14")
+vim_genes <- c("VIM", "VIMP", "VIMP1", "VIM-AS1")
+cdh1_genes <- c("PCDH1", "CDH1")
 cell_data_set <- new_cell_data_set(all_tumor_cells_fpkm_denoised,gene_metadata=tumor_gene_names)
 cds <- preprocess_cds(cell_data_set, num_dim=100, method="PCA")
 cds <- reduce_dimension(cds)
@@ -476,7 +487,7 @@ miRNA_gene_intersect
 
 #Now doing the grid search of optimal values for the linear, integrated model----
 #Currently just two metrics (MAD and SDE).
-weights <- seq(from = 0, to=1, by=0.1)
+weights <- seq(from = 0, to=0.3, by=0.1)
 df_index <- 1
 integrated_gene_lists <- list()
 a3 <- 0.1
