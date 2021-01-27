@@ -63,8 +63,8 @@ geneRank <- function(ranking1 = NULL, ranking2 = NULL, ranking3 = NULL, a1 = 1,
   for(i in names(res)) {
     res[i] = getRank(ranking1, i)*a1+getRank(ranking2, i)*a2+getRank(ranking3, i)*a3
   }
-  #res=res/sum(res) 
-  res = res[order(res, decreasing = T)]
+  #res=res/sum(res)
+  #res = res[order(res, decreasing = T, method = "radix")]
   res
 }
 
@@ -406,6 +406,14 @@ for (i in rownames(miRNA_score)){
   }
 }
 
+#Now calculating the rowsums of each gene for total number of miRNA interactions----
+mirna_gene_list <- rowSums(miRNA_score)
+mirna_gene_list <- as.data.frame(mirna_gene_list)
+colnames(mirna_gene_list)[1] <- "Counts"
+mirna_gene_list <- arrange(mirna_gene_list, desc(Counts))
+mirna_gene_list <- as.vector(mirna_gene_list)
+mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
+mirna.ranking <- as.vector(mirna.ranking)
 
 all_miRNA_targets <- do.call(rbind, all_miRNA_genes)
 all_miRNA_targets <- arrange(all_miRNA_targets, desc(consSites))
@@ -471,10 +479,11 @@ miRNA_gene_intersect
 weights <- seq(from = 0, to=1, by=0.1)
 df_index <- 1
 integrated_gene_lists <- list()
+a3 <- 0.1
 
 for (x in weights) {
   print(x)
-  current_ranking <- geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking, a1=x, a2=1-x)
+  current_ranking <- geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking, ranking3 = mirna.ranking,  a1=x, a2=1-(x+a3), a3= 0.1)
   current_ranking <- as.data.frame(current_ranking)
   integrated_gene_lists[[df_index]] <- current_ranking
   df_index <- df_index + 1
