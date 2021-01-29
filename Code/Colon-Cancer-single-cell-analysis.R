@@ -271,10 +271,15 @@ current_list <- current_rowname_split
 for (y in seq(1:length(current_list))){
   #print(current_list[[y]][2])
   finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
-  }
+}
 
-finished_gene_list <- unique(finished_gene_list)
+#rownames(all_tumor_cells_fpkm_denoised) <- rownames(finished_gene_list)
+# finished_gene_list <- unique(finished_gene_list)
+# finished_gene_list <- as.data.frame(finished_gene_list)
+# colnames(finished_gene_list)[1] <- "gene_short_name"
+# rownames(finished_gene_list) <- finished_gene_list$gene_short_name
 
+#all_tumor_cells_fpkm_denoised <- filter(all_tumor_cells_fpkm_denoised, rownames(all_tumor_cells_fpkm_denoised) %in% rownames(finished_gene_list))
 
 #Moncole3 steps ----
 #Here We first are making some vectors of VIM genes (mesencymal progression marker) and CDH genes (epithelial marker) that I can use to
@@ -283,8 +288,8 @@ finished_gene_list <- unique(finished_gene_list)
 #PCA and UMAP to help cluster the cells and learn their order orientation in space. I plot the VIM and CDH1 expression levels to
 #understand where to set the start point of the pseudotime calculation. I then plot the graph with the pseudotime calculated
 #to get a view of what it looks like. 
-vim_genes <- c("VIM", "VIMP", "VIMP1", "VIM-AS1")
-cdh1_genes <- c("PCDH1", "CDH1")
+vim_genes <- c("chr10:17256237-17279592_VIM_ENSG00000026025.9", "chr15:101811021-101817705_VIMP_ENSG00000131871.10", "chr6:126923501-126924795_VIMP1_ENSG00000220548.3", "chr10:17256237-17279592_VIM-AS1_ENSG00000229124.2")
+cdh1_genes <- c("chr5:141232937-141258811_PCDH1_ENSG00000156453.9", "chr16:68771127-68869451_CDH1_ENSG00000039068.14")
 cell_data_set <- new_cell_data_set(all_tumor_cells_fpkm_denoised,gene_metadata=tumor_gene_names)
 cds <- preprocess_cds(cell_data_set, num_dim=100, method="PCA")
 cds <- reduce_dimension(cds)
@@ -363,7 +368,7 @@ common_mirnas <- intersect(miRmap_mirnas$mature_name, dbDEMC_high_miRNAs$miRBase
 #Now submitting these miRNAs to TargetScan to get genes to make a gene list for the third metric----
 my_num <- 1
 miRNA_targets <- list()
-for (m in common_mirnas[1:50]) {
+for (m in common_mirnas[1:300]) {
   print(m)
   current_target <- targetScan(mirna=common_mirnas[my_num], species="Human", release="7.2", maxOut= NULL)
   miRNA_name <- m
@@ -374,6 +379,8 @@ for (m in common_mirnas[1:50]) {
   print(my_num)
 }
 
+#Simplifying the output of the targetscan commands to just the Gene name
+#and the mirna columns
 counter <- 1
 total_list <- list()
 for (i in miRNA_targets){
@@ -424,15 +431,18 @@ colnames(mirna_gene_list)[1] <- "Counts"
 mirna_gene_list <- arrange(mirna_gene_list, desc(Counts))
 mirna_gene_list <- as.vector(mirna_gene_list)
 mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
+colnames(mirna.ranking)[1] <- "Score"
 mirna.ranking <- as.vector(mirna.ranking)
 
-all_miRNA_targets <- do.call(rbind, all_miRNA_genes)
-all_miRNA_targets <- arrange(all_miRNA_targets, desc(consSites))
-miRNA_gene_intersect <- intersect(all_miRNA_targets$Ortholog, miRmap_transcripts$gene_name)
-miRNA_gene_intersect
+write.csv(mirna.ranking, file = "Data/Exported-data/mirna-ranking.csv")
+#Loading in a large set of well known EMT genes----
+emt_genes <- read.csv(file = "Data/EMT-gene-data/emt-hallmark-genes.csv", sep = ',')
+common_genes <- intersect(head(emt_genes$Genes, n=20), rownames(mirna.ranking))
 
-#Reading in the HMMD V3.2 file
-# hmdd <- read.csv("Data/miRNA-data/hmdd-3-2-all-data.txt", sep = '\t')
+#Loading in a defined set of colon cancer genes----
+cc_genes <- read.csv(file = "Data/Colon-cancer-markers/cc-markers.csv", sep = ',')
+common_cc_genes <- intersect(cc_genes$Markers, head(emt_genes$Genes, n =80))
+
 
 #All of this code is on hiatus until a further date----
 # #Reading in the miRNA similarity score information
@@ -487,7 +497,7 @@ miRNA_gene_intersect
 
 #Now doing the grid search of optimal values for the linear, integrated model----
 #Currently just two metrics (MAD and SDE).
-weights <- seq(from = 0, to=0.3, by=0.1)
+weights <- seq(from = 0, to=1, by=0.1)
 df_index <- 1
 integrated_gene_lists <- list()
 a3 <- 0.1
