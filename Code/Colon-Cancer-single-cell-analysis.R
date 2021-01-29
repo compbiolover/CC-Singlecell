@@ -323,6 +323,7 @@ mads <- apply(all_tumor_cells_fpkm_denoised,1,mad)
 index <- order(mads, decreasing=TRUE)
 mad.ranking<- mads[index]
 mad.ranking<-abs(mad.ranking)/sum(abs(mad.ranking))
+save(mad.ranking, file = "Data/Exported-data/R-objects/mad.ranking.RData")
 
 #3.2 The switchde (SDE) metric ----
 sdes <- switchde(all_tumor_cells_fpkm_denoised, as.numeric(pseudotime_data$Pseudotime), verbose = TRUE)
@@ -332,6 +333,7 @@ vim.sdes.rank <- sde.filtered[index,]
 vim.sdes.ranking <- vim.sdes.rank$k
 names(vim.sdes.ranking) <- vim.sdes.rank$gene
 vim.sdes.ranking<-abs(vim.sdes.ranking)/sum(abs(vim.sdes.ranking))
+save(vim.sdes.ranking, file = "Data/Exported-data/R-objects/vim.sdes.ranking.RData")
 
 #3.3 The miRNA metric ----
 #Loading the microRNA data from Mary----
@@ -432,9 +434,21 @@ mirna_gene_list <- arrange(mirna_gene_list, desc(Counts))
 mirna_gene_list <- as.vector(mirna_gene_list)
 mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
 colnames(mirna.ranking)[1] <- "Score"
-mirna.ranking <- as.vector(mirna.ranking)
 
-write.csv(mirna.ranking, file = "Data/Exported-data/mirna-ranking.csv")
+#Converting the gene symbols to Ensembl gene ids to have a common gene naming----
+#system with other metrics
+library(EnsDb.Hsapiens.v79)
+
+# 2. Convert from gene.symbol to ensembl.gene
+geneSymbols <-  c('DDX26B','CCDC83',  'MAST3', 'RPL11', 'ZDHHC20',  'LUC7L3',  'SNORD49A',  'CTSH', 'ACOT8')
+
+geneIDs2 <- ensembldb::select(EnsDb.Hsapiens.v79, keys= geneSymbols, keytype = "SYMBOL", columns = c("SYMBOL","GENEID"))
+
+mirna.ranking <- as.vector(mirna.ranking)
+save(mirna.ranking, file = "Data/Exported-data/R-objects/mirna.ranking.RData")
+#write.csv(mirna.ranking, file = "Data/Exported-data/mirna-ranking.csv")
+
+
 #Loading in a large set of well known EMT genes----
 emt_genes <- read.csv(file = "Data/EMT-gene-data/emt-hallmark-genes.csv", sep = ',')
 common_genes <- intersect(head(emt_genes$Genes, n=20), rownames(mirna.ranking))
