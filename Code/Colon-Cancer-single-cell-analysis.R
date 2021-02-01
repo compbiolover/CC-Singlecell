@@ -323,6 +323,16 @@ mads <- apply(all_tumor_cells_fpkm_denoised,1,mad)
 index <- order(mads, decreasing=TRUE)
 mad.ranking<- mads[index]
 mad.ranking<-abs(mad.ranking)/sum(abs(mad.ranking))
+
+current_rowname_split <- strsplit(names(mad.ranking), "_")
+finished_gene_list <- c()
+current_list <- current_rowname_split
+for (y in seq(1:length(current_list))){
+  #print(current_list[[y]][2])
+  finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
+}
+
+names(mad.ranking) <- finished_gene_list
 save(mad.ranking, file = "Data/Exported-data/R-objects/mad.ranking.RData")
 
 #3.2 The switchde (SDE) metric ----
@@ -333,6 +343,17 @@ vim.sdes.rank <- sde.filtered[index,]
 vim.sdes.ranking <- vim.sdes.rank$k
 names(vim.sdes.ranking) <- vim.sdes.rank$gene
 vim.sdes.ranking<-abs(vim.sdes.ranking)/sum(abs(vim.sdes.ranking))
+
+current_rowname_split <- strsplit(names(vim.sdes.ranking), "_")
+finished_gene_list <- c()
+current_list <- current_rowname_split
+for (y in seq(1:length(current_list))){
+  #print(current_list[[y]][2])
+  finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
+}
+
+names(vim.sdes.ranking) <- finished_gene_list
+
 save(vim.sdes.ranking, file = "Data/Exported-data/R-objects/vim.sdes.ranking.RData")
 
 #3.3 The miRNA metric ----
@@ -370,7 +391,7 @@ common_mirnas <- intersect(miRmap_mirnas$mature_name, dbDEMC_high_miRNAs$miRBase
 #Now submitting these miRNAs to TargetScan to get genes to make a gene list for the third metric----
 my_num <- 1
 miRNA_targets <- list()
-for (m in common_mirnas[1:300]) {
+for (m in common_mirnas[1:900]) {
   print(m)
   current_target <- targetScan(mirna=common_mirnas[my_num], species="Human", release="7.2", maxOut= NULL)
   miRNA_name <- m
@@ -440,9 +461,9 @@ colnames(mirna.ranking)[1] <- "Score"
 library(EnsDb.Hsapiens.v79)
 
 # 2. Convert from gene.symbol to ensembl.gene
-geneSymbols <-  c('DDX26B','CCDC83',  'MAST3', 'RPL11', 'ZDHHC20',  'LUC7L3',  'SNORD49A',  'CTSH', 'ACOT8')
+geneSymbols <-  rownames(mirna.ranking)
 
-geneIDs2 <- ensembldb::select(EnsDb.Hsapiens.v79, keys= geneSymbols, keytype = "SYMBOL", columns = c("SYMBOL","GENEID"))
+geneIDs2 <- ensembldb::select(EnsDb.Hsapiens.v79, keys= geneSymbols, keytype = "SYMBOL", columns = c("SYMBOL","GENEID", "ENTREZID","UNIPROTID", "PROTEINDOMAINID"))
 
 mirna.ranking <- as.vector(mirna.ranking)
 save(mirna.ranking, file = "Data/Exported-data/R-objects/mirna.ranking.RData")
@@ -455,7 +476,7 @@ common_genes <- intersect(head(emt_genes$Genes, n=20), rownames(mirna.ranking))
 
 #Loading in a defined set of colon cancer genes----
 cc_genes <- read.csv(file = "Data/Colon-cancer-markers/cc-markers.csv", sep = ',')
-common_cc_genes <- intersect(cc_genes$Markers, head(emt_genes$Genes, n =80))
+common_cc_genes <- intersect(cc_genes$Markers, head(rownames(mirna.ranking), n=200))
 
 
 #All of this code is on hiatus until a further date----
