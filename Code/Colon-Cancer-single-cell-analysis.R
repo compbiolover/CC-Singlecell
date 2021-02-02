@@ -560,6 +560,19 @@ for (x in seq(1:length(integrated_gene_lists))){
   gene_lists_to_test[[x]] <- gene_names_to_test
 }
 
+
+#Changing the colnames of the signle cell dataframe to the simple gene name so
+#that subsetting works
+current_colname_split <- strsplit(colnames(all_tumor_cells_fpkm_denoised_df), "_")
+finished_gene_list <- c()
+current_list <- current_rowname_split
+for (y in seq(1:length(current_list))){
+  #print(current_list[[y]][2])
+  finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
+}
+
+colnames(all_tumor_cells_fpkm_denoised_df) <- finished_gene_list
+
 genes_of_interest <- list()
 for (x in seq(1:length(integrated_gene_lists))){
   current_list <- gene_lists_to_test[[x]]
