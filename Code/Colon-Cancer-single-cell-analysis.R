@@ -353,7 +353,6 @@ for (y in seq(1:length(current_list))){
 }
 
 names(vim.sdes.ranking) <- finished_gene_list
-
 save(vim.sdes.ranking, file = "Data/Exported-data/R-objects/vim.sdes.ranking.RData")
 
 #3.3 The miRNA metric ----
@@ -449,12 +448,12 @@ for (i in rownames(miRNA_score)){
 
 #Now calculating the rowsums of each gene for total number of miRNA interactions----
 mirna_gene_list <- rowSums(miRNA_score)
-mirna_gene_list <- as.data.frame(mirna_gene_list)
-colnames(mirna_gene_list)[1] <- "Counts"
-mirna_gene_list <- arrange(mirna_gene_list, desc(Counts))
-mirna_gene_list <- as.vector(mirna_gene_list)
 mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
-colnames(mirna.ranking)[1] <- "Score"
+mirna.ranking <- sort(mirna.ranking, decreasing = TRUE)
+
+
+
+
 
 #Converting the gene symbols to Ensembl gene ids to have a common gene naming----
 #system with other metrics
@@ -535,15 +534,20 @@ common_cc_genes <- intersect(cc_genes$Markers, head(rownames(mirna.ranking), n=2
 weights <- seq(from = 0, to=1, by=0.1)
 df_index <- 1
 integrated_gene_lists <- list()
-a3 <- 0.1
+a3_weights <- seq(from = 0, to=1, by=0.1)
 
-for (x in weights) {
+
+for (x in a3_weights){
   print(x)
-  current_ranking <- geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking, ranking3 = mirna.ranking,  a1=x, a2=1-(x+a3), a3= 0.1)
-  current_ranking <- as.data.frame(current_ranking)
-  integrated_gene_lists[[df_index]] <- current_ranking
-  df_index <- df_index + 1
+  for (y in weights) {
+    print(y)
+    current_ranking <- geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking, ranking3 = mirna.ranking,  a1=x, a2=1-(x+a3), a3= y)
+    current_ranking <- as.data.frame(current_ranking)
+    integrated_gene_lists[[df_index]] <- current_ranking
+    df_index <- df_index + 1
+  }
 }
+
 #Subsetting the gene expression data frame to just the top N genes found from the integrated ranking at different combinations/values of weights ----
 gene_lists_to_test <- list()
 all_tumor_cells_fpkm_denoised_df <- as.data.frame(all_tumor_cells_fpkm_denoised)
