@@ -597,10 +597,8 @@ for (x in seq(1:length(integrated_gene_lists))) {
   finished_gene_list <- c()
   current_list <- all_split_colnames[[x]]
   for (y in seq(1:length(current_list))){
-    #print(current_list[[y]][2])
-    finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
+    finished_gene_list <- c(finished_gene_list, current_list[[y]])
   }
-  finished_gene_list <- unique(finished_gene_list)
   finished_sets[[x]] <-finished_gene_list
 }
 
