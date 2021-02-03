@@ -29,51 +29,51 @@ setwd("~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/")
 
 #Copying in the functions that are helpful from the Li et al. paper. ----
 
-# geneRank <- function(ranking1 = NULL,
-#                     ranking2  = NULL,
-#                     a1        = 1,
-#                     a2        = 0){
-#   gns = c(names(ranking1),names(ranking2))
-#   gns = unique(gns)
-#   res = rep(0, length(gns))
-#   names(res) = gns
-#   for(i in names(res)) {
-#     res[i] = getRank(ranking1, i)*a1+getRank(ranking2, i)*a2
-#   }
-#   #res=res/sum(res) 
-#   res = res[order(res, decreasing = T)]
-#   res
-# }
+ # geneRank <- function(ranking1 = NULL,
+ #                     ranking2  = NULL,
+ #                     a1        = 1,
+ #                     a2        = 0){
+ #   gns = c(names(ranking1),names(ranking2))
+ #   gns = unique(gns)
+ #   res = rep(0, length(gns))
+ #   names(res) = gns
+ #   for(i in names(res)) {
+ #     res[i] = getRank(ranking1, i)*a1+getRank(ranking2, i)*a2
+ #   }
+ #   #res=res/sum(res) 
+ #   res = res[order(res, decreasing = T)]
+ #   res
+ # }
+ # 
+ # getRank <- function(ranking = NULL,
+ #                    gn      = NULL){
+ #   if (gn %in% names(ranking)) {
+ #     return(ranking[gn])
+ #   }
+ #   else return(0.0)
+ # }
 
-# getRank <- function(ranking = NULL,
-#                    gn      = NULL){
-#   if (gn %in% names(ranking)) {
-#     return(ranking[gn])
-#   }
-#   else return(0.0)
-# }
-
-# Ranking genes by three measurements
+#Ranking genes by three measurements
 geneRank <- function(ranking1 = NULL, ranking2 = NULL, ranking3 = NULL, a1 = 1,
-                     a2 = 0, a3 = 0){
-  gns = c(names(ranking1),names(ranking2),names(ranking3))
-  gns = unique(gns)
-  res = rep(0, length(gns))
-  names(res) = gns
-  for(i in names(res)) {
-    res[i] = getRank(ranking1, i)*a1+getRank(ranking2, i)*a2+getRank(ranking3, i)*a3
-  }
-  #res=res/sum(res)
-  #res = res[order(res, decreasing = T, method = "radix")]
-  res
-}
+                      a2 = 0, a3 = 0){
+   gns = c(names(ranking1),names(ranking2),names(ranking3))
+   gns = unique(gns)
+   res = rep(0, length(gns))
+   names(res) = gns
+   for(i in names(res)) {
+     res[i] = getRank(ranking1, i)*a1+getRank(ranking2, i)*a2+getRank(ranking3, i)*a3
+   }
+   #res=res/sum(res)
+   #res = res[order(res, decreasing = T)]
+   res
+ }
 
-getRank <- function(ranking = NULL, gn = NULL){
-  if (gn %in% names(ranking)) {
-    return(ranking[gn])
-  }
-  else return(0.0)
-}
+ getRank <- function(ranking = NULL, gn = NULL){
+   if (gn %in% names(ranking)) {
+     return(ranking[gn])
+   }
+   else return(0.0)
+ }
 # grid.search <- function(ranking1 = NULL,
 #                        ranking2 = NULL,
 #                        N        = 50){
@@ -450,23 +450,14 @@ for (i in rownames(miRNA_score)){
 mirna_gene_list <- rowSums(miRNA_score)
 mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
 mirna.ranking <- sort(mirna.ranking, decreasing = TRUE)
-
-
-
-
-
-#Converting the gene symbols to Ensembl gene ids to have a common gene naming----
-#system with other metrics
-library(EnsDb.Hsapiens.v79)
-
-# 2. Convert from gene.symbol to ensembl.gene
-geneSymbols <-  rownames(mirna.ranking)
-
-geneIDs2 <- ensembldb::select(EnsDb.Hsapiens.v79, keys= geneSymbols, keytype = "SYMBOL", columns = c("SYMBOL","GENEID", "ENTREZID","UNIPROTID", "PROTEINDOMAINID"))
-
 mirna.ranking <- as.vector(mirna.ranking)
 save(mirna.ranking, file = "Data/Exported-data/R-objects/mirna.ranking.RData")
 #write.csv(mirna.ranking, file = "Data/Exported-data/mirna-ranking.csv")
+
+
+
+
+
 
 
 #Loading in a large set of well known EMT genes----
@@ -530,7 +521,7 @@ common_cc_genes <- intersect(cc_genes$Markers, head(rownames(mirna.ranking), n=2
 # miRNA_gene_intersect
 
 #Now doing the grid search of optimal values for the linear, integrated model----
-#Currently just two metrics (MAD and SDE).
+#Currently all 3 metrics (MAD and SDE and miRNA).
 weights <- seq(from = 0, to=1, by=0.1)
 df_index <- 1
 integrated_gene_lists <- list()
@@ -546,6 +537,20 @@ for (x in a3_weights){
     integrated_gene_lists[[df_index]] <- current_ranking
     df_index <- df_index + 1
   }
+}
+
+
+#Code for just two metrics----
+weights <- seq(from = 0, to=1, by=0.1)
+df_index <- 1
+integrated_gene_lists <- list()
+
+for (y in weights) {
+  print(y)
+  current_ranking <- geneRank(ranking1 = vim.sdes.ranking, ranking2 = mirna.ranking,  a1=x, a2=1-x)
+  current_ranking <- as.data.frame(current_ranking)
+  integrated_gene_lists[[df_index]] <- current_ranking
+  df_index <- df_index + 1
 }
 
 #Subsetting the gene expression data frame to just the top N genes found from the integrated ranking at different combinations/values of weights ----
@@ -657,9 +662,10 @@ rows_to_remove <- setdiff(rownames(merged_df), rownames(survival_df))
 merged_df <- merged_df[!(row.names(merged_df) %in% rows_to_remove), ]
 
 
-colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="-",replacement=".")
+colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="-", replacement=".")
 colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="_", replacement=".")
 colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="/", replacement=".")
+
 
 #Now doing data splitting for training and testing sets----
 df_for_train_test_split <- merge(merged_df, survival_df, by="row.names")
@@ -690,7 +696,8 @@ for (x in seq(1:length(all_intersections_cleaned))){
   current_formula_data <- as.vector(current_formula_data)
   current_formula_data <- current_formula_data[-107]
   
-  f <- as.formula(paste("~", paste(current_formula_data[1:length(current_formula_data)], collapse = "+")))
+  my_formula <- paste("~", paste(current_formula_data[1:length(current_formula_data)], collapse = "+"))
+  f <- as.formula(my_formula)
   
   
   
