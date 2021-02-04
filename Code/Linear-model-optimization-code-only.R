@@ -2,6 +2,8 @@
 #Purpose: Contains just code needed to optimize linear model on
 #lab server
 
+#Loading needed packages----
+library(tidyverse)
 #Loading in the functions that I need----
 #Ranking genes by three measurements
 geneRank <- function(ranking1 = NULL, ranking2 = NULL, ranking3 = NULL, a1 = 1,
@@ -56,7 +58,6 @@ save(integrated_gene_lists, file = "Data/integrated_gene_lists.RData")
 
 #Resetting these two variables for this new for loop
 df_index <- 1
-integrated_gene_lists <- list()
 
 #Sorting all of the lists from greatest gene to least gene by score
 for(x in integrated_gene_lists){

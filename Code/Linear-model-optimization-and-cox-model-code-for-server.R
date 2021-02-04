@@ -3,12 +3,9 @@
 #lab server
 
 #Loading the needed packages----
-library(glmnet);packageVersion("glmnet")
-library(Rmagic);packageVersion("Rmagic")
-library(SummarizedExperiment);packageVersion("SummarizedExperiment")
-library(TCGAbiolinks);packageVersion("TCGAbiolinks")
-library(tidyverse);packageVersion("tidyverse")
-library(utils);packageVersion("utils")
+library(glmnet)
+library(tidyverse)
+library(utils)
 
 #Loading needed functions----
 # Ranking genes by three measurements
@@ -37,7 +34,9 @@ getRank <- function(ranking = NULL, gn = NULL){
 load(file = "Data/mad.ranking.RData")
 load(file = "Data/vim.sdes.ranking.RData")
 load(file = "Data/mirna.ranking.RData")
-all_tumor_cells_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_tumor_all_cells_FPKM.csv")
+load(file = "Data/COA_data_df.RData")
+load(file = "Data/COA_survival_data.RData")
+load(file = "Data/bulk_rna_df.RData")
 
 #Loading the bulk RNA seq files. ----
 #Define query.
@@ -119,13 +118,13 @@ weights <- seq(from = 0, to=1, by=0.1)
 df_index <- 1
 integrated_gene_lists <- list()
 a3_weights <- seq(from = 0, to=1, by=0.1)
-
+a3 <- 0
 
 for (x in a3_weights){
   print(x)
   for (y in weights) {
     print(y)
-    current_ranking <- geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking, ranking3 = mirna.ranking,  a1=x, a2=1-(x+a3), a3= y)
+    current_ranking <- geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking, ranking3 = mirna.ranking,  a1=x, a2=1-(x+a3), a3=y)
     current_ranking <- as.data.frame(current_ranking)
     integrated_gene_lists[[df_index]] <- current_ranking
     df_index <- df_index + 1
@@ -215,36 +214,6 @@ time <- as.numeric(merged_df$days_to_last_follow_up)
 survival_df$time <- cbind(time)
 survival_df <- na.omit(survival_df)
 
-
-all_intersections_cleaned <- list()
-for (x in seq(1:length(all_intersections))){
-  genes_in_bulk_RNA <- all_intersections[[x]]
-  genes_in_bulk_RNA <- sapply(genes_in_bulk_RNA, gsub, pattern="-",replacement=".")
-  genes_in_bulk_RNA <- sapply(genes_in_bulk_RNA, gsub, pattern="_", replacement=".")
-  genes_in_bulk_RNA <- sapply(genes_in_bulk_RNA, gsub, pattern="/", replacement=".")
-  all_intersections_cleaned[[x]] <- genes_in_bulk_RNA
-}
-
-rows_to_remove <- setdiff(rownames(merged_df), rownames(survival_df))
-merged_df <- merged_df[!(row.names(merged_df) %in% rows_to_remove), ]
-
-
-colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="-", replacement=".")
-colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="_", replacement=".")
-colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="/", replacement=".")
-
-
-#Now getting the glmnet dataframe ready----
-df_for_train_test_split <- merge(merged_df, survival_df, by="row.names")
-df_for_train_test_split <- subset(df_for_train_test_split, select=-c(Row.names, vital_status, time))
-df_for_train_test_split <- filter(.data = df_for_train_test_split, days.to.last.follow.up!=0)
-my_time <- df_for_train_test_split$days.to.last.follow.up
-my_status <- df_for_train_test_split$vital.status
-df_for_train_test_split <- subset(df_for_train_test_split, select=c(TSPAN6:AC007389.3))
-df_for_train_test_split$days.to.last.follow.up <- my_time
-df_for_train_test_split$vital.status <- my_status
-set.seed(1)
-
 #Cox models----
 cox_models <- list()
 f_objects <- list()
@@ -253,6 +222,7 @@ c_indicies <- list()
 prediction_res <- list()
 all_coefs <- list()
 all_active_coefs <- list()
+all_formulas <- list()
 
 for (x in seq(1:length(all_intersections_cleaned))){
   current_formula_data <- all_intersections_cleaned[[x]]
@@ -287,6 +257,11 @@ for (x in seq(1:length(all_intersections_cleaned))){
   all_active_coefs[[x]] <- Active.Coefficients
   
 }
+save(all_formulas, file = "Data/Data-from-pipeline/all_formulas.RData")
+save(cox_models, file = "Data/Data-from-pipeline/cox_models.RData")
+save(f_objects, file = "Data/Data-from-pipeline/f_objects.RData")
+save(lambdas, file = "Data/Data-from-pipeline/lambdas.RData")
+save(c_indicies, file = "Data/Data-from-pipeline/c_indicies.RData")
 
 for(x in seq(1:length(cox_models))){
   current_model <- cox_models[[x]]

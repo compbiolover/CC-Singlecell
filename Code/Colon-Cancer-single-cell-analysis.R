@@ -212,7 +212,7 @@ GDCdownload(query           = colon_query,
 COA_data_se <- GDCprepare(colon_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-Colon-Cancer-Dataset/")
 colon_ind <- is.na(COA_data_se$days_to_last_follow_up)
 COA_data_se$days_to_last_follow_up[colon_ind] <- COA_data_se$days_to_death[colon_ind]
-
+save(COA_data_se, file = "Data/Exported-data/R-objects/COA_data_se.RData")
 
 
 #Turning the summarizedExperiment object into a data frame and re-factoring the labels on the vital_status column from Alive/Dead to 0/1.
@@ -225,6 +225,8 @@ COA_data_df$vital_status <- as.numeric(as.character(COA_data_df$vital_status))
 COA_survival_data <- subset(COA_data_df, select=c("vital_status", "days_to_last_follow_up"))
 COA_survival_data$vital_status <- factor(COA_survival_data$vital_status, levels = c(0,1),
                                          labels = c(FALSE,TRUE))
+save(COA_data_df, file = "Data/Exported-data/R-objects/COA_data_df.RData")
+save(COA_survival_data, file = "Data/Exported-data/R-objects/COA_survival_data.RData")
 
 # Building the bulk RNA dataframe to merge with clinical data to run Cox PH on
 #We do this by extracting various components of the summarizedExperiment object that was made earlier.
@@ -235,6 +237,7 @@ bulk_rna_df <- t(bulk_rna_df)
 bulk_rna_df <- as.data.frame(bulk_rna_df)
 bulk_rownames <- rownames(bulk_rna_df)
 bulk_rna_df$barcode <- bulk_rownames
+save(bulk_rna_df, file = "Data/Exported-data/R-objects/bulk_rna_df.RData")
 
 #Making a pseudotime of the all tumor cells from the scRNA-seq dataset (data is already pre-processed).
 #We do this through the magic() function. We use the seed parameter set to '123' to make the results reproducible.
@@ -556,6 +559,7 @@ for (y in weights) {
 #Subsetting the gene expression data frame to just the top N genes found from the integrated ranking at different combinations/values of weights ----
 gene_lists_to_test <- list()
 all_tumor_cells_fpkm_denoised_df <- as.data.frame(all_tumor_cells_fpkm_denoised)
+#save(all_tumor_cells_fpkm_denoised_df, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_denoised.RData")
 all_tumor_cells_fpkm_denoised_df <- t(all_tumor_cells_fpkm_denoised_df)
 for (x in seq(1:length(integrated_gene_lists))){
   print(x)
@@ -565,26 +569,31 @@ for (x in seq(1:length(integrated_gene_lists))){
   gene_lists_to_test[[x]] <- gene_names_to_test
 }
 
+#save(gene_lists_to_test, file = "Data/Exported-data/R-objects/gene_lists_to_test.RData")
 
-#Changing the colnames of the signle cell dataframe to the simple gene name so
+#Changing the colnames of the single cell dataframe to the simple gene name so
 #that subsetting works
-current_colname_split <- strsplit(colnames(all_tumor_cells_fpkm_denoised_df), "_")
+current_colname_split <- strsplit(rownames(all_tumor_cells_fpkm_denoised_df), "_")
 finished_gene_list <- c()
-current_list <- current_rowname_split
+current_list <- current_colname_split
 for (y in seq(1:length(current_list))){
   #print(current_list[[y]][2])
   finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
 }
 
+all_tumor_cells_fpkm_denoised_df <- t(all_tumor_cells_fpkm_denoised_df)
 colnames(all_tumor_cells_fpkm_denoised_df) <- finished_gene_list
 
 genes_of_interest <- list()
 for (x in seq(1:length(integrated_gene_lists))){
   current_list <- gene_lists_to_test[[x]]
   current_list <- as.data.frame(current_list)
-  current_genes <- subset(all_tumor_cells_fpkm_denoised_df, select = current_list$GeneName) 
+  common_genes <- intersect(colnames(all_tumor_cells_fpkm_denoised_df), current_list$GeneName)
+  current_genes <- subset(all_tumor_cells_fpkm_denoised_df, select = common_genes) 
   genes_of_interest[[x]] <- current_genes
 }
+
+#save(genes_of_interest, file = "Data/Exported-data/R-objects/genes_of_interest.RData")
 
 all_split_colnames <- list()
 for (x in seq(1:length(integrated_gene_lists))){
@@ -607,12 +616,15 @@ for (x in seq(1:length(integrated_gene_lists))) {
   finished_sets[[x]] <-finished_gene_list
 }
 
+save(finished_sets, file = "Data/Exported-data/R-objects/finished_sets.RData")
+
 #Making the dataframe that contains just the genes by samples that we need from bulk RNA-seq data
 gene_expression_info <- COA_data_se@assays@data@listData[["HTSeq - Counts"]]
 rownames(gene_expression_info) <- COA_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
 colnames(gene_expression_info) <- COA_data_se@colData@rownames
 gene_expression_info <- t(gene_expression_info)
 
+save(gene_expression_info, file = "Data/Exported-data/R-objects/gene_expression_info.RData")
 
 all_intersections <- list()
 for (x in seq(1:length(finished_sets))){
@@ -621,7 +633,7 @@ for (x in seq(1:length(finished_sets))){
   all_intersections[[x]] <- current_intersect
 }
 
-
+save(all_intersections, file = "Data/Exported-data/R-objects/all_intersections.RData")
 
 #Merging the two dataframes together into a larger dataframe that we can use for the Cox PH
 bulk_rna_df_unique <- subset(bulk_rna_df, select = unique(colnames(bulk_rna_df)))
@@ -658,6 +670,7 @@ for (x in seq(1:length(all_intersections))){
   all_intersections_cleaned[[x]] <- genes_in_bulk_RNA
 }
 
+save(all_intersections_cleaned, file = "Data/Exported-data/R-objects/all_intersections_cleaned.RData")
 rows_to_remove <- setdiff(rownames(merged_df), rownames(survival_df))
 merged_df <- merged_df[!(row.names(merged_df) %in% rows_to_remove), ]
 
@@ -666,6 +679,7 @@ colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="-", replacemen
 colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="_", replacement=".")
 colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="/", replacement=".")
 
+save(merged_df, file = "Data/Exported-data/R-objects/merged_df_replaced.RData")
 
 #Now doing data splitting for training and testing sets----
 df_for_train_test_split <- merge(merged_df, survival_df, by="row.names")
@@ -676,6 +690,7 @@ my_status <- df_for_train_test_split$vital.status
 df_for_train_test_split <- subset(df_for_train_test_split, select=c(TSPAN6:AC007389.3))
 df_for_train_test_split$days.to.last.follow.up <- my_time
 df_for_train_test_split$vital.status <- my_status
+save(df_for_train_test_split, file = "Data/Exported-data/R-objects/df_for_train_test_split.RData")
 set.seed(1)
 index <- createDataPartition(df_for_train_test_split$vital.status, p = 0.6, list = F)
 merged_train <- df_for_train_test_split[index, ] # 60%
@@ -690,6 +705,7 @@ c_indicies <- list()
 prediction_res <- list()
 all_coefs <- list()
 all_active_coefs <- list()
+all_formulas <- list()
 
 for (x in seq(1:length(all_intersections_cleaned))){
   current_formula_data <- all_intersections_cleaned[[x]]
@@ -697,6 +713,7 @@ for (x in seq(1:length(all_intersections_cleaned))){
   current_formula_data <- current_formula_data[-107]
   
   my_formula <- paste("~", paste(current_formula_data[1:length(current_formula_data)], collapse = "+"))
+  all_formulas[[x]] <- my_formula
   f <- as.formula(my_formula)
   
   
@@ -724,6 +741,11 @@ for (x in seq(1:length(all_intersections_cleaned))){
   all_active_coefs[[x]] <- Active.Coefficients
   
 }
+save(all_formulas, file = "Data/Data-from-pipeline/all_formulas.RData")
+save(all_formulas, file = "Data/Data-from-pipeline/cox_models.RData")
+save(all_formulas, file = "Data/Data-from-pipeline/f_objects.RData")
+save(all_formulas, file = "Data/Data-from-pipeline/lambdas.RData")
+save(all_formulas, file = "Data/Data-from-pipeline/c_indicies.RData")
 
 for(x in seq(1:length(cox_models))){
   current_model <- cox_models[[x]]
