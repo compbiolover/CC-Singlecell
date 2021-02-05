@@ -2,6 +2,8 @@
 #Purpose: Contains just code needed to optimize linear model on
 #lab server
 
+#Setting the working directory to where our project files are----
+setwd("/home/awillems/Projects/CC_Singlecell")
 #Loading the needed packages----
 library(glmnet)
 library(tidyverse)
@@ -47,32 +49,6 @@ load(file = "Data/mad.ranking.RData")
 load(file = "Data/merged_df_replaced.RData")
 load(file = "Data/mirna.ranking.RData")
 load(file = "Data/vim.sdes.ranking.RData")
-
-#We do this through the magic() function. We use the seed parameter set to '123' to make the results reproducible.----
-#We first turn the single-cell data into a data frame and get the rownames of the frame (gene names).
-#We then subset the data frame to remove the unnecessary column that contains the rownames in a column now that 
-#they are stored in the actual rownames. The input of the magic() function requires the data to be in matrix
-#format. We then transpose the results and do some basic filtering. The filtering involves filtering to include 
-#rows that are greater than 0.3 and 0. This mean value is then compared to 0.2 and must be greater than 0.2 to be
-#kept in the dataset. We then convert this output back to a dataframe and include a new name for the first column
-#Which includes the short names of the genes. Once this is finished then we finally convert the dataframe back to
-#a matrix for future calculations. The end product is a matrix that contains 375 cells (columns) and 23,479 genes (rows).
-all_tumor_cells_fpkm_df <- as.data.frame(all_tumor_cells_fpkm)
-non_denoised_gene_names <- all_tumor_cells_fpkm_df$X
-non_denoised_gene_names <- as.data.frame(non_denoised_gene_names)
-colnames(non_denoised_gene_names)[1] <- "gene_short_name"
-rownames(all_tumor_cells_fpkm_df) <- non_denoised_gene_names$gene_short_name
-all_tumor_cells_fpkm_denoised <- subset(all_tumor_cells_fpkm_df, select=RHC3546__Tcell__.C6E879:RHC6041__Macrophage__.FFFF55)
-all_tumor_cells_fpkm_denoised <- as.matrix(all_tumor_cells_fpkm_denoised)
-all_tumor_cells_fpkm_denoised <- magic(t(all_tumor_cells_fpkm_denoised), seed = 123)
-all_tumor_cells_fpkm_denoised <- t(all_tumor_cells_fpkm_denoised[["result"]])
-all_tumor_cells_fpkm_denoised <- all_tumor_cells_fpkm_denoised[rowMeans(all_tumor_cells_fpkm_denoised) > 0.3 & rowMeans(all_tumor_cells_fpkm_denoised > 0) > 0.2,]
-all_tumor_cells_fpkm_denoised <-  as.data.frame(all_tumor_cells_fpkm_denoised)
-tumor_gene_names <- rownames(all_tumor_cells_fpkm_denoised)
-tumor_gene_names <- as.data.frame(tumor_gene_names)
-colnames(tumor_gene_names)[1] <- "gene_short_name"
-rownames(tumor_gene_names) <- tumor_gene_names$gene_short_name
-all_tumor_cells_fpkm_denoised <- as.matrix(all_tumor_cells_fpkm_denoised)
 
 #Doing some pre-processing of the rownames to make stuff cleaner----
 current_rowname_split <- strsplit(rownames(all_tumor_cells_fpkm_denoised), "_")
