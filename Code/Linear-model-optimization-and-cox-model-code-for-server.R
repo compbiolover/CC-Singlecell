@@ -31,53 +31,23 @@ getRank <- function(ranking = NULL, gn = NULL){
 }
 
 #Loading the needed files for the optimization----
-load(file = "Data/mad.ranking.RData")
-load(file = "Data/vim.sdes.ranking.RData")
-load(file = "Data/mirna.ranking.RData")
-load(file = "Data/COA_data_df.RData")
-load(file = "Data/COA_survival_data.RData")
+load(file = "Data/all_intersections_cleaned.RData")
+load(file = "Data/all_intersections.RData")
+load(file = "Data/all_tumor_cells_fpkm_denoised.RData")
 load(file = "Data/bulk_rna_df.RData")
+load(file = "Data/COA_data_df.RData")
+load(file = "Data/COA_data_se.RData")
+load(file = "Data/COA_survival_data.RData")
+load(file = "Data/df_for_train_test_split.RData")
+load(file = "Data/finished_sets.RData")
+load(file = "Data/gene_expression_info.RData")
+load(file = "Data/gene_lists_to_test.RData")
+load(file = "Data/genes_of_interest.RData")
+load(file = "Data/mad.ranking.RData")
+load(file = "Data/merged_df_replaced.RData")
+load(file = "Data/mirna.ranking.RData")
+load(file = "Data/vim.sdes.ranking.RData")
 
-#Loading the bulk RNA seq files. ----
-#Define query.
-colon_query <- GDCquery(project       = "TCGA-COAD",
-                        data.category = "Transcriptome Profiling",
-                        data.type     = "Gene Expression Quantification",
-                        workflow.type = "HTSeq - Counts")
-
-#Downloading the data.
-GDCdownload(query           = colon_query,
-            method          = "api",
-            files.per.chunk = 10,
-            directory       = "Data/Bulk-data/TCGA-Colon-Cancer-Dataset")
-
-#Making the summarizedExperiment object and then removing all entries that lacked days_to_last_follow_up information
-COA_data_se <- GDCprepare(colon_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-Colon-Cancer-Dataset/")
-colon_ind <- is.na(COA_data_se$days_to_last_follow_up)
-COA_data_se$days_to_last_follow_up[colon_ind] <- COA_data_se$days_to_death[colon_ind]
-
-
-
-#Turning the summarizedExperiment object into a data frame and re-factoring the labels on the vital_status column from Alive/Dead to 0/1.
-#We then turn them into the boolean values TRUE/FALSE for use in later calculations. 
-COA_data_df <- as.data.frame(colData(COA_data_se))
-COA_data_df$vital_status <- factor(COA_data_df$vital_status, levels = c("Alive", "Dead"),
-                                   labels = c(0,1))
-
-COA_data_df$vital_status <- as.numeric(as.character(COA_data_df$vital_status))
-COA_survival_data <- subset(COA_data_df, select=c("vital_status", "days_to_last_follow_up"))
-COA_survival_data$vital_status <- factor(COA_survival_data$vital_status, levels = c(0,1),
-                                         labels = c(FALSE,TRUE))
-
-# Building the bulk RNA dataframe to merge with clinical data to run Cox PH on
-#We do this by extracting various components of the summarizedExperiment object that was made earlier.
-bulk_rna_df <- COA_data_se@assays@data@listData[["HTSeq - Counts"]]
-colnames(bulk_rna_df) <- COA_data_se@colData@rownames
-rownames(bulk_rna_df) <- COA_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
-bulk_rna_df <- t(bulk_rna_df)
-bulk_rna_df <- as.data.frame(bulk_rna_df)
-bulk_rownames <- rownames(bulk_rna_df)
-bulk_rna_df$barcode <- bulk_rownames
 #We do this through the magic() function. We use the seed parameter set to '123' to make the results reproducible.----
 #We first turn the single-cell data into a data frame and get the rownames of the frame (gene names).
 #We then subset the data frame to remove the unnecessary column that contains the rownames in a column now that 
@@ -146,21 +116,23 @@ for (x in seq(1:length(integrated_gene_lists))){
 
 #Changing the colnames of the signle cell dataframe to the simple gene name so
 #that subsetting works
-current_colname_split <- strsplit(colnames(all_tumor_cells_fpkm_denoised_df), "_")
+current_colname_split <- strsplit(rownames(all_tumor_cells_fpkm_denoised_df), "_")
 finished_gene_list <- c()
-current_list <- current_rowname_split
+current_list <- current_colname_split
 for (y in seq(1:length(current_list))){
   #print(current_list[[y]][2])
   finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
 }
 
+all_tumor_cells_fpkm_denoised_df <- t(all_tumor_cells_fpkm_denoised_df)
 colnames(all_tumor_cells_fpkm_denoised_df) <- finished_gene_list
 
 genes_of_interest <- list()
 for (x in seq(1:length(integrated_gene_lists))){
   current_list <- gene_lists_to_test[[x]]
   current_list <- as.data.frame(current_list)
-  current_genes <- subset(all_tumor_cells_fpkm_denoised_df, select = current_list$GeneName) 
+  common_genes <- intersect(colnames(all_tumor_cells_fpkm_denoised_df), current_list$GeneName)
+  current_genes <- subset(all_tumor_cells_fpkm_denoised_df, select = common_genes) 
   genes_of_interest[[x]] <- current_genes
 }
 
