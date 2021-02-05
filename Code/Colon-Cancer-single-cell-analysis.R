@@ -265,6 +265,7 @@ tumor_gene_names <- as.data.frame(tumor_gene_names)
 colnames(tumor_gene_names)[1] <- "gene_short_name"
 rownames(tumor_gene_names) <- tumor_gene_names$gene_short_name
 all_tumor_cells_fpkm_denoised <- as.matrix(all_tumor_cells_fpkm_denoised)
+save(all_tumor_cells_fpkm_denoised, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_denoised.RData")
 
 #Doing some pre-processing of the rownames to make stuff cleaner----
 current_rowname_split <- strsplit(rownames(all_tumor_cells_fpkm_denoised), "_")
@@ -559,7 +560,7 @@ for (y in weights) {
 #Subsetting the gene expression data frame to just the top N genes found from the integrated ranking at different combinations/values of weights ----
 gene_lists_to_test <- list()
 all_tumor_cells_fpkm_denoised_df <- as.data.frame(all_tumor_cells_fpkm_denoised)
-#save(all_tumor_cells_fpkm_denoised_df, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_denoised.RData")
+save(all_tumor_cells_fpkm_denoised_df, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_denoised_df.RData")
 all_tumor_cells_fpkm_denoised_df <- t(all_tumor_cells_fpkm_denoised_df)
 for (x in seq(1:length(integrated_gene_lists))){
   print(x)
@@ -670,7 +671,7 @@ for (x in seq(1:length(all_intersections))){
   all_intersections_cleaned[[x]] <- genes_in_bulk_RNA
 }
 
-save(all_intersections_cleaned, file = "Data/Exported-data/R-objects/all_intersections_cleaned.RData")
+#save(all_intersections_cleaned, file = "Data/Exported-data/R-objects/all_intersections_cleaned.RData")
 rows_to_remove <- setdiff(rownames(merged_df), rownames(survival_df))
 merged_df <- merged_df[!(row.names(merged_df) %in% rows_to_remove), ]
 
@@ -679,7 +680,7 @@ colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="-", replacemen
 colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="_", replacement=".")
 colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="/", replacement=".")
 
-save(merged_df, file = "Data/Exported-data/R-objects/merged_df_replaced.RData")
+#save(merged_df, file = "Data/Exported-data/R-objects/merged_df_replaced.RData")
 
 #Now doing data splitting for training and testing sets----
 df_for_train_test_split <- merge(merged_df, survival_df, by="row.names")
