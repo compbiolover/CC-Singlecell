@@ -560,7 +560,7 @@ for (y in weights) {
 #Subsetting the gene expression data frame to just the top N genes found from the integrated ranking at different combinations/values of weights ----
 gene_lists_to_test <- list()
 all_tumor_cells_fpkm_denoised_df <- as.data.frame(all_tumor_cells_fpkm_denoised)
-save(all_tumor_cells_fpkm_denoised_df, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_denoised_df.RData")
+#save(all_tumor_cells_fpkm_denoised_df, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_denoised_df.RData")
 all_tumor_cells_fpkm_denoised_df <- t(all_tumor_cells_fpkm_denoised_df)
 for (x in seq(1:length(integrated_gene_lists))){
   print(x)
