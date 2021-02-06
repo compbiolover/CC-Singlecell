@@ -108,29 +108,53 @@ for (x in weights) {
   df_index <- df_index + 1
 }
 
+#Trying to speed up with lapply()
+my_grid_search <- function(metric1=vim.sdes.ranking, metric2=mirna.ranking, weight1=0){
+  current_ranking <- geneRank(ranking1 = vim.sdes.ranking, ranking2 = mirna.ranking,  a1=weight1, a2=1-weight1)
+  current_ranking <- as.data.frame(current_ranking)
+  return(gene_rankings)
+}
 
 
-gene_lists_to_test <- list()
+
+#gene_lists_to_test <- list()
 all_tumor_cells_fpkm_denoised_df <- as.data.frame(all_tumor_cells_fpkm_denoised)
 all_tumor_cells_fpkm_denoised_df <- t(all_tumor_cells_fpkm_denoised_df)
-for (x in seq(1:length(integrated_gene_lists))){
-  print(x)
-  current_gene_list <- as.data.frame(integrated_gene_lists[[x]])
+# for (x in seq(1:length(integrated_gene_lists))){
+#   print(x)
+#   current_gene_list <- as.data.frame(integrated_gene_lists[[x]])
+#   current_gene_list$GeneName <- rownames(current_gene_list)
+#   gene_names_to_test <- head(current_gene_list, n = 900)
+#   gene_lists_to_test[[x]] <- gene_names_to_test
+# }
+
+subsetter <-function(subset_num=900, gene.list=integrated_gene_lists){
+  current_gene_list <- as.data.frame(gene.list)
   current_gene_list$GeneName <- rownames(current_gene_list)
-  gene_names_to_test <- head(current_gene_list, n = 900)
-  gene_lists_to_test[[x]] <- gene_names_to_test
+  gene_names_to_test <- head(current_gene_list, n = subset_num)
+  return(gene_names_to_test)
 }
 
 
 #Changing the colnames of the signle cell dataframe to the simple gene name so
 #that subsetting works
-current_colname_split <- strsplit(colnames(all_tumor_cells_fpkm_denoised_df), "_")
-finished_gene_list <- c()
-current_list <- current_colname_split
-for (y in seq(1:length(current_list))){
-  #print(current_list[[y]][2])
-  finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
+gene_name_cleaner <- function(data.to.clean=all_tumor_cells_fpkm_denoised_df){
+  data.to.clean <-t(data.to.clean)
+  current_colname_split <- strsplit(colnames(data.to.clean), "_")
+  finished_gene_list <- c()
+  current_list <- current_colname_split
+  for (y in seq(1:length(current_list))){
+    finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
+  }
+  return(finished_gene_list)
 }
+# current_colname_split <- strsplit(colnames(all_tumor_cells_fpkm_denoised_df), "_")
+# finished_gene_list <- c()
+# current_list <- current_colname_split
+# for (y in seq(1:length(current_list))){
+#   #print(current_list[[y]][2])
+#   finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
+# }
 
 #all_tumor_cells_fpkm_denoised_df <- t(all_tumor_cells_fpkm_denoised_df)
 colnames(all_tumor_cells_fpkm_denoised_df) <- finished_gene_list

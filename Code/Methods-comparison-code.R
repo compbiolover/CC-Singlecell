@@ -4,10 +4,12 @@
 #Loading needed packages----
 library(magrittr);packageVersion("magrittr")
 library(MAST);packageVersion("MAST")
-
+library(scDD);packageVersion("scDD")
+library(SingleCellExperiment);packageVersion("SingleCellExperiment")
 
 #Loading our single cell data----
 all_tumor_cells_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_tumor_all_cells_FPKM.csv")
+all_tumor_cells_fpkm <- as.matrix(all_tumor_cells_fpkm)
 all_tumor_cells_fpkm$Condition <- "Cancer"
 colnames(all_tumor_cells_fpkm)[1] <- "Genes"
 all_nm_cells_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_NM_all_cells_FPKM.csv")
@@ -22,6 +24,11 @@ combined_data <- all_nm_cells_fpkm %>% full_join(all_tumor_cells_fpkm, by="Genes
 #Looking at tutorial data to understand how to use MAST----
 scaRaw <- FromMatrix(t(maits$expressionmat), maits$cdat, maits$fdat)
 
+#Looking at tutorial data to understand how to use scDD----
+data(scDatExSim)
+
+#Trying to load my own data into SingleCell Experiment format----
+scDD_data <- SingleCellExperiment(counts=all_tumor_cells_fpkm)
 #Trying to load my own data into MAST format----
 my_fData <- as.data.frame(dimnames(all_tumor_cells_fpkm)[[1]])
 my_cData <- as.data.frame(dimnames(all_tumor_cells_fpkm)[[2]])
