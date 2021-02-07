@@ -146,7 +146,8 @@ gene_name_cleaner <- function(data.to.clean=all_tumor_cells_fpkm_denoised_df){
   for (y in seq(1:length(current_list))){
     finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
   }
-  return(finished_gene_list)
+  colnames(data.to.clean) <- finished_gene_list
+  return(data.to.clean)
 }
 # current_colname_split <- strsplit(colnames(all_tumor_cells_fpkm_denoised_df), "_")
 # finished_gene_list <- c()
