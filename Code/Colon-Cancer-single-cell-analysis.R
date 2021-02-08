@@ -682,6 +682,17 @@ colnames(merged_df) <- sapply(colnames(merged_df), gsub, pattern="/", replacemen
 
 #save(merged_df, file = "Data/Exported-data/R-objects/merged_df_replaced.RData")
 
+
+#Now looking at just the top 900 genes from the MAD metric to see what we get for the cox model c-index value----
+mad.ranking.subset <- head(mad.ranking, n=900)
+mad.ranking.subset <- unlist(mad.ranking.subset)
+mad.ranking.subset.df <- as.data.frame(mad.ranking.subset)
+colnames(mad.ranking.subset.df)[1] <- "Score"
+mad.ranking.subset.df <- t(mad.ranking.subset.df)
+colnames(mad.ranking.subset.df) <- names(mad.ranking.subset)
+
+
+
 #Now doing data splitting for training and testing sets----
 df_for_train_test_split <- merge(merged_df, survival_df, by="row.names")
 df_for_train_test_split <- subset(df_for_train_test_split, select=-c(Row.names, vital_status, time))
@@ -709,7 +720,8 @@ all_active_coefs <- list()
 all_formulas <- list()
 
 for (x in seq(1:length(all_intersections_cleaned))){
-  current_formula_data <- all_intersections_cleaned[[x]]
+  #current_formula_data <- all_intersections_cleaned[[x]]
+  current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
   current_formula_data <- as.vector(current_formula_data)
   current_formula_data <- current_formula_data[-107]
   

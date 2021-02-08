@@ -33,8 +33,8 @@ all_nm_cells_fpkm <- subset(all_nm_cells_fpkm, select=c(RHC3934__Bcell__.7DEA7B:
 #Doing pre-processing to get my data ready to go into the SingleCellExperiment data----
 #container format
 condition <- c(rep(1, ncol(all_tumor_cells_fpkm)), rep(2, ncol(all_nm_cells_fpkm)))
-tumor_colnames <- paste("C1",seq(1:length(colnames(all_tumor_cells_fpkm))),sep = ".")
-nm_colnames <- paste("C2",seq(1:length(colnames(all_nm_cells_fpkm))),sep = ".")
+tumor_colnames <- paste("CC",seq(1:length(colnames(all_tumor_cells_fpkm))),sep = ".")
+nm_colnames <- paste("NM",seq(1:length(colnames(all_nm_cells_fpkm))),sep = ".")
 colnames(all_tumor_cells_fpkm) <- tumor_colnames
 colnames(all_nm_cells_fpkm) <- nm_colnames
 names(condition) <- c(colnames(all_tumor_cells_fpkm), colnames(all_nm_cells_fpkm))

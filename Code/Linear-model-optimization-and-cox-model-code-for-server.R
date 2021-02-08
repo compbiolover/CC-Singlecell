@@ -61,20 +61,20 @@ getRank <- function(ranking = NULL,
 
 
 #Loading the needed files for the optimization----
-# load(file = "Data/all_intersections_cleaned.RData")
-# load(file = "Data/all_intersections.RData")
+load(file = "Data/all_intersections_cleaned.RData")
+load(file = "Data/all_intersections.RData")
 load(file = "Data/all_tumor_cells_fpkm_denoised.RData")
-# load(file = "Data/bulk_rna_df.RData")
-# load(file = "Data/COA_data_df.RData")
-# load(file = "Data/COA_data_se.RData")
-# load(file = "Data/COA_survival_data.RData")
-# load(file = "Data/df_for_train_test_split.RData")
-# load(file = "Data/finished_sets.RData")
-# load(file = "Data/gene_expression_info.RData")
-# load(file = "Data/gene_lists_to_test.RData")
-# load(file = "Data/genes_of_interest.RData")
+load(file = "Data/bulk_rna_df.RData")
+load(file = "Data/COA_data_df.RData")
+load(file = "Data/COA_data_se.RData")
+load(file = "Data/COA_survival_data.RData")
+load(file = "Data/df_for_train_test_split.RData")
+load(file = "Data/finished_sets.RData")
+load(file = "Data/gene_expression_info.RData")
+load(file = "Data/gene_lists_to_test.RData")
+load(file = "Data/genes_of_interest.RData")
 load(file = "Data/Exported-data/R-objects/mad.ranking.RData")
-#load(file = "Data/mirna.ranking.RData")
+load(file = "Data/mirna.ranking.RData")
 load(file = "Data/Exported-data/R-objects/vim.sdes.ranking.RData")
 
 #Code for the grid search linear model optimization----
@@ -96,51 +96,30 @@ load(file = "Data/Exported-data/R-objects/vim.sdes.ranking.RData")
 # }
 
 #Code for just two metrics----
+#First pre-calculate all of my values for params and then do a single for loop passing those values
 weights <- seq(from = 0, to=1, by=0.1)
 df_index <- 1
-integrated_gene_lists <- list()
+integrated_gene_lists <-vector(mode = "list", length = 11)
 
 for (x in weights) {
-  print(x)
   current_ranking <- geneRank(ranking1 = vim.sdes.ranking, ranking2 = mirna.ranking,  a1=x, a2=1-x)
-  current_ranking <- as.data.frame(current_ranking)
-  integrated_gene_lists[[df_index]] <- current_ranking
+  integrated_gene_lists[[df_index]] <- as.data.frame(current_ranking)
   df_index <- df_index + 1
 }
 
-#Trying to speed up with lapply()
-my_grid_search <- function(metric1=vim.sdes.ranking, metric2=mirna.ranking, weight1=0){
-  current_ranking <- geneRank(ranking1 = vim.sdes.ranking, ranking2 = mirna.ranking,  a1=weight1, a2=1-weight1)
-  current_ranking <- as.data.frame(current_ranking)
-  return(gene_rankings)
-}
-
-
-
-#gene_lists_to_test <- list()
-all_tumor_cells_fpkm_denoised_df <- as.data.frame(all_tumor_cells_fpkm_denoised)
-all_tumor_cells_fpkm_denoised_df <- t(all_tumor_cells_fpkm_denoised_df)
-# for (x in seq(1:length(integrated_gene_lists))){
-#   print(x)
-#   current_gene_list <- as.data.frame(integrated_gene_lists[[x]])
-#   current_gene_list$GeneName <- rownames(current_gene_list)
-#   gene_names_to_test <- head(current_gene_list, n = 900)
-#   gene_lists_to_test[[x]] <- gene_names_to_test
-# }
-
-subsetter <-function(subset_num=900, gene.list=integrated_gene_lists){
+subsetter <-function(subset_num=900, gene.list=NULL){
   current_gene_list <- as.data.frame(gene.list)
   current_gene_list$GeneName <- rownames(current_gene_list)
   gene_names_to_test <- head(current_gene_list, n = subset_num)
   return(gene_names_to_test)
 }
+gene_names_to_test <- lapply(integrated_gene_lists, subsetter, subset_num=900)
 
-
-#Changing the colnames of the signle cell dataframe to the simple gene name so
+#Changing the colnames of the single cell dataframe to the simple gene name so
 #that subsetting works
 gene_name_cleaner <- function(data.to.clean=all_tumor_cells_fpkm_denoised_df){
   data.to.clean <-t(data.to.clean)
-  current_colname_split <- strsplit(colnames(data.to.clean), "_")
+  current_colname_split <- strsplit(colnames(data.to.clean), "_") #Clean this dataframe at the beginning. Always use clean dataframe
   finished_gene_list <- c()
   current_list <- current_colname_split
   for (y in seq(1:length(current_list))){
@@ -149,59 +128,17 @@ gene_name_cleaner <- function(data.to.clean=all_tumor_cells_fpkm_denoised_df){
   colnames(data.to.clean) <- finished_gene_list
   return(data.to.clean)
 }
-# current_colname_split <- strsplit(colnames(all_tumor_cells_fpkm_denoised_df), "_")
-# finished_gene_list <- c()
-# current_list <- current_colname_split
-# for (y in seq(1:length(current_list))){
-#   #print(current_list[[y]][2])
-#   finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
-# }
+all_tumor_cells_fpkm_denoised_df <- gene_name_cleaner(data.to.clean = all_tumor_cells_fpkm_denoised_df)
 
-#all_tumor_cells_fpkm_denoised_df <- t(all_tumor_cells_fpkm_denoised_df)
-colnames(all_tumor_cells_fpkm_denoised_df) <- finished_gene_list
 
 genes_of_interest <- list()
 for (x in seq(1:length(integrated_gene_lists))){
-  current_list <- gene_lists_to_test[[x]]
-  current_list <- as.data.frame(current_list)
-  common_genes <- intersect(colnames(all_tumor_cells_fpkm_denoised_df), current_list$GeneName)
+  current_list <- gene_names_to_test[[x]]
+  common_genes <- intersect(colnames(all_tumor_cells_fpkm_denoised_df),current_list$GeneName)
   current_genes <- subset(all_tumor_cells_fpkm_denoised_df, select = common_genes)
   genes_of_interest[[x]] <- current_genes
 }
 
-# all_split_colnames <- list()
-# for (x in seq(1:length(integrated_gene_lists))){
-#   for (y in seq(1:length(colnames(genes_of_interest[[x]])))){
-#     current_df <- genes_of_interest[[x]]
-#     current_df <- as.data.frame(current_df)
-#     current_colname_split <- strsplit(colnames(current_df), "_")
-#     all_split_colnames[[x]] <- current_colname_split
-#   }
-# 
-# }
-
-finished_sets <- list()
-df_index <-1
-for(x in genes_of_interest){
-  current_list <- x
-  finished_sets[[df_index]] <- colnames(current_list)
-  df_index <- df_index +1
-}
-
-# for (x in seq(1:length(integrated_gene_lists))) {
-#   finished_gene_list <- c()
-#   current_list <- all_split_colnames[[x]]
-#   for (y in seq(1:length(current_list))){
-#     finished_gene_list <- c(finished_gene_list, current_list[[y]])
-#   }
-#   finished_sets[[x]] <-finished_gene_list
-# }
-
-#Making the dataframe that contains just the genes by samples that we need from bulk RNA-seq data
-# gene_expression_info <- COA_data_se@assays@data@listData[["HTSeq - Counts"]]
-# rownames(gene_expression_info) <- COA_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
-# colnames(gene_expression_info) <- COA_data_se@colData@rownames
-# gene_expression_info <- t(gene_expression_info)
 
 
 all_intersections <- list()
@@ -266,8 +203,8 @@ all_active_coefs <- list()
 all_formulas <- list()
 
 for (x in seq(1:length(all_intersections_cleaned))){
-  #current_formula_data <- all_intersections_cleaned[[x]]
-  current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
+  current_formula_data <- all_intersections_cleaned[[x]]
+  #current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
   current_formula_data <- as.vector(current_formula_data)
   #current_formula_data <- current_formula_data[-107]
   
@@ -304,11 +241,11 @@ for(x in seq(1:length(cox_models))){
   current_model <-cox_models[[x]]
   print(current_model)
 }
-save(all_formulas, file = "Data/Data-from-pipeline/MAD-SDES/all_formulas.RData")
-save(cox_models, file = "Data/Data-from-pipeline/MAD-SDES/cox_models.RData")
-save(f_objects, file = "Data/Data-from-pipeline/MAD-SDES/f_objects.RData")
-save(lambdas, file = "Data/Data-from-pipeline/MAD-SDES/lambdas.RData")
-save(c_indicies, file = "Data/Data-from-pipeline/MAD-SDES/c_indicies.RData")
+# save(all_formulas, file = "Data/Data-from-pipeline/MAD-SDES/all_formulas.RData")
+# save(cox_models, file = "Data/Data-from-pipeline/MAD-SDES/cox_models.RData")
+# save(f_objects, file = "Data/Data-from-pipeline/MAD-SDES/f_objects.RData")
+# save(lambdas, file = "Data/Data-from-pipeline/MAD-SDES/lambdas.RData")
+# save(c_indicies, file = "Data/Data-from-pipeline/MAD-SDES/c_indicies.RData")
 
 for(x in seq(1:length(cox_models))){
   current_model <- cox_models[[x]]
