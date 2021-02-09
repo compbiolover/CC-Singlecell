@@ -203,8 +203,8 @@ all_active_coefs <- list()
 all_formulas <- list()
 
 for (x in seq(1:length(all_intersections_cleaned))){
-  current_formula_data <- all_intersections_cleaned[[x]]
-  #current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
+  #current_formula_data <- all_intersections_cleaned[[x]]
+  current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
   current_formula_data <- as.vector(current_formula_data)
   #current_formula_data <- current_formula_data[-107]
   

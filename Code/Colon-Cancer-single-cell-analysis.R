@@ -549,8 +549,8 @@ weights <- seq(from = 0, to=1, by=0.1)
 df_index <- 1
 integrated_gene_lists <- list()
 
-for (y in weights) {
-  print(y)
+for (x in weights) {
+  print(x)
   current_ranking <- geneRank(ranking1 = vim.sdes.ranking, ranking2 = mirna.ranking,  a1=x, a2=1-x)
   current_ranking <- as.data.frame(current_ranking)
   integrated_gene_lists[[df_index]] <- current_ranking
@@ -617,7 +617,7 @@ for (x in seq(1:length(integrated_gene_lists))) {
   finished_sets[[x]] <-finished_gene_list
 }
 
-save(finished_sets, file = "Data/Exported-data/R-objects/finished_sets.RData")
+#save(finished_sets, file = "Data/Exported-data/R-objects/finished_sets.RData")
 
 #Making the dataframe that contains just the genes by samples that we need from bulk RNA-seq data
 gene_expression_info <- COA_data_se@assays@data@listData[["HTSeq - Counts"]]
@@ -625,7 +625,7 @@ rownames(gene_expression_info) <- COA_data_se@rowRanges@elementMetadata@listData
 colnames(gene_expression_info) <- COA_data_se@colData@rownames
 gene_expression_info <- t(gene_expression_info)
 
-save(gene_expression_info, file = "Data/Exported-data/R-objects/gene_expression_info.RData")
+#save(gene_expression_info, file = "Data/Exported-data/R-objects/gene_expression_info.RData")
 
 all_intersections <- list()
 for (x in seq(1:length(finished_sets))){
@@ -634,7 +634,7 @@ for (x in seq(1:length(finished_sets))){
   all_intersections[[x]] <- current_intersect
 }
 
-save(all_intersections, file = "Data/Exported-data/R-objects/all_intersections.RData")
+#save(all_intersections, file = "Data/Exported-data/R-objects/all_intersections.RData")
 
 #Merging the two dataframes together into a larger dataframe that we can use for the Cox PH
 bulk_rna_df_unique <- subset(bulk_rna_df, select = unique(colnames(bulk_rna_df)))
@@ -702,7 +702,7 @@ my_status <- df_for_train_test_split$vital.status
 df_for_train_test_split <- subset(df_for_train_test_split, select=c(TSPAN6:AC007389.3))
 df_for_train_test_split$days.to.last.follow.up <- my_time
 df_for_train_test_split$vital.status <- my_status
-save(df_for_train_test_split, file = "Data/Exported-data/R-objects/df_for_train_test_split.RData")
+#save(df_for_train_test_split, file = "Data/Exported-data/R-objects/df_for_train_test_split.RData")
 set.seed(1)
 index <- createDataPartition(df_for_train_test_split$vital.status, p = 0.6, list = F)
 merged_train <- df_for_train_test_split[index, ] # 60%
@@ -710,6 +710,7 @@ merged_test <- df_for_train_test_split[-index, ] # 40%
 
 
 #Cox models----
+set.seed(1)
 cox_models <- list()
 f_objects <- list()
 lambdas <- list()
@@ -720,10 +721,10 @@ all_active_coefs <- list()
 all_formulas <- list()
 
 for (x in seq(1:length(all_intersections_cleaned))){
-  #current_formula_data <- all_intersections_cleaned[[x]]
-  current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
+  current_formula_data <- all_intersections_cleaned[[x]]
+  #current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
   current_formula_data <- as.vector(current_formula_data)
-  current_formula_data <- current_formula_data[-107]
+  #current_formula_data <- current_formula_data[-107]
   
   my_formula <- paste("~", paste(current_formula_data[1:length(current_formula_data)], collapse = "+"))
   all_formulas[[x]] <- my_formula
