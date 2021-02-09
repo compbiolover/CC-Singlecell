@@ -721,8 +721,8 @@ all_active_coefs <- list()
 all_formulas <- list()
 
 for (x in seq(1:length(all_intersections_cleaned))){
-  current_formula_data <- all_intersections_cleaned[[x]]
-  #current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
+  #current_formula_data <- all_intersections_cleaned[[x]]
+  current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
   current_formula_data <- as.vector(current_formula_data)
   #current_formula_data <- current_formula_data[-107]
   
@@ -754,6 +754,44 @@ for (x in seq(1:length(all_intersections_cleaned))){
   all_coefs[[x]] <- Coefficients
   all_active_coefs[[x]] <- Active.Coefficients
   
+  #Saving just the active gene names
+  active_genes <-rownames(Coefficients)[Active.Index]
+  surv_gene_df=merged_df[,active_genes]
+  metric.coef <- as.list(mad.ranking.subset)
+  metric.coef <- as.data.frame(metric.coef)
+  metric.coef <- t(metric.coef)
+  colnames(metric.coef)[1] <- "Score"
+  gene_weight <- as.data.frame(metric.coef)
+  gene_weight <- t(gene_weight)
+  gene_weight <- subset(gene_weight, select=colnames(surv_gene_df))
+  gene_weight <- t(gene_weight)
+  gene_weight <- sort(gene_weight, decreasing = TRUE)
+  weight_function=function(x){crossprod(as.numeric(x),gene_weight)}
+  trainScore=apply(surv_gene_df,1,weight_function)
+  risk=as.vector(ifelse(trainScore>median(trainScore),"high","low"))
+  surv_gene_df <- cbind(risk, surv_gene_df)
+  vital.status <- merged_df$vital.status
+  days.to.last.follow.up <- merged_df$days.to.last.follow.up
+  surv_gene_df <- cbind(vital.status, surv_gene_df)
+  surv_gene_df <- cbind(days.to.last.follow.up, surv_gene_df)
+  km_fit <- survfit(Surv(days.to.last.follow.up, vital.status) ~ risk, data = surv_gene_df)
+  
+  #P-value calculation for KM curves
+  diff=survdiff(Surv(days.to.last.follow.up, vital.status) ~risk,data = surv_gene_df)
+  pValue=1-pchisq(diff$chisq,df=1)
+  pValue=signif(pValue,4)
+  pValue=format(pValue, scientific = TRUE)
+  
+  #KM Curves plotting code
+  surPlot<-ggsurvplot(km_fit, 
+                     data=surv_gene_df,
+                     pval=paste0("p=",pValue),
+                     pval.size=4,
+                     legend.labs=c("High risk", "Low risk"),
+                     legend.title="Risk",
+                     xlab="Time(months)",
+                     palette=c("red", "blue")
+                     )
 }
 save(all_formulas, file = "Data/Data-from-pipeline/all_formulas.RData")
 save(all_formulas, file = "Data/Data-from-pipeline/cox_models.RData")
