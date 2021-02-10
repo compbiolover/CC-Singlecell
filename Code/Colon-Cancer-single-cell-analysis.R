@@ -4,7 +4,6 @@
 
 #Loading needed R packages. ----
 library(caret);packageVersion("caret")
-library(dplyr);packageVersion("dplyr")
 library(glmnet);packageVersion("glmnet")
 library(hoardeR);packageVersion("hoardeR")
 library(Matrix);packageVersion("Matrix")
@@ -12,15 +11,11 @@ library(mlr);packageVersion("mlr")
 library(mlr3);packageVersion("mlr3")
 library(mlr3proba);packageVersion("mlr3proba")
 library(monocle3);packageVersion("monocle3")
-library(PTC);packageVersion("PTC")
-library(pROC);packageVersion("pROC")
 library(Rmagic);packageVersion("Rmagic")
 library(SummarizedExperiment);packageVersion("SummarizedExperiment")
-library(stringr);packageVersion("stringr")
 library(survival);packageVersion("survival")
 library(survminer);packageVersion("survminer")
 library(switchde);packageVersion("switchde")
-library(targetscan.Hs.eg.db);packageVersion("targetscan.Hs.eg.db")
 library(TCGAbiolinks);packageVersion("TCGAbiolinks")
 library(tidyverse);packageVersion("tidyverse")
 
@@ -45,13 +40,7 @@ setwd("~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/")
  #   res
  # }
  # 
- # getRank <- function(ranking = NULL,
- #                    gn      = NULL){
- #   if (gn %in% names(ranking)) {
- #     return(ranking[gn])
- #   }
- #   else return(0.0)
- # }
+
 
 #Ranking genes by three measurements
 geneRank <- function(ranking1 = NULL, ranking2 = NULL, ranking3 = NULL, a1 = 1,
@@ -74,23 +63,7 @@ geneRank <- function(ranking1 = NULL, ranking2 = NULL, ranking3 = NULL, a1 = 1,
    }
    else return(0.0)
  }
-# grid.search <- function(ranking1 = NULL,
-#                        ranking2 = NULL,
-#                        N        = 50){
-#   res = NULL
-#   for(a1 in seq(0,1)){
-#     for(a2 in seq(0,1-a1)){
-#       ranking = geneRank(ranking1, ranking2,a1,a2)
-#       temp = benchdb(ranking, N)
-#       View(temp)
-#       View(res)
-#       if(is.null(res)) res = temp
-#       else res = cbind(res, temp)
-#     }
-#   }
-#   res
-#   View(res)
-# }
+
 
 
 grid.search <- function(ranking1 = NULL, ranking2 = NULL, ranking3 = NULL, N = 50){
@@ -191,7 +164,7 @@ benchdb <- function(ranking = NULL,
 #epi_cells_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_NM_epithelial_cells_FPKM.csv")
 all_tumor_cells_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_tumor_all_cells_FPKM.csv")
 #epi_cells_tumor_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_tumor_epithelial_cells_FPKM.csv")
-#geo_ega_id_match <- read.csv("Data/Single-cell-data/GSE81861_GEO_EGA_ID_match.csv")
+
 
 
 
@@ -268,22 +241,18 @@ all_tumor_cells_fpkm_denoised <- as.matrix(all_tumor_cells_fpkm_denoised)
 save(all_tumor_cells_fpkm_denoised, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_denoised.RData")
 
 #Doing some pre-processing of the rownames to make stuff cleaner----
-current_rowname_split <- strsplit(rownames(all_tumor_cells_fpkm_denoised), "_")
-
+current_colname_split <- strsplit(colnames(t(all_tumor_cells_fpkm_denoised)), "_")
 finished_gene_list <- c()
-current_list <- current_rowname_split
-for (y in seq(1:length(current_list))){
+current_list <- current_colname_split
+for (x in seq(1:length(current_list))){
   #print(current_list[[y]][2])
-  finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
+  finished_gene_list <- c(finished_gene_list, current_list[[x]][2])
 }
 
-#rownames(all_tumor_cells_fpkm_denoised) <- rownames(finished_gene_list)
-# finished_gene_list <- unique(finished_gene_list)
-# finished_gene_list <- as.data.frame(finished_gene_list)
-# colnames(finished_gene_list)[1] <- "gene_short_name"
-# rownames(finished_gene_list) <- finished_gene_list$gene_short_name
-
-#all_tumor_cells_fpkm_denoised <- filter(all_tumor_cells_fpkm_denoised, rownames(all_tumor_cells_fpkm_denoised) %in% rownames(finished_gene_list))
+all_tumor_cells_fpkm_denoised <- t(all_tumor_cells_fpkm_denoised)
+colnames(all_tumor_cells_fpkm_denoised) <- finished_gene_list
+all_tumor_cells_fpkm_denoised_cleaned <- all_tumor_cells_fpkm_denoised
+#save(all_tumor_cells_fpkm_denoised_cleaned, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_denoised_cleaned.RData")
 
 #Moncole3 steps ----
 #Here We first are making some vectors of VIM genes (mesencymal progression marker) and CDH genes (epithelial marker) that I can use to
@@ -311,6 +280,7 @@ plot_cells(cds                 = cds,
            label_branch_points = FALSE,
            graph_label_size    = 1.5)
 
+#save(cds, file = "Data/Exported-data/R-objects/cds.RData")
 
 #Integrating the new pseudotime data into the count matrix. Here I extract just the pseudotime calculations from the cds
 #object to a use for the swithde() calculation later. The output of this code is a dataframe that has 2 columns (pseudotime
@@ -320,6 +290,7 @@ pseudotime_data <- as.data.frame(pseudotime_data)
 colnames(pseudotime_data) <- "Pseudotime"
 pseudotime_contents <- rownames(pseudotime_data)
 pseudotime_data$Samples <- pseudotime_contents
+#save(pseudotime_data, file = "Data/Exported-data/R-objects/pseudotime_data.RData")
 
 #Different metrics ----
 #3.1 The median absolute deviation metric (MAD) ----
@@ -348,6 +319,8 @@ vim.sdes.ranking <- vim.sdes.rank$k
 names(vim.sdes.ranking) <- vim.sdes.rank$gene
 vim.sdes.ranking<-abs(vim.sdes.ranking)/sum(abs(vim.sdes.ranking))
 
+#This code block goes and cleans up the gene names of the list 
+#(they are rownames)
 current_rowname_split <- strsplit(names(vim.sdes.ranking), "_")
 finished_gene_list <- c()
 current_list <- current_rowname_split
@@ -382,9 +355,6 @@ dbDEMC_high_miRNAs <- as.vector(dbDEMC_high_miRNAs)
 #miRNAs from miRmap----
 #miRmap_transcripts <- read.csv(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homsap_transcripts.csv", sep = ',')
 miRmap_mirnas <- read.csv(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homsap_mirnas.csv", sep = ',')
-
-#f <- function(x, pos) print(pos)
-#miRmap_targets <- read_csv_chunked(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homsap_targets.csv", chunk_size = 1000, callback = DataFrameCallback$new(f))
 
 
 #Common miRNAs between databases----
@@ -455,7 +425,7 @@ mirna_gene_list <- rowSums(miRNA_score)
 mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
 mirna.ranking <- sort(mirna.ranking, decreasing = TRUE)
 #mirna.ranking <- as.vector(mirna.ranking)
-save(mirna.ranking, file = "Data/Exported-data/R-objects/mirna.ranking.RData")
+#save(mirna.ranking, file = "Data/Exported-data/R-objects/mirna.ranking.RData")
 #write.csv(mirna.ranking, file = "Data/Exported-data/mirna-ranking.csv")
 
 
@@ -472,57 +442,6 @@ common_genes <- intersect(head(emt_genes$Genes, n=20), rownames(mirna.ranking))
 cc_genes <- read.csv(file = "Data/Colon-cancer-markers/cc-markers.csv", sep = ',')
 common_cc_genes <- intersect(cc_genes$Markers, head(rownames(mirna.ranking), n=200))
 
-
-#All of this code is on hiatus until a further date----
-# #Reading in the miRNA similarity score information
-# library(readxl)
-# miRNA_similarity_names <- read_excel("Data/miRNA-data/miRNA-similarity-data/microRNA name.xls", col_names = FALSE)
-# colnames(miRNA_similarity_names) <- "miRNAs"
-# rownames(miRNA_similarity_names) <- miRNA_similarity_names$miRNAs
-# miRNA_similarity <- read.csv("Data/miRNA-data/miRNA-similarity-data/miRNA similarity matrix.txt", sep = '\t')
-# for (x in seq(1:length(colnames(miRNA_similarity)))){
-#   colnames(miRNA_similarity)[x] <- rownames(miRNA_similarity_names)[x]
-# }
-# 
-# #This next section will be dedicated to getting the disease similarity part setup
-# 
-# 
-# # Using the hoardeR package targetScan() function to get the miRNA targets.
-# my_num <- 1
-# remove <- c("miR-451", "miR-21", "miR-221", "miR-154-3p/487-3p", "miR-487a")
-# miRNA_targets <- list()
-# my_miRNA[1] <- "let-7-5p/98-5p"
-# my_miRNA[4] <- "miR-15a-3p"
-# my_miRNA[5] <- "miR-15-5p"
-# my_miRNA[12] <- "miR-30-5p"
-# my_miRNA[14] <- "miR-25-3p/32-5p/92-3p/363-3p/367-3p"
-# my_miRNA[16] <- "miR-34-5p/449-5p"
-# my_miRNA[41] <- "miR-15-5p/16-5p/195-5p/424-5p/497-5p"
-# my_miRNA[45] <- "miR-204-5p/211-5p"
-# my_miRNA[52] <- "miR-302-3p/372-3p/373-3p/520-3p"
-# my_miRNA[56] <- "miR-302-3p/372-3p/373-3p/520-3p"
-# my_miRNA[77] <- "miR-96-5p/1271-5p"
-# my_miRNA[80] <- "miR-96-5p/1271-5p"
-# my_miRNA[86] <- "miR-21-5p/590-5p"
-# 
-# 
-# my_miRNA <- setdiff(my_miRNA, remove)
-# my_miRNA <- trimws(my_miRNA)
-# 
-# for (m in my_miRNA[1:121]) {
-#   print(m)
-#   current_target <- targetScan(mirna=my_miRNA[my_num], species="Human", release="7.2", maxOut= 50)
-#   miRNA_name <- m
-#   miRNA_name_final <- rep(miRNA_name, times=length(current_target$Ortholog))
-#   current_target <- cbind(current_target,miRNA_name_final)
-#   miRNA_targets[[m]] <- current_target
-#   my_num <- my_num + 1
-#   print(my_num)
-# }
-# all_miRNA_targets <- do.call(rbind, miRNA_targets)
-# all_miRNA_targets <- arrange(all_miRNA_targets, desc(consSites))
-# miRNA_gene_intersect <- intersect(all_miRNA_targets$Ortholog, genes_in_bulk_RNA)
-# miRNA_gene_intersect
 
 #Now doing the grid search of optimal values for the linear, integrated model----
 #Currently all 3 metrics (MAD and SDE and miRNA).
@@ -544,97 +463,63 @@ for (x in a3_weights){
 }
 
 
-#Code for just two metrics----
+#Grid search for just two metrics----
 weights <- seq(from = 0, to=1, by=0.1)
 df_index <- 1
 integrated_gene_lists <- list()
 
 for (x in weights) {
-  print(x)
   current_ranking <- geneRank(ranking1 = vim.sdes.ranking, ranking2 = mirna.ranking,  a1=x, a2=1-x)
   current_ranking <- as.data.frame(current_ranking)
   integrated_gene_lists[[df_index]] <- current_ranking
   df_index <- df_index + 1
 }
 
-#Subsetting the gene expression data frame to just the top N genes found from the integrated ranking at different combinations/values of weights ----
+#save(integrated_gene_lists, file = "Data/Exported-data/R-objects/integrated-gene-lists-for-two-metrics.RData")
+
+#Subsetting the gene expression data frame to just the top 900 genes found from the integrated ranking at different combinations/values of weights ----
 gene_lists_to_test <- list()
-all_tumor_cells_fpkm_denoised_df <- as.data.frame(all_tumor_cells_fpkm_denoised)
-#save(all_tumor_cells_fpkm_denoised_df, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_denoised_df.RData")
+all_tumor_cells_fpkm_denoised_df_cleaned <- as.data.frame(all_tumor_cells_fpkm_denoised_cleaned)
+#save(all_tumor_cells_fpkm_denoised_df_cleaned, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_denoised_df_cleaned.RData")
 all_tumor_cells_fpkm_denoised_df <- t(all_tumor_cells_fpkm_denoised_df)
 for (x in seq(1:length(integrated_gene_lists))){
-  print(x)
+  #print(x)
   current_gene_list <- as.data.frame(integrated_gene_lists[[x]])
   current_gene_list$GeneName <- rownames(current_gene_list)
   gene_names_to_test <- head(current_gene_list, n = 900)
   gene_lists_to_test[[x]] <- gene_names_to_test
 }
 
-#save(gene_lists_to_test, file = "Data/Exported-data/R-objects/gene_lists_to_test.RData")
+#save(gene_lists_to_test, file = "Data/Exported-data/R-objects/gene_lists_to_test_MiRNA_SDES.RData")
 
-#Changing the colnames of the single cell dataframe to the simple gene name so
-#that subsetting works
-current_colname_split <- strsplit(rownames(all_tumor_cells_fpkm_denoised_df), "_")
-finished_gene_list <- c()
-current_list <- current_colname_split
-for (y in seq(1:length(current_list))){
-  #print(current_list[[y]][2])
-  finished_gene_list <- c(finished_gene_list, current_list[[y]][2])
-}
 
-all_tumor_cells_fpkm_denoised_df <- t(all_tumor_cells_fpkm_denoised_df)
-colnames(all_tumor_cells_fpkm_denoised_df) <- finished_gene_list
-
+#Shrinking the scRNA-seq dataframe down to just the common genes in each of my integrated
+#lists and it
 genes_of_interest <- list()
 for (x in seq(1:length(integrated_gene_lists))){
   current_list <- gene_lists_to_test[[x]]
-  current_list <- as.data.frame(current_list)
-  common_genes <- intersect(colnames(all_tumor_cells_fpkm_denoised_df), current_list$GeneName)
-  current_genes <- subset(all_tumor_cells_fpkm_denoised_df, select = common_genes) 
+  common_genes <- intersect(colnames(all_tumor_cells_fpkm_denoised_df_cleaned), current_list$GeneName)
+  current_genes <- subset(all_tumor_cells_fpkm_denoised_df_cleaned, select = common_genes) 
   genes_of_interest[[x]] <- current_genes
 }
 
-#save(genes_of_interest, file = "Data/Exported-data/R-objects/genes_of_interest.RData")
-
-all_split_colnames <- list()
-for (x in seq(1:length(integrated_gene_lists))){
-  for (y in seq(1:length(colnames(genes_of_interest[[x]])))){
-    current_df <- genes_of_interest[[x]]
-    current_df <- as.data.frame(current_df)
-    current_colname_split <- strsplit(colnames(current_df), "_")
-    all_split_colnames[[x]] <- current_colname_split
-  }
-  
-}
-
-finished_sets <- list()
-for (x in seq(1:length(integrated_gene_lists))) {
-  finished_gene_list <- c()
-  current_list <- all_split_colnames[[x]]
-  for (y in seq(1:length(current_list))){
-    finished_gene_list <- c(finished_gene_list, current_list[[y]])
-  }
-  finished_sets[[x]] <-finished_gene_list
-}
-
-#save(finished_sets, file = "Data/Exported-data/R-objects/finished_sets.RData")
+#save(genes_of_interest, file = "Data/Exported-data/R-objects/genes_of_interest_MiRNA_SDES.RData")
 
 #Making the dataframe that contains just the genes by samples that we need from bulk RNA-seq data
 gene_expression_info <- COA_data_se@assays@data@listData[["HTSeq - Counts"]]
 rownames(gene_expression_info) <- COA_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
 colnames(gene_expression_info) <- COA_data_se@colData@rownames
 gene_expression_info <- t(gene_expression_info)
-
 #save(gene_expression_info, file = "Data/Exported-data/R-objects/gene_expression_info.RData")
 
 all_intersections <- list()
-for (x in seq(1:length(finished_sets))){
-  current_set <- finished_sets[[x]]
-  current_intersect <- intersect(colnames(gene_expression_info), current_set)
+for (x in seq(1:length(genes_of_interest))){
+  current_set <- genes_of_interest[[x]]
+  current_intersect <- intersect(colnames(gene_expression_info), colnames(current_set))
   all_intersections[[x]] <- current_intersect
 }
 
-#save(all_intersections, file = "Data/Exported-data/R-objects/all_intersections.RData")
+#save(all_intersections, file = "Data/Exported-data/R-objects/all_intersections_MiRNA-SDES.RData")
 
 #Merging the two dataframes together into a larger dataframe that we can use for the Cox PH
 bulk_rna_df_unique <- subset(bulk_rna_df, select = unique(colnames(bulk_rna_df)))
@@ -671,7 +556,7 @@ for (x in seq(1:length(all_intersections))){
   all_intersections_cleaned[[x]] <- genes_in_bulk_RNA
 }
 
-#save(all_intersections_cleaned, file = "Data/Exported-data/R-objects/all_intersections_cleaned.RData")
+#save(all_intersections_cleaned, file = "Data/Exported-data/R-objects/all_intersections_cleaned-MiRNA-SDES.RData")
 rows_to_remove <- setdiff(rownames(merged_df), rownames(survival_df))
 merged_df <- merged_df[!(row.names(merged_df) %in% rows_to_remove), ]
 
@@ -690,7 +575,7 @@ mad.ranking.subset.df <- as.data.frame(mad.ranking.subset)
 colnames(mad.ranking.subset.df)[1] <- "Score"
 mad.ranking.subset.df <- t(mad.ranking.subset.df)
 colnames(mad.ranking.subset.df) <- names(mad.ranking.subset)
-
+save(mad.ranking.subset.df, file = "Data/Exported-data/R-objects/mad.ranking.subset.df.RData")
 
 
 #Now doing data splitting for training and testing sets----
@@ -703,11 +588,6 @@ df_for_train_test_split <- subset(df_for_train_test_split, select=c(TSPAN6:AC007
 df_for_train_test_split$days.to.last.follow.up <- my_time
 df_for_train_test_split$vital.status <- my_status
 #save(df_for_train_test_split, file = "Data/Exported-data/R-objects/df_for_train_test_split.RData")
-set.seed(1)
-index <- createDataPartition(df_for_train_test_split$vital.status, p = 0.6, list = F)
-merged_train <- df_for_train_test_split[index, ] # 60%
-merged_test <- df_for_train_test_split[-index, ] # 40%
-
 
 #Cox models----
 set.seed(1)
@@ -721,8 +601,8 @@ all_active_coefs <- list()
 all_formulas <- list()
 
 for (x in seq(1:length(all_intersections_cleaned))){
-  #current_formula_data <- all_intersections_cleaned[[x]]
-  current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
+  current_formula_data <- all_intersections_cleaned[[x]]
+  #current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
   current_formula_data <- as.vector(current_formula_data)
   #current_formula_data <- current_formula_data[-107]
   
@@ -757,16 +637,24 @@ for (x in seq(1:length(all_intersections_cleaned))){
   #Saving just the active gene names
   active_genes <-rownames(Coefficients)[Active.Index]
   surv_gene_df=merged_df[,active_genes]
-  metric.coef <- as.list(mad.ranking.subset)
-  metric.coef <- as.data.frame(metric.coef)
+  #metric.coef <- as.list(mad.ranking.subset)
+  metric.coef <- active_genes
+  integrated_gene_list_info <- integrated_gene_lists[[11]]
+  integrated_gene_list_info <- t(integrated_gene_list_info)
+  common_genes <- intersect(metric.coef, colnames(integrated_gene_list_info))
+  integrated_gene_list_info <- subset(integrated_gene_list_info, select=common_genes)
+  #metric.coef <- as.data.frame(metric.coef)
   metric.coef <- t(metric.coef)
   colnames(metric.coef)[1] <- "Score"
-  gene_weight <- as.data.frame(metric.coef)
+  gene_weight <- as.data.frame(integrated_gene_list_info)
+  #gene_weight <- as.data.frame(metric.coef)
   gene_weight <- t(gene_weight)
-  gene_weight <- subset(gene_weight, select=colnames(surv_gene_df))
-  gene_weight <- t(gene_weight)
+  #gene_weight <- subset(gene_weight, select=colnames(surv_gene_df))
+  #gene_weight <- subset(gene_weight, select=colnames(surv_gene_df))
+  #gene_weight <- t(gene_weight)
   gene_weight <- sort(gene_weight, decreasing = TRUE)
   weight_function=function(x){crossprod(as.numeric(x),gene_weight)}
+  surv_gene_df <- surv_gene_df[,common_genes]
   trainScore=apply(surv_gene_df,1,weight_function)
   risk=as.vector(ifelse(trainScore>median(trainScore),"high","low"))
   surv_gene_df <- cbind(risk, surv_gene_df)
@@ -775,15 +663,15 @@ for (x in seq(1:length(all_intersections_cleaned))){
   surv_gene_df <- cbind(vital.status, surv_gene_df)
   surv_gene_df <- cbind(days.to.last.follow.up, surv_gene_df)
   km_fit <- survfit(Surv(days.to.last.follow.up, vital.status) ~ risk, data = surv_gene_df)
-  
+
   #P-value calculation for KM curves
   diff=survdiff(Surv(days.to.last.follow.up, vital.status) ~risk,data = surv_gene_df)
   pValue=1-pchisq(diff$chisq,df=1)
   pValue=signif(pValue,4)
   pValue=format(pValue, scientific = TRUE)
-  
+
   #KM Curves plotting code
-  surPlot<-ggsurvplot(km_fit, 
+  surPlot<-ggsurvplot(km_fit,
                      data=surv_gene_df,
                      pval=paste0("p=",pValue),
                      pval.size=4,
@@ -793,11 +681,11 @@ for (x in seq(1:length(all_intersections_cleaned))){
                      palette=c("red", "blue")
                      )
 }
-save(all_formulas, file = "Data/Data-from-pipeline/all_formulas.RData")
-save(all_formulas, file = "Data/Data-from-pipeline/cox_models.RData")
-save(all_formulas, file = "Data/Data-from-pipeline/f_objects.RData")
-save(all_formulas, file = "Data/Data-from-pipeline/lambdas.RData")
-save(all_formulas, file = "Data/Data-from-pipeline/c_indicies.RData")
+# save(all_formulas, file = "Data/Data-from-pipeline/all_formulas.RData")
+# save(all_formulas, file = "Data/Data-from-pipeline/cox_models.RData")
+# save(all_formulas, file = "Data/Data-from-pipeline/f_objects.RData")
+# save(all_formulas, file = "Data/Data-from-pipeline/lambdas.RData")
+# save(all_formulas, file = "Data/Data-from-pipeline/c_indicies.RData")
 
 for(x in seq(1:length(cox_models))){
   current_model <- cox_models[[x]]
@@ -832,12 +720,6 @@ all_active_coefs_merged <- do.call(rbind, all_active_coefs)
 #colnames(test_preds)[1] <- "Predicted C-index on Test data"
 # write.csv(all_active_coefs_merged, file = my.filename, row.names = TRUE, quote = FALSE)
 
-
-
-#Doing heatmap of weights for linear model with the color shading indicating what the c-index value is----
-for (x in cox_models){
-  print(x)
-}
 
 
 #With random genes selected of the same size as our N significant ones ----
