@@ -4,14 +4,9 @@
 
 #Loading needed packages----
 library(glmnet);packageVersion("glmnet")
-library(hoardeR);packageVersion("hoardeR")
-library(monocle3);packageVersion("monocle3")
-library(Rmagic);packageVersion("Rmagic")
 library(SummarizedExperiment);packageVersion("SummarizedExperiment")
 library(survival);packageVersion("survival")
 library(survminer);packageVersion("survminer")
-library(switchde);packageVersion("switchde")
-library(TCGAbiolinks);packageVersion("TCGAbiolinks")
 library(tidyverse);packageVersion("tidyverse")
 
 #Copying in the functions that are helpful from the Li et al. paper. ----
@@ -57,11 +52,6 @@ getRank <- function(ranking = NULL,
   }
   else return(0.0)
 }
-
-#Loading the single-cell data files. ----
-all_tumor_cells_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_tumor_all_cells_FPKM.csv")
-
-
 #Loading the .RData files to simplify analysis----
 load(file = "Data/Exported-data/R-objects/COA_data_se.RData", verbose = TRUE)
 load(file = "Data/Exported-data/R-objects/COA_data_df.RData", verbose = TRUE)
@@ -80,35 +70,49 @@ load(file = "Data/Exported-data/R-objects/mad.ranking.subset.df.RData", verbose 
 
 #Cox models----
 set.seed(1)
-cox_models <- list()
-f_objects <- list()
-lambdas <- list()
-c_indicies <- list()
-prediction_res <- list()
-all_coefs <- list()
-all_active_coefs <- list()
-all_formulas <- list()
+cox_models <- vector(mode = "list", length = length(all_intersections_cleaned))
+f_objects <- vector(mode = "list", length = length(all_intersections_cleaned))
+lambdas <- vector(mode = "list", length = length(all_intersections_cleaned))
+c_indicies <- vector(mode = "list", length = length(all_intersections_cleaned))
+prediction_res <- vector(mode = "list", length = length(all_intersections_cleaned))
+all_coefs <- vector(mode = "list", length = length(all_intersections_cleaned))
+all_active_coefs <- vector(mode = "list", length = length(all_intersections_cleaned))
+all_formulas <- vector(mode = "list", length = length(all_intersections_cleaned))
 
-for (x in seq(1:length(all_intersections_cleaned))){
-  current_formula_data <- all_intersections_cleaned[[x]]
-  #current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
+
+#Making the y of the cox model----
+my_y <- Surv(time = df_for_train_test_split$days.to.last.follow.up, event = df_for_train_test_split$vital.status)
+
+
+my_formula_maker <- function(gene.list=all_intersections[[1]]){
+  input_list <- as.vector(gene.list)
+  my_formula <- paste("~", paste(input_list[1:length(input_list)], collapse = "+"))
+  my_formula <- as.formula(my_formula)
+  return(my_formula)
+}
+
+
+#Mad list subset (still need to integrate)
+#current_formula_data <- intersect(colnames(mad.ranking.subset.df), colnames(df_for_train_test_split))
+
+
+for (x in seq(1:length(all_intersections))){
+  #current_formula_data <- all_intersections[[x]]
+  
   current_formula_data <- as.vector(current_formula_data)
   #current_formula_data <- current_formula_data[-107]
   
   my_formula <- paste("~", paste(current_formula_data[1:length(current_formula_data)], collapse = "+"))
-  all_formulas[[x]] <- my_formula
   f <- as.formula(my_formula)
   
   
-  
   my_x <- model.matrix(f, df_for_train_test_split)
-  my_y <- Surv(time = df_for_train_test_split$days.to.last.follow.up, event = df_for_train_test_split$vital.status)
   cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C", maxit=100000, family="cox")
   current_lambdas <- cv_fit$lambda
   current_c_indicies <- cv_fit$cvm
   
   
-  
+  #Adding the 10-fold cox model and other relevant info to lists
   cox_models[[x]] <- cv_fit
   f_objects[[x]] <- f
   lambdas[[x]] <- current_lambdas
@@ -120,23 +124,16 @@ for (x in seq(1:length(all_intersections_cleaned))){
   Coefficients <- coef(fit, s = cv_fit$lambda.min)
   Active.Index <- which(as.logical(Coefficients) != 0)
   Active.Coefficients  <- Coefficients[Active.Index]
+  
+  #Adding the relevant data bits to lists for further processing
   all_coefs[[x]] <- Coefficients
   all_active_coefs[[x]] <- Active.Coefficients
+  all_formulas[[x]] <- my_formula
 }
 
 for(x in seq(1:length(cox_models))){
   current_model <- cox_models[[x]]
   print(current_model)
-}
-
-all_c_indexes_finished <- list()
-all_lambdas <-list()
-min_lambda <- list()
-for (x in seq(1:length(cox_models))){
-  current_model <- cox_models[[x]]
-  all_c_indexes_finished[[x]] <- current_model$cvm
-  all_lambdas[[x]] <- current_model$lambda
-  min_lambda[[x]] <- current_model$lambda.min
 }
 
 
