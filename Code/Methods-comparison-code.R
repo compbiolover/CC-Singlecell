@@ -2,9 +2,8 @@
 #Purpose: Code to test several scRNA-seq methods to my method
 
 #Loading needed packages----
-#library(MAST);packageVersion("MAST")
-library(scDD);packageVersion("scDD")
-library(SingleCellExperiment);packageVersion("SingleCellExperiment")
+library(scDD)
+library(SingleCellExperiment)
 
 #Loading needed functions----
 gene_name_cleaner <- function(data.to.clean=all_tumor_cells_fpkm_denoised_df){
@@ -24,11 +23,14 @@ rownames(all_tumor_cells_fpkm) <- all_tumor_cells_fpkm$X
 all_tumor_cells_fpkm <- gene_name_cleaner(data.to.clean = all_tumor_cells_fpkm)
 all_tumor_cells_fpkm <- t(all_tumor_cells_fpkm)
 all_tumor_cells_fpkm <- subset(all_tumor_cells_fpkm, select=c(RHC3546__Tcell__.C6E879:RHC6041__Macrophage__.FFFF55))
+save(all_tumor_cells_fpkm, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_for_scdd.RData")
+
 all_nm_cells_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_NM_all_cells_FPKM.csv")
 rownames(all_nm_cells_fpkm) <- all_nm_cells_fpkm$X
 all_nm_cells_fpkm <- gene_name_cleaner(data.to.clean = all_nm_cells_fpkm)
 all_nm_cells_fpkm <- t(all_nm_cells_fpkm)
 all_nm_cells_fpkm <- subset(all_nm_cells_fpkm, select=c(RHC3934__Bcell__.7DEA7B:RHC6187__Macrophage__.FFFF55))
+save(all_nm_cells_fpkm, file = "Data/Exported-data/R-objects/all_nm_cells_fpkm_for_scdd.RData")
 
 #Doing pre-processing to get my data ready to go into the SingleCellExperiment data----
 #container format

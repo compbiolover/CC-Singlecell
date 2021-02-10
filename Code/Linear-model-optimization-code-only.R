@@ -34,6 +34,7 @@ load(file = "Data/vim.sdes.ranking.RData")
 load(file = "Data/mirna.ranking.RData")
 
 #Doing the optimization for the model----
+set.seed(1)
 weights <- seq(from = 0, to=1, by=0.1)
 a3_weights <- seq(from = 0, to=1, by=0.1)
 a3 <- 0
