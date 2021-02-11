@@ -334,12 +334,13 @@ save(vim.sdes.ranking, file = "Data/Exported-data/R-objects/vim.sdes.ranking.RDa
 
 #3.3 The miRNA metric ----
 #Loading the microRNA data from Mary----
-my_miRNA <- read.table(file="Data/miRNA-data/miRNA_list.txt", sep="\t", header=FALSE)
-my_miRNA <- my_miRNA[1]
-colnames(my_miRNA) <- "miRNAs"
-my_miRNA <- my_miRNA$miRNAs
-my_miRNA <- as.vector(my_miRNA)
-my_miRNA <- trimws(my_miRNA)
+emt_miRNA <- read.table(file="Data/miRNA-data/miRNA_list.txt", sep="\t", header=FALSE)
+emt_miRNA <- emt_miRNA[1]
+colnames(emt_miRNA) <- "miRNAs"
+emt_miRNA <- emt_miRNA$miRNAs
+emt_miRNA <- as.vector(emt_miRNA)
+emt_miRNA <- trimws(emt_miRNA)
+emt_miRNA <- paste("hsa",sep = "-",emt_miRNA)
 
 
 #miRNAs from dbDEMC version 2.0----
@@ -352,6 +353,11 @@ dbDEMC_high <- filter(dbDEMC_high, Cancer.Type=="colorectal cancer" | Cancer.Typ
 dbDEMC_high_miRNAs <- subset(dbDEMC_high, select = miRBase.Update.ID)
 dbDEMC_high_miRNAs <- as.vector(dbDEMC_high_miRNAs)
 
+
+dbDEMC_low <- filter(dbDEMC_low, Cancer_Type=="colorectal cancer" | Cancer_Type=="colon cancer")
+dbDEMC_low_miRNAs <- subset(dbDEMC_low, select = miRBase_update)
+dbDEMC_low_miRNAs <- as.vector(dbDEMC_low_miRNAs)
+
 #miRNAs from miRmap----
 #miRmap_transcripts <- read.csv(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homsap_transcripts.csv", sep = ',')
 miRmap_mirnas <- read.csv(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homsap_mirnas.csv", sep = ',')
@@ -359,20 +365,25 @@ miRmap_mirnas <- read.csv(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homs
 
 #Common miRNAs between databases----
 #Intersection between the miRNAs of the two databases
+#24 common miRNAs found across emt, dbDEMC colon cancer (high), and miRmap
+#High dbDEMC mirnas
 common_mirnas <- intersect(miRmap_mirnas$mature_name, dbDEMC_high_miRNAs$miRBase.Update.ID)
+common_mirnas <- intersect(common_mirnas, emt_miRNA)
+
+#Low dbDEMC mirnas
+common_mirnas <- intersect(miRmap_mirnas$mature_name, dbDEMC_low_miRNAs$miRBase_update)
+common_mirnas <- intersect(common_mirnas, emt_miRNA)
 
 #Now submitting these miRNAs to TargetScan to get genes to make a gene list for the third metric----
 my_num <- 1
-miRNA_targets <- list()
-for (m in common_mirnas[1:600]) {
-  print(m)
+miRNA_targets <- vector(mode = "list", length = length(common_mirnas))
+for (m in common_mirnas[1:length(common_mirnas)]) {
   current_target <- targetScan(mirna=common_mirnas[my_num], species="Human", release="7.2", maxOut= NULL)
   miRNA_name <- m
   miRNA_name_final <- rep(miRNA_name, times=length(current_target$Ortholog))
   current_target <- cbind(current_target,miRNA_name_final)
   miRNA_targets[[m]] <- current_target
   my_num <- my_num + 1
-  print(my_num)
 }
 
 #Simplifying the output of the targetscan commands to just the Gene name
@@ -425,8 +436,8 @@ mirna_gene_list <- rowSums(miRNA_score)
 mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
 mirna.ranking <- sort(mirna.ranking, decreasing = TRUE)
 #mirna.ranking <- as.vector(mirna.ranking)
-#save(mirna.ranking, file = "Data/Exported-data/R-objects/mirna.ranking.RData")
-#write.csv(mirna.ranking, file = "Data/Exported-data/mirna-ranking.csv")
+save(mirna.ranking, file = "Data/Exported-data/R-objects/mirna.ranking.all.three.dbs.demc.low.RData")
+write.csv(mirna.ranking, file = "Data/Exported-data/Csv-files/mirna.ranking.all.three.dbs.demc.low.csv")
 
 
 
