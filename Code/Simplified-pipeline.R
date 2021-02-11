@@ -5,15 +5,13 @@
 #Loading needed packages----
 library(doParallel)
 library(glmnet)
-library(SummarizedExperiment)
 library(survival)
-library(survminer)
 library(tidyverse)
 
 #Setting the directory for the lab server----
 setwd("/home/awillems/Projects/CC_Singlecell")
 #Registering multiple cores----
-registerDoParallel(11)
+registerDoParallel(12)
 #Copying in the functions that are helpful from the Li et al. paper. ----
 #Function used to rank my linear model with just two metrics
 two_metric_geneRank <- function(ranking1 = NULL,
@@ -58,69 +56,71 @@ getRank <- function(ranking = NULL,
   else return(0.0)
 }
 #Loading the .RData files to simplify analysis----
-load(file = "Data/Exported_data/R_objects/COA_data_se.RData", verbose = TRUE)
-load(file = "Data/Exported_data/R_objects/COA_data_df.RData", verbose = TRUE)
-load(file = "Data/Exported_data/R_objects/bulk_rna_df.RData", verbose = TRUE)
-load(file = "Data/Exported_data/R_objects/all_tumor_cells_fpkm_denoised_cleaned.RData", verbose = TRUE)
-load(file = "Data/Exported_data/R_objects/mad.ranking.RData", verbose = TRUE)
-load(file = "Data/Exported_data/R_objects/vim.sdes.ranking.RData", verbose = TRUE)
-load(file = "Data/Exported_data/R_objects/mirna.ranking.RData", verbose = TRUE)
-#load(file = "Data/Exported_data/R_objects/integrated-gene-lists-for-two-metrics.RData", verbose = TRUE) #This is the SDES + MiRNA metrics
-load(file = "Data/Exported_data/R_objects/all_tumor_cells_fpkm_denoised_df_cleaned.RData", verbose = TRUE)
-#load(file = "Data/Exported_data/R_objects/gene_lists_to_test_MiRNA_SDES.RData", verbose = TRUE)
-#load(file = "Data/Exported_data/R_objects/all_intersections_cleaned-MiRNA-SDES.RData", verbose = TRUE)
-load(file = "Data/Exported_data/R_objects/df_for_train_test_split.RData", verbose = TRUE)
-load(file = "Data/Exported_data/R_objects/merged_df_replaced.RData", verbose = TRUE)
-#load(file = "Data/Exported_data/R_objects/mad.ranking.subset.df.RData", verbose = TRUE)
-#load(file = "Data/Lab-server-data/All-three-metrics/sorted_gene_lists_all_three_metrics.RData", verbose = TRUE)
+load(file = "Data/Exported_data/R_objects/COA_data_se.RData")
+load(file = "Data/Exported_data/R_objects/COA_data_df.RData")
+load(file = "Data/Exported_data/R_objects/bulk_rna_df.RData")
+load(file = "Data/Exported_data/R_objects/all_tumor_cells_fpkm_denoised_cleaned.RData")
+load(file = "Data/Exported_data/R_objects/gene_expression_info.RData")
+#load(file = "Data/Exported_data/R_objects/mad.ranking.RData")
+load(file = "Data/Exported_data/R_objects/vim.sdes.ranking.RData")
+load(file = "Data/Exported_data/R_objects/mirna.ranking.RData")
+#load(file = "Data/Exported_data/R_objects/integrated-gene-lists-for-two-metrics.RData") #This is the SDES + MiRNA metrics
+load(file = "Data/Exported_data/R_objects/all_tumor_cells_fpkm_denoised_df_cleaned.RData")
+#load(file = "Data/Exported_data/R_objects/gene_lists_to_test_MiRNA_SDES.RData")
+#load(file = "Data/Exported_data/R_objects/all_intersections_cleaned-MiRNA-SDES.RData")
+load(file = "Data/Exported_data/R_objects/df_for_train_test_split.RData")
+load(file = "Data/Exported_data/R_objects/merged_df_replaced.RData")
+#load(file = "Data/Exported_data/R_objects/mad.ranking.subset.df.RData")
+#load(file = "Data/Lab-server-data/All-three-metrics/sorted_gene_lists_all_three_metrics.RData")
 
 
 
 #Optimization for just 2 metrics----
-# weights <- seq(from = 0, to=1, by=0.1)
-# df_index <- 1
-# integrated_gene_lists <- vector(mode = "list", length = length(weights))
-# 
-# for (x in weights) {
-#   current_ranking <- two_metric_geneRank(ranking1 = vim.sdes.ranking, ranking2 = mirna.ranking,  a1=x, a2=1-x)
-#   current_ranking <- as.data.frame(current_ranking)
-#   integrated_gene_lists[[df_index]] <- current_ranking
-#   df_index <- df_index + 1
-# }
-# 
-# save(integrated_gene_lists, file = "Data/Exported-data/R-objects/integrated-gene-lists-for-two-metrics.RData")
+weights <- seq(from = 0, to=1, by=0.1)
+df_index <- 1
+integrated_gene_lists <- vector(mode = "list", length = length(weights))
+
+for (x in weights) {
+  current_ranking <- two_metric_geneRank(ranking1 = vim.sdes.ranking, ranking2 = mirna.ranking,  a1=x, a2=1-x)
+  current_ranking <- as.data.frame(current_ranking)
+  integrated_gene_lists[[df_index]] <- current_ranking
+  df_index <- df_index + 1
+}
+
+save(integrated_gene_lists, file = "Data/Exported-data/R-objects/integrated-gene-lists-for-two-metrics.RData")
 
 
 #Optimization for all 3 metrics (MAD and SDE and miRNA)----
-weights <- seq(from = 0, to=1, by=0.1)
-a3_weights <- seq(from = 0, to=1, by=0.1)
-a3 <- 0
-df_index <- 1
-integrated_gene_lists <- vector(mode = "list", length = length(weights)*length(a3_weights))
-
-
-
-for (x in a3_weights){
-  for (y in weights) {
-    current_ranking <- three_metric_geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking, ranking3 = mirna.ranking,  a1=x, a2=1-(x+a3), a3= y)
-    current_ranking <- as.data.frame(current_ranking)
-    integrated_gene_lists[[df_index]] <- current_ranking
-    df_index <- df_index + 1
-  }
-}
-
-save(integrated_gene_lists, file = "Data/Exported-data/R-objects/integrated-gene-lists-for-all-three-metrics.RData")
+# weights <- seq(from = 0, to=1, by=0.1)
+# a3_weights <- seq(from = 0, to=1, by=0.1)
+# a3 <- 0
+# df_index <- 1
+# integrated_gene_lists <- vector(mode = "list", length = length(weights)*length(a3_weights))
+# 
+# 
+# 
+# for (x in a3_weights){
+#   for (y in weights) {
+#     current_ranking <- three_metric_geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking, ranking3 = mirna.ranking,  a1=x, a2=1-(x+a3), a3= y)
+#     current_ranking <- as.data.frame(current_ranking)
+#     integrated_gene_lists[[df_index]] <- current_ranking
+#     df_index <- df_index + 1
+#   }
+# }
+# 
+# save(integrated_gene_lists, file = "Data/Exported_data/R_objects/integrated_gene_lists_for_all_three_metrics.RData")
 
 #Subsetting the integrated lists to just the top N number of genes for each list----
 gene_lists_to_test <- vector(mode = "list", length = length(integrated_gene_lists))
 for (x in seq(1:length(integrated_gene_lists))){
+  current_gene_list <- integrated_gene_lists[[x]]
   current_gene_list$GeneName <- rownames(current_gene_list)
   gene_names_to_test <- head(current_gene_list, n = 900)
   gene_lists_to_test[[x]] <- gene_names_to_test
 }
 
-save(gene_lists_to_test, file = "Data/Exported-data/R-objects/gene_lists_to_test_all_three_metrics.RData")
-
+#save(gene_lists_to_test, file = "Data/Exported_data/R_objects/gene_lists_to_test_all_three_metrics.RData")
+save(gene_lists_to_test, file = "Data/Exported_data/R_objects/gene_lists_to_test_sdes_mirna.RData")
 
 #Shrinking the scRNA-seq dataframe down to just the common genes in each of my integrated
 #lists and it
@@ -132,7 +132,8 @@ for (x in seq(1:length(integrated_gene_lists))){
   genes_of_interest[[x]] <- current_genes
 }
 
-save(genes_of_interest, file = "Data/Exported-data/R-objects/genes_of_interest_all_three_metrics.RData")
+#save(genes_of_interest, file = "Data/Exported_data/R_objects/genes_of_interest_all_three_metrics.RData")
+save(genes_of_interest, file = "Data/Exported_data/R_objects/genes_of_interest_sdes_mirna.RData")
 
 #Now getting the intersection of my gene signature list and the bulk dataframe
 #from TCGA's list
@@ -143,7 +144,8 @@ for (x in seq(1:length(genes_of_interest))){
   all_intersections[[x]] <- current_intersect
 }
 
-save(all_intersections, file = "Data/Exported-data/R-objects/all_intersections_all_three_metrics.RData")
+#save(all_intersections, file = "Data/Exported_data/R_objects/all_intersections_all_three_metrics.RData")
+save(all_intersections, file = "Data/Exported_data/R_objects/all_intersections_sdes_mirna.RData")
 
 #Ensuring that any 'bad' characters in my gene list are removed
 all_intersections_cleaned <- vector(mode = "list", length = length(integrated_gene_lists))
@@ -155,8 +157,8 @@ for (x in seq(1:length(all_intersections))){
   all_intersections_cleaned[[x]] <- genes_in_bulk_RNA
 }
 
-save(all_intersections_cleaned, file = "Data/Exported-data/R-objects/all_intersections_cleaned_all_three_metrics.RData")
-
+#save(all_intersections_cleaned, file = "Data/Exported_data/R_objects/all_intersections_cleaned_all_three_metrics.RData")
+save(all_intersections_cleaned, file = "Data/Exported_data/R_objects/all_intersections_cleaned_sdes_mirna.RData")
 
 
 #Cox models----
