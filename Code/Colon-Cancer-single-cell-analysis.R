@@ -366,26 +366,35 @@ miRmap_mirnas <- read.csv(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homs
 #Common miRNAs between databases----
 #Intersection between the miRNAs of the two databases
 #24 common miRNAs found across emt, dbDEMC colon cancer (high), and miRmap
-#High dbDEMC mirnas
+#High dbDEMC mirnas. 1561 common miRNAs between dbDEMC high and miRmap.
 common_mirnas <- intersect(miRmap_mirnas$mature_name, dbDEMC_high_miRNAs$miRBase.Update.ID)
-common_mirnas <- intersect(common_mirnas, emt_miRNA)
+#common_mirnas <- intersect(common_mirnas, emt_miRNA)
+#Removing an entry that is not in targetScan and causes error.
+common_mirnas <- common_mirnas[-1375]
+
+#Intersection of dmDEMC (high) with just EMT set
+#common_mirnas <- intersect(dbDEMC_high_miRNAs$miRBase.Update.ID, emt_miRNA)
 
 #Low dbDEMC mirnas
 common_mirnas <- intersect(miRmap_mirnas$mature_name, dbDEMC_low_miRNAs$miRBase_update)
 common_mirnas <- intersect(common_mirnas, emt_miRNA)
 
+
 #Now submitting these miRNAs to TargetScan to get genes to make a gene list for the third metric----
 my_num <- 1
-miRNA_targets <- vector(mode = "list", length = length(common_mirnas))
-for (m in common_mirnas[1:length(common_mirnas)]) {
-  current_target <- targetScan(mirna=common_mirnas[my_num], species="Human", release="7.2", maxOut= NULL)
+miRNA_targets <- vector(mode = "list", length = 1374)
+for (m in common_mirnas[1:1374]) {
+  print(m)
+  current_target <- targetScan(mirna=common_mirnas[my_num], species="Human", release="7.2", maxOut= 5)
   miRNA_name <- m
   miRNA_name_final <- rep(miRNA_name, times=length(current_target$Ortholog))
   current_target <- cbind(current_target,miRNA_name_final)
   miRNA_targets[[m]] <- current_target
+  print(my_num)
   my_num <- my_num + 1
 }
 
+save(miRNA_targets, file = "Data/Exported-data/R-objects/miRNA_targets_1374_5_genes.RData")
 #Simplifying the output of the targetscan commands to just the Gene name
 #and the mirna columns
 counter <- 1
@@ -436,8 +445,8 @@ mirna_gene_list <- rowSums(miRNA_score)
 mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
 mirna.ranking <- sort(mirna.ranking, decreasing = TRUE)
 #mirna.ranking <- as.vector(mirna.ranking)
-save(mirna.ranking, file = "Data/Exported-data/R-objects/mirna.ranking.all.three.dbs.demc.low.RData")
-write.csv(mirna.ranking, file = "Data/Exported-data/Csv-files/mirna.ranking.all.three.dbs.demc.low.csv")
+#save(mirna.ranking, file = "Data/Exported-data/R-objects/mirna.ranking.1364.mirnas.RData")
+#write.csv(mirna.ranking, file = "Data/Exported-data/Csv-files/mirna.ranking.1364.mirnas.csv")
 
 
 
