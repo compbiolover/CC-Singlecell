@@ -97,6 +97,7 @@ unique_gm_names <- unique(rownames(gm_cells))
 gm_cells <- gm_cells[unique_gm_names,]
 
 condition <- c(rep(1, ncol(h1_cells)), rep(2, ncol(gm_cells)))
+condition <- factor(condition)
 
 names(condition) <- c(colnames(h1_cells), colnames(gm_cells))
 
