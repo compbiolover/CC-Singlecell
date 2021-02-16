@@ -40,5 +40,5 @@ surPlot<-ggsurvplot(km_fit,
                     conf.int = FALSE,
                     legend.labs=c("High risk", "Low risk"),
                     legend.title="Risk",
-                    xlab="Time(days)",
+                    xlab="Time (days)",
                     palette=c("red", "blue"))

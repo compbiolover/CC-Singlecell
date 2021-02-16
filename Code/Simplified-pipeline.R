@@ -190,6 +190,15 @@ for (x in seq(1:length(all_intersections_cleaned))){
   current_formula_data <- scdd_subset
   current_formula_data <- intersect(current_formula_data, colnames(merged_df))
   
+  #For just scDD method cell lines
+  scdd_subset_cell <- head(scdd_res_cell_line$gene, n=150)
+  current_formula_data <- scdd_subset_cell
+  current_formula_data <- intersect(current_formula_data, colnames(merged_df))
+  
+  #For just DEsingle CC patient data
+  des_subset <- head(rownames(des_results), n=150)
+  current_formula_data <- scdd_subset
+  current_formula_data <- intersect(current_formula_data, colnames(merged_df))
   
   
   #current_formula_data <- current_formula_data[-107]
@@ -223,7 +232,7 @@ for (x in seq(1:length(all_intersections_cleaned))){
   all_formulas[[x]] <- my_formula
 }
 
-save(all_formulas, file = "Data/Data-from-pipeline/all_formulas_1800_gene_subset.RData")
+save(all_formulas, file = "Data/Data-from-pipeline/all_formulas_des_results.RData")
 save(cox_models, file = "Data/Data-from-pipeline/cox_models_1800_gene_subset.RData")
 save(f_objects, file = "Data/Data-from-pipeline/f_objects_1800_gene_subset.RData")
 save(lambdas, file = "Data/Data-from-pipeline/lambdas_1800_gene_subset.RData")
