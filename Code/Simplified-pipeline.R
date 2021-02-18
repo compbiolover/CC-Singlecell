@@ -11,7 +11,7 @@ library(tidyverse)
 #Setting the directory for the lab server----
 setwd("/home/awillems/Projects/CC_Singlecell")
 #Registering multiple cores----
-registerDoParallel(2)
+registerDoParallel(12)
 #Copying in the functions that are helpful from the Li et al. paper. ----
 #Function used to rank my linear model with just two metrics
 two_metric_geneRank <- function(ranking1 = NULL,
@@ -63,7 +63,7 @@ load(file = "Data/Exported_data/R_objects/all_tumor_cells_fpkm_denoised_cleaned.
 load(file = "Data/Exported_data/R_objects/gene_expression_info.RData")
 load(file = "Data/Exported_data/R_objects/mad.ranking.RData")
 load(file = "Data/Exported_data/R_objects/vim.sdes.ranking.RData")
-load(file = "Data/Exported_data/R_objects/mirna.ranking.1364.mirnas.RData", verbose = TRUE) #For the mirna that come from miRmap + dbDEMC (high) but a larger subset (1364 miRNAs)
+#load(file = "Data/Exported_data/R_objects/mirna.ranking.1364.mirnas.RData") #For the mirna that come from miRmap + dbDEMC (high) but a larger subset (1364 miRNAs)
 #load(file = "Data/Exported_data/R_objects/mirna.ranking.all.three.dbs.demc.low.RData", verbose = TRUE) #For the mirna that comes from 3 mirn dbs (low version of dbDEMC) 
 #load(file = "Data/Exported_data/R_objects/mirna.ranking.all.three.dbs.RData", verbose = TRUE) #For the mirna that comes from 3 mirn dbs (high version of dbDEMC)
 #load(file = "Data/Exported_data/R_objects/mirna.ranking.RData")
@@ -74,43 +74,44 @@ load(file = "Data/Exported_data/R_objects/all_tumor_cells_fpkm_denoised_df_clean
 load(file = "Data/Exported_data/R_objects/df_for_train_test_split.RData")
 load(file = "Data/Exported_data/R_objects/merged_df_replaced.RData")
 #load(file = "Data/Exported_data/R_objects/mad.ranking.subset.df.RData")
-#load(file = "Data/Lab-server-data/All-three-metrics/sorted_gene_lists_all_three_metrics.RData")
+#load(file = "Data/Lab-server-data/All-three-metrics/sorted_gene_lists_all_three_metrics.RData", verbose = TRUE)
 
 
 
 #Optimization for just 2 metrics----
-# weights <- seq(from = 0, to=1, by=0.1)
-# df_index <- 1
-# integrated_gene_lists <- vector(mode = "list", length = length(weights))
-# 
-# for (x in weights) {
-#   current_ranking <- two_metric_geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking,  a1=x, a2=1-x)
-#   current_ranking <- as.data.frame(current_ranking)
-#   integrated_gene_lists[[df_index]] <- current_ranking
-#   df_index <- df_index + 1
-# }
-
-#save(integrated_gene_lists, file = "Data/Exported_data/R_objects/integrated_gene_lists_for_mad_sdes.RData")
-
-#Optimization for all 3 metrics (MAD and SDE and miRNA)----
 weights <- seq(from = 0, to=1, by=0.1)
-a3_weights <- seq(from = 0, to=1, by=0.1)
-a3 <- 0
 df_index <- 1
-integrated_gene_lists <- vector(mode = "list", length = length(weights)*length(a3_weights))
+integrated_gene_lists <- vector(mode = "list", length = length(weights))
 
+for (x in weights) {
+  print(x)
+  current_ranking <- two_metric_geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking,  a1=x, a2=1-x)
+  current_ranking <- as.data.frame(current_ranking)
+  integrated_gene_lists[[df_index]] <- current_ranking
+  df_index <- df_index + 1
+ }
 
+save(integrated_gene_lists, file = "Data/Exported_data/R_objects/integrated_gene_lists_MAD_SDES.RData")
 
-for (x in a3_weights){
-  for (y in weights) {
-    current_ranking <- three_metric_geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking, ranking3 = mirna.ranking,  a1=x, a2=1-(x+a3), a3= y)
-    current_ranking <- as.data.frame(current_ranking)
-    integrated_gene_lists[[df_index]] <- current_ranking
-    df_index <- df_index + 1
-  }
-}
-
-save(integrated_gene_lists, file = "Data/Exported_data/R_objects/integrated_gene_lists_for_all_three_metricsall_intersections_all_three_metrics_1800_gene_subset.RData")
+#Optimization for all 3 metrics (MAD, SDE and miRNA)----
+# weights <- seq(from = 0, to=1, by=0.1)
+# a3_weights <- seq(from = 0, to=1, by=0.1)
+# a3 <- 0
+# df_index <- 1
+# integrated_gene_lists <- vector(mode = "list", length = length(weights)*length(a3_weights))
+# 
+# 
+# 
+# for (x in a3_weights){
+#   for (y in weights) {
+#     current_ranking <- three_metric_geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking, ranking3 = mirna.ranking,  a1=x, a2=1-(x+a3), a3= y)
+#     current_ranking <- as.data.frame(current_ranking)
+#     integrated_gene_lists[[df_index]] <- current_ranking
+#     df_index <- df_index + 1
+#   }
+# }
+# 
+# save(integrated_gene_lists, file = "Data/Exported_data/R_objects/integrated_gene_lists_for_all_three_metricsall_intersections_all_three_metrics_1800_gene_subset.RData")
 
 #Subsetting the integrated lists to just the top N number of genes for each list----
 gene_lists_to_test <- vector(mode = "list", length = length(integrated_gene_lists))
@@ -121,7 +122,7 @@ for (x in seq(1:length(integrated_gene_lists))){
   gene_lists_to_test[[x]] <- gene_names_to_test
 }
 
-save(gene_lists_to_test, file = "Data/Exported_data/R_objects/gene_lists_to_test_all_three_metrics_all_intersections_all_three_metrics_1800_gene_subset.RData")
+save(gene_lists_to_test, file = "Data/Exported_data/R_objects/gene_lists_to_test_all_intersections_MAD_SDES.RData")
 #save(gene_lists_to_test, file = "Data/Exported_data/R_objects/gene_lists_to_test_mad_sdes.RData")
 
 #Shrinking the scRNA-seq dataframe down to just the common genes in each of my integrated
@@ -134,7 +135,7 @@ for (x in seq(1:length(integrated_gene_lists))){
   genes_of_interest[[x]] <- current_genes
 }
 
-save(genes_of_interest, file = "Data/Exported_data/R_objects/genes_of_interest_all_three_metrics_all_three_metrics_all_intersections_all_three_metrics_1800_gene_subset.RData")
+save(genes_of_interest, file = "Data/Exported_data/R_objects/genes_of_interest_MAD_SDES.RData")
 #save(genes_of_interest, file = "Data/Exported_data/R_objects/genes_of_interest_mad_sdes.RData")
 
 #Now getting the intersection of my gene signature list and the bulk dataframe
@@ -146,7 +147,7 @@ for (x in seq(1:length(genes_of_interest))){
   all_intersections[[x]] <- current_intersect
 }
 
-save(all_intersections, file = "Data/Exported_data/R_objects/all_intersections_all_three_metrics_all_intersections_all_three_metrics_1800_gene_subset.RData")
+save(all_intersections, file = "Data/Exported_data/R_objects/all_intersections_MAD_SDES.RData")
 #save(all_intersections, file = "Data/Exported_data/R_objects/all_intersections_mad_sdes.RData")
 
 #Ensuring that any 'bad' characters in my gene list are removed
@@ -159,7 +160,7 @@ for (x in seq(1:length(all_intersections))){
   all_intersections_cleaned[[x]] <- genes_in_bulk_RNA
 }
 
-save(all_intersections_cleaned, file = "Data/Exported_data/R_objects/all_intersections_cleaned_all_three_metrics_mirna_ranking_all_three_1800_gene_subset.RData")
+save(all_intersections_cleaned, file = "Data/Exported_data/R_objects/all_intersections_cleaned_MAD_SDES.RData")
 #save(all_intersections_cleaned, file = "Data/Exported_data/R_objects/all_intersections_cleaned_mad_sdes.RData")
 
 
@@ -169,12 +170,11 @@ cox_models <- vector(mode = "list", length = length(all_intersections_cleaned))
 f_objects <- vector(mode = "list", length = length(all_intersections_cleaned))
 lambdas <- vector(mode = "list", length = length(all_intersections_cleaned))
 c_indicies <- vector(mode = "list", length = length(all_intersections_cleaned))
-#prediction_res <- vector(mode = "list", length = length(all_intersections_cleaned))
 all_coefs <- vector(mode = "list", length = length(all_intersections_cleaned))
 all_active_coefs <- vector(mode = "list", length = length(all_intersections_cleaned))
 all_formulas <- vector(mode = "list", length = length(all_intersections_cleaned))
 
-#Making the y of the cox model----
+#Making the y for the cox model----
 my_y <- Surv(time = df_for_train_test_split$days.to.last.follow.up, event = df_for_train_test_split$vital.status)
 
 #The cox model loop----
@@ -185,27 +185,41 @@ for (x in seq(1:length(all_intersections_cleaned))){
   # current_formula_data <- rownames(t(mad.ranking.subset.df))
   # current_formula_data <- intersect(current_formula_data, colnames(merged_df))
   
+  #For just SDES metric
+  # current_formula_data <- rownames(t(vim.sdes.ranking.subset.df))
+  # current_formula_data <- intersect(current_formula_data, colnames(merged_df))
+  
+  #For just MiRNA metric
+  current_formula_data <- rownames(t(mirna.ranking.subset.df))
+  current_formula_data <- intersect(current_formula_data, colnames(merged_df))
+  
+  
   #For just scDD method
-  scdd_subset <- head(res$gene, n=150)
-  current_formula_data <- scdd_subset
-  current_formula_data <- intersect(current_formula_data, colnames(merged_df))
-  
-  #For just scDD method cell lines
-  scdd_subset_cell <- head(scdd_res_cell_line$gene, n=150)
-  current_formula_data <- scdd_subset_cell
-  current_formula_data <- intersect(current_formula_data, colnames(merged_df))
-  
-  #For just DEsingle CC patient data
-  des_subset <- head(rownames(des_results), n=150)
-  current_formula_data <- scdd_subset
-  current_formula_data <- intersect(current_formula_data, colnames(merged_df))
+  # scdd_subset <- head(res$gene, n=150)
+  # current_formula_data <- scdd_subset
+  # current_formula_data <- intersect(current_formula_data, colnames(merged_df))
+  # 
+  # #For just scDD method cell lines
+  # scdd_subset_cell <- head(scdd_res_cell_line$gene, n=150)
+  # current_formula_data <- scdd_subset_cell
+  # current_formula_data <- intersect(current_formula_data, colnames(merged_df))
+  # 
+  # #For just DEsingle CC patient data
+  # des_subset <- head(rownames(des_results), n=150)
+  # current_formula_data <- des_subset
+  # current_formula_data <- intersect(current_formula_data, colnames(merged_df))
+  # 
+  # #For just DEsingle cell-line data
+  # des_subset_cell <- head(rownames(results.sig.h1.gm), n=150)
+  # current_formula_data <- des_subset_cell
+  # current_formula_data <- intersect(current_formula_data, colnames(merged_df))
+  # 
   
   
   #current_formula_data <- current_formula_data[-107]
   
   my_formula <- paste("~", paste(current_formula_data[1:length(current_formula_data)], collapse = "+"))
   f <- as.formula(my_formula)
-  
   
   my_x <- model.matrix(f, df_for_train_test_split)
   cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C", maxit=100000, family="cox", parallel = TRUE)
@@ -232,55 +246,15 @@ for (x in seq(1:length(all_intersections_cleaned))){
   all_formulas[[x]] <- my_formula
 }
 
-save(all_formulas, file = "Data/Data-from-pipeline/all_formulas_des_results.RData")
-save(cox_models, file = "Data/Data-from-pipeline/cox_models_1800_gene_subset.RData")
-save(f_objects, file = "Data/Data-from-pipeline/f_objects_1800_gene_subset.RData")
-save(lambdas, file = "Data/Data-from-pipeline/lambdas_1800_gene_subset.RData")
-save(c_indicies, file = "Data/Data-from-pipeline/c_indicies_1800_gene_subset.RData")
-save(all_coefs, file = "Data/Data-from-pipeline/all_coefs_1800_gene_subset.RData")
-save(all_active_coefs, file = "Data/Data-from-pipeline/all_active_coefs_1800_gene_subset.RData")
+save(all_formulas, file = "Data/Data-from-pipeline/all_formulas_MAD_SDES.RData")
+save(cox_models, file = "Data/Data-from-pipeline/cox_models_MAD_SDES.RData")
+save(f_objects, file = "Data/Data-from-pipeline/f_objects_MAD_SDES.RData")
+save(lambdas, file = "Data/Data-from-pipeline/lambdas_MAD_SDES.RData")
+save(c_indicies, file = "Data/Data-from-pipeline/c_indicies_MAD_SDES.RData")
+save(all_coefs, file = "Data/Data-from-pipeline/all_coefs_MAD_SDES.RData")
+save(all_active_coefs, file = "Data/Data-from-pipeline/all_active_coefs_MAD_SDES.RData")
 
 for(x in seq(1:length(cox_models))){
   current_model <- cox_models[[x]]
   print(current_model)
 }
-
-#KM Curves----
-#These are examples I found of how to calculate the birinarizing of the expression data
-#trainScore=apply(surv_gene_df,1,weight_function)
-#risk=as.vector(ifelse(trainScore>median(trainScore),"high","low"))
-
-
-#Saving just the active gene names
-#For MAD metric currently
-# active_genes <-rownames(Coefficients)[Active.Index]
-# surv_gene_df=merged_df[,active_genes]
-# beta <-Active.Coefficients
-# gene_expr <- mean(as.matrix(surv_gene_df))
-# patient_gene_expr <- as.vector(apply(surv_gene_df,1,sum))
-# hr_calc <- beta*(patient_gene_expr-gene_expr)
-# risk <- as.vector(ifelse(hr_calc>median(hr_calc),"high", "low"))
-# surv_gene_df <- cbind(risk, surv_gene_df)
-# vital.status <- merged_df$vital.status
-# days.to.last.follow.up <- merged_df$days.to.last.follow.up
-# surv_gene_df <- cbind(vital.status, surv_gene_df)
-# surv_gene_df <- cbind(days.to.last.follow.up, surv_gene_df)
-# km_fit <- survfit(Surv(days.to.last.follow.up, vital.status) ~ risk, data = surv_gene_df)
-# 
-# #P-value calculation for KM curves
-# diff=survdiff(Surv(days.to.last.follow.up, vital.status) ~risk,data = surv_gene_df)
-# pValue=1-pchisq(diff$chisq,df=1)
-# pValue=signif(pValue,4)
-# pValue=format(pValue, scientific = TRUE)
-# pValue
-# 
-# #KM Curves plotting code
-# surPlot<-ggsurvplot(km_fit,
-#                     data=surv_gene_df,
-#                     pval=paste0("p=",pValue),
-#                     pval.size=4,
-#                     conf.int = FALSE,
-#                     legend.labs=c("High risk", "Low risk"),
-#                     legend.title="Risk",
-#                     xlab="Time(days)",
-#                     palette=c("red", "blue"))

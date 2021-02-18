@@ -201,7 +201,7 @@ register(param)
 des_results <- DEsingle(counts = sce, group = condition, parallel = TRUE, BPPARAM = param)
 #save(des_results, "/home/awillems/Projects/CC_Singlecell/Data/Data-from-pipeline/des_results.RData")
 
-load("Data/Exported-data/R-objects/des_results.RData")
+#load("Data/Exported-data/R-objects/des_results.RData")
 
 
 

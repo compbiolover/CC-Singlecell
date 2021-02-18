@@ -11,6 +11,7 @@ library(mlr);packageVersion("mlr")
 library(mlr3);packageVersion("mlr3")
 library(mlr3proba);packageVersion("mlr3proba")
 library(monocle3);packageVersion("monocle3")
+library(RColorBrewer);packageVersion("RColorBrewer")
 library(Rmagic);packageVersion("Rmagic")
 library(SummarizedExperiment);packageVersion("SummarizedExperiment")
 library(survival);packageVersion("survival")
@@ -598,6 +599,24 @@ colnames(mad.ranking.subset.df) <- names(mad.ranking.subset)
 save(mad.ranking.subset.df, file = "Data/Exported-data/R-objects/mad.ranking.subset.df.RData")
 
 
+#Now looking at just the top 900 genes from the SDES metric to see what we get from the cox model c-index value----
+vim.sdes.ranking.subset <- head(vim.sdes.ranking, n=900)
+vim.sdes.ranking.subset <- unlist(vim.sdes.ranking.subset)
+vim.sdes.ranking.subset.df <- as.data.frame(vim.sdes.ranking.subset)
+colnames(vim.sdes.ranking.subset.df)[1] <- "Score"
+vim.sdes.ranking.subset.df <- t(vim.sdes.ranking.subset.df)
+colnames(vim.sdes.ranking.subset.df) <- names(vim.sdes.ranking.subset)
+save(vim.sdes.ranking.subset.df, file = "Data/Exported-data/R-objects/vim.sdes.ranking.subset.df.RData")
+
+#Now looking at just the top 900 genes from the MiRNA metric to see what we get from the cox model c-index value----
+mirna.ranking.subset <- head(mirna.ranking, n=900)
+mirna.ranking.subset <- unlist(mirna.ranking.subset)
+mirna.ranking.subset.df <- as.data.frame(mirna.ranking.subset)
+colnames(mirna.ranking.subset.df)[1] <- "Score"
+mirna.ranking.subset.df <- t(mirna.ranking.subset.df)
+colnames(mirna.ranking.subset.df) <- names(mirna.ranking.subset)
+save(mirna.ranking.subset.df, file = "Data/Exported-data/R-objects/mirna.ranking.subset.df.RData")
+
 #Now doing data splitting for training and testing sets----
 df_for_train_test_split <- merge(merged_df, survival_df, by="row.names")
 df_for_train_test_split <- subset(df_for_train_test_split, select=-c(Row.names, vital_status, time))
@@ -850,8 +869,27 @@ percent_shared <- (num_in_both/(num_in_my_list-1))* 100
 percent_shared
 
 
-#Comparison to other methods ----
+#Reading in a file that contains the 10-fold c-indexes for all conditions (keep updating this as you get more data!!)
+cv_master <- read.csv(file = "Data/Elastic-net-performance/900-gene-subset-performance/c-index-performance-table.csv")
+cv_master_subset <- cv_master[c(1,2,3,8,9,10),]
+barplot(Mean.10.fold.CV.C.index.Performance ~ Method, data = cv_master_subset, main="10-fold CV Performance", ylab = "Mean 10-fold CV C-index")
 
+cv_master_subset$Method <- factor(cv_master_subset$Method, levels = c("MAD", "SDES", "MiRNA", "MAD + SDES", "MiRNA + SDES", "MAD + SDES + MiRNA"))
+cv_master_subset$Mean.10.fold.CV.C.index.Performance <- formatC(cv_master_subset$Mean.10.fold.CV.C.index.Performance, format="f", digits=2)
+
+p<-ggplot(data=cv_master_subset, aes(x=Method, y=Mean.10.fold.CV.C.index.Performance, fill=Method)) +
+  geom_bar(stat="identity")+
+  theme_minimal()+
+  scale_x_discrete(limits=c("MAD", "SDES", "MiRNA", "MAD + SDES", "MiRNA + SDES", "MAD + SDES + MiRNA"), expand = c(0, 0))+
+  labs(title="10-fold CV Performance Across Methods", 
+       x="Method", y = "Mean 10-fold CV C-index")+
+  scale_y_discrete(expand = expansion(mult = c(0, .1)))+
+  theme(plot.title = element_text(hjust = 0.5))+
+  geom_text(aes(label=Mean.10.fold.CV.C.index.Performance), vjust=1.6, color="white", size=3.5)
+  
+p
+ 
+#Comparison to other methods ----
 #1. Xu et al. method ----
 Xu_gene_sigs <- c("HES5", "ZNF417", "GLRA2", "OR8D2", "HOXA7", "FABP6", "MUSK", "HTR6", "GRIP2", "KLRK1", "VEGFA", "AKAP12", "RHEB", "NCRNA00152", "PMEPA1")
 
