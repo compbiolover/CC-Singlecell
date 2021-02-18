@@ -184,14 +184,14 @@ for (x in seq(1:length(all_intersections_cleaned))){
   #For just MAD metric
   # current_formula_data <- rownames(t(mad.ranking.subset.df))
   # current_formula_data <- intersect(current_formula_data, colnames(merged_df))
-  
+
   #For just SDES metric
   # current_formula_data <- rownames(t(vim.sdes.ranking.subset.df))
   # current_formula_data <- intersect(current_formula_data, colnames(merged_df))
   
   #For just MiRNA metric
-  current_formula_data <- rownames(t(mirna.ranking.subset.df))
-  current_formula_data <- intersect(current_formula_data, colnames(merged_df))
+  # current_formula_data <- rownames(t(mirna.ranking.subset.df))
+  # current_formula_data <- intersect(current_formula_data, colnames(merged_df))
   
   
   #For just scDD method
