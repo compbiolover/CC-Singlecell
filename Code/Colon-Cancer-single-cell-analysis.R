@@ -54,7 +54,7 @@ geneRank <- function(ranking1 = NULL, ranking2 = NULL, ranking3 = NULL, a1 = 1,
      res[i] = getRank(ranking1, i)*a1+getRank(ranking2, i)*a2+getRank(ranking3, i)*a3
    }
    #res=res/sum(res)
-   #res = res[order(res, decreasing = T)]
+   res = res[order(res, decreasing = T)]
    res
  }
 
@@ -163,10 +163,33 @@ benchdb <- function(ranking = NULL,
 
 #all_cells_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_NM_all_cells_FPKM.csv")
 #epi_cells_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_NM_epithelial_cells_FPKM.csv")
-all_tumor_cells_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_tumor_all_cells_FPKM.csv")
+all_tumor_cells_fpkm <- read.csv("Data/Single-cell-data/FPKM/GSE81861_CRC_tumor_all_cells_FPKM.csv")
 #epi_cells_tumor_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_tumor_epithelial_cells_FPKM.csv")
 
 
+#Loading the Gastric cancer single-cell data----
+k562_cells <- read.csv("Data/Single-cell-data/Other-cancers/GSE65525_RAW/GSM1599500_K562_cells.csv")
+rownames(k562_cells) <- k562_cells$X
+k562_cells <- subset(k562_cells, select=c(X0:X0.238))
+colnames(k562_cells) <- seq(from=1,to=239,by=1)
+
+
+#Denoising the K562 cells----
+k562_denoised <- magic(t(k562_cells), seed = 123)
+k562_denoised <- t(k562_denoised[["result"]])
+k562_denoised <- k562_denoised[rowMeans(k562_denoised) > 0.3 & rowMeans(k562_denoised > 0) > 0.2,]
+k562_denoised <-  as.data.frame(k562_denoised)
+tumor_gene_names <- rownames(k562_denoised)
+tumor_gene_names <- as.data.frame(tumor_gene_names)
+colnames(tumor_gene_names)[1] <- "gene_short_name"
+rownames(tumor_gene_names) <- tumor_gene_names$gene_short_name
+k562_denoised <- as.matrix(k562_denoised)
+
+
+#Loading glioblastoma single cells----
+glio <- read.csv("Data/Single-cell-data/Other-cancers/GSE57872_GBM_data_matrix.txt", sep='\t')
+rownames(glio) <- glio$X
+glio <- subset(glio, select=c(MGH264_A01:MGH31Tumor))
 
 
 #Loading the bulk RNA seq files. ----
@@ -264,6 +287,8 @@ all_tumor_cells_fpkm_denoised_cleaned <- all_tumor_cells_fpkm_denoised
 #to get a view of what it looks like. 
 vim_genes <- c("chr10:17256237-17279592_VIM_ENSG00000026025.9", "chr15:101811021-101817705_VIMP_ENSG00000131871.10", "chr6:126923501-126924795_VIMP1_ENSG00000220548.3", "chr10:17256237-17279592_VIM-AS1_ENSG00000229124.2")
 cdh1_genes <- c("chr5:141232937-141258811_PCDH1_ENSG00000156453.9", "chr16:68771127-68869451_CDH1_ENSG00000039068.14")
+vim_genes <- "VIM"
+cell_data_set <- new_cell_data_set(k562_denoised, gene_metadata = tumor_gene_names)
 cell_data_set <- new_cell_data_set(all_tumor_cells_fpkm_denoised,gene_metadata=tumor_gene_names)
 cds <- preprocess_cds(cell_data_set, num_dim=100, method="PCA")
 cds <- reduce_dimension(cds)
@@ -295,6 +320,7 @@ pseudotime_data$Samples <- pseudotime_contents
 
 #Different metrics ----
 #3.1 The median absolute deviation metric (MAD) ----
+mads <- apply(k562_denoised,1,mad)
 mads <- apply(all_tumor_cells_fpkm_denoised,1,mad)
 index <- order(mads, decreasing=TRUE)
 mad.ranking<- mads[index]
@@ -312,6 +338,7 @@ names(mad.ranking) <- finished_gene_list
 save(mad.ranking, file = "Data/Exported-data/R-objects/mad.ranking.RData")
 
 #3.2 The switchde (SDE) metric ----
+sdes <- switchde(k562_denoised, as.numeric(pseudotime_data$Pseudotime), verbose = TRUE)
 sdes <- switchde(all_tumor_cells_fpkm_denoised, as.numeric(pseudotime_data$Pseudotime), verbose = TRUE)
 sde.filtered <- filter(sdes, qval < 0.05)
 index <- order(abs(sde.filtered$k), decreasing = T)
@@ -351,6 +378,7 @@ colnames(dbDEMC_low)[1] <- "miRNA.ID"
 
 #Filtering to just the miRNAs associated with colorectal or colon cancer. 
 dbDEMC_high <- filter(dbDEMC_high, Cancer.Type=="colorectal cancer" | Cancer.Type=="colon cancer")
+dbDEMC_high <- filter(dbDEMC_high, Cancer.Type=="leukemia")
 dbDEMC_high_miRNAs <- subset(dbDEMC_high, select = miRBase.Update.ID)
 dbDEMC_high_miRNAs <- as.vector(dbDEMC_high_miRNAs)
 
@@ -371,7 +399,7 @@ miRmap_mirnas <- read.csv(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homs
 common_mirnas <- intersect(miRmap_mirnas$mature_name, dbDEMC_high_miRNAs$miRBase.Update.ID)
 #common_mirnas <- intersect(common_mirnas, emt_miRNA)
 #Removing an entry that is not in targetScan and causes error.
-common_mirnas <- common_mirnas[-1375]
+common_mirnas <- common_mirnas[-1375:-1376]
 
 #Intersection of dmDEMC (high) with just EMT set
 #common_mirnas <- intersect(dbDEMC_high_miRNAs$miRBase.Update.ID, emt_miRNA)
@@ -382,11 +410,12 @@ common_mirnas <- intersect(common_mirnas, emt_miRNA)
 
 
 #Now submitting these miRNAs to TargetScan to get genes to make a gene list for the third metric----
+#testing to see if all of the miRNAs exist in targetscan before getting all submitted at onece
 my_num <- 1
-miRNA_targets <- vector(mode = "list", length = 1374)
-for (m in common_mirnas[1:1374]) {
+miRNA_targets <- vector(mode = "list", length = length(common_mirnas))
+for (m in common_mirnas[1:length(common_mirnas)]) {
   print(m)
-  current_target <- targetScan(mirna=common_mirnas[my_num], species="Human", release="7.2", maxOut= 5)
+  current_target <- targetScan(mirna=common_mirnas[my_num], species="Human", release="7.2", maxOut= 1)
   miRNA_name <- m
   miRNA_name_final <- rep(miRNA_name, times=length(current_target$Ortholog))
   current_target <- cbind(current_target,miRNA_name_final)
@@ -395,7 +424,7 @@ for (m in common_mirnas[1:1374]) {
   my_num <- my_num + 1
 }
 
-save(miRNA_targets, file = "Data/Exported-data/R-objects/miRNA_targets_1374_5_genes.RData")
+#save(miRNA_targets, file = "Data/Exported-data/R-objects/all_miRNA_targets.RData")
 #Simplifying the output of the targetscan commands to just the Gene name
 #and the mirna columns
 counter <- 1
@@ -441,13 +470,15 @@ for (i in rownames(miRNA_score)){
   }
 }
 
+save(miRNA_score, file = "Data/Exported-data/R-objects/all_miRNA_score_df_finished.RData")
+
 #Now calculating the rowsums of each gene for total number of miRNA interactions----
 mirna_gene_list <- rowSums(miRNA_score)
 mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
 mirna.ranking <- sort(mirna.ranking, decreasing = TRUE)
 #mirna.ranking <- as.vector(mirna.ranking)
-#save(mirna.ranking, file = "Data/Exported-data/R-objects/mirna.ranking.1364.mirnas.RData")
-#write.csv(mirna.ranking, file = "Data/Exported-data/Csv-files/mirna.ranking.1364.mirnas.csv")
+#save(mirna.ranking, file = "Data/Exported-data/R-objects/mirna.ranking.all.mirnas.RData")
+#write.csv(mirna.ranking, file = "Data/Exported-data/Csv-files/mirna.ranking.all.mirnas.csv")
 
 
 
@@ -492,14 +523,18 @@ integrated_gene_lists <- list()
 for (x in weights) {
   current_ranking <- geneRank(ranking1 = vim.sdes.ranking, ranking2 = mirna.ranking,  a1=x, a2=1-x)
   current_ranking <- as.data.frame(current_ranking)
-  integrated_gene_lists[[df_index]] <- current_ranking
+  integrated_gene_lists[[as.character(df_index)]] <- current_ranking
   df_index <- df_index + 1
 }
+
 
 #save(integrated_gene_lists, file = "Data/Exported-data/R-objects/integrated-gene-lists-for-two-metrics.RData")
 
 #Subsetting the gene expression data frame to just the top 900 genes found from the integrated ranking at different combinations/values of weights ----
 gene_lists_to_test <- list()
+k562_denoised_df <- as.data.frame(k562_denoised)
+k562_denoised_df <- t(k562_denoised_df)
+
 all_tumor_cells_fpkm_denoised_df_cleaned <- as.data.frame(all_tumor_cells_fpkm_denoised_cleaned)
 #save(all_tumor_cells_fpkm_denoised_df_cleaned, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_denoised_df_cleaned.RData")
 all_tumor_cells_fpkm_denoised_df <- t(all_tumor_cells_fpkm_denoised_df)
@@ -616,6 +651,15 @@ colnames(mirna.ranking.subset.df)[1] <- "Score"
 mirna.ranking.subset.df <- t(mirna.ranking.subset.df)
 colnames(mirna.ranking.subset.df) <- names(mirna.ranking.subset)
 save(mirna.ranking.subset.df, file = "Data/Exported-data/R-objects/mirna.ranking.subset.df.RData")
+
+#Now looking at top 900 genes from the MiRNA metric (larger 1364 miRNA) set to see what we get from the cox model c-index value----
+mirna.ranking.subset <- head(mirna.ranking, n=900)
+mirna.ranking.subset <- unlist(mirna.ranking.subset)
+mirna.ranking.subset.df <- as.data.frame(mirna.ranking.subset)
+colnames(mirna.ranking.subset.df)[1] <- "Score"
+mirna.ranking.subset.df <- t(mirna.ranking.subset.df)
+colnames(mirna.ranking.subset.df) <- names(mirna.ranking.subset)
+save(mirna.ranking.subset.df, file = "Data/Exported-data/R-objects/mirna.ranking.subset.from.1364.df.RData")
 
 #Now doing data splitting for training and testing sets----
 df_for_train_test_split <- merge(merged_df, survival_df, by="row.names")
@@ -869,7 +913,7 @@ percent_shared <- (num_in_both/(num_in_my_list-1))* 100
 percent_shared
 
 
-#Reading in a file that contains the 10-fold c-indexes for all conditions (keep updating this as you get more data!!)
+#Reading in a file that contains the 10-fold c-indexes for all conditions (keep updating this as you get more data!!)----
 cv_master <- read.csv(file = "Data/Elastic-net-performance/900-gene-subset-performance/c-index-performance-table.csv")
 cv_master_subset <- cv_master[c(1,2,3,8,9,10),]
 barplot(Mean.10.fold.CV.C.index.Performance ~ Method, data = cv_master_subset, main="10-fold CV Performance", ylab = "Mean 10-fold CV C-index")
@@ -889,6 +933,18 @@ p<-ggplot(data=cv_master_subset, aes(x=Method, y=Mean.10.fold.CV.C.index.Perform
   
 p
  
+
+#Comparison to simulated data----
+#Simulated, random survival times for TCGA bulk data for just trying to seperate live vs. dead patients----
+#Using the alive_patients and dead_patients for a length calculation later
+alive_patients <- filter(df_for_train_test_split, vital.status == 0)
+dead_patients <- filter(df_for_train_test_split, vital.status == 1)
+
+#Setting the value of the days.to.last.follow.up column based on the value of the vital.status column
+df_for_train_test_split$days.to.last.follow.up[df_for_train_test_split$vital.status==0]=runif(length(alive_patients$vital.status), min = 5000, max = 10000)
+df_for_train_test_split$days.to.last.follow.up[df_for_train_test_split$vital.status==1]=runif(length(dead_patients$vital.status), min = 0, max = 0.1)
+
+
 #Comparison to other methods ----
 #1. Xu et al. method ----
 Xu_gene_sigs <- c("HES5", "ZNF417", "GLRA2", "OR8D2", "HOXA7", "FABP6", "MUSK", "HTR6", "GRIP2", "KLRK1", "VEGFA", "AKAP12", "RHEB", "NCRNA00152", "PMEPA1")

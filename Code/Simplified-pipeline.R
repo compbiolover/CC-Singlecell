@@ -79,19 +79,32 @@ load(file = "Data/Exported_data/R_objects/merged_df_replaced.RData")
 
 
 #Optimization for just 2 metrics----
-weights <- seq(from = 0, to=1, by=0.1)
-df_index <- 1
-integrated_gene_lists <- vector(mode = "list", length = length(weights))
-
-for (x in weights) {
-  print(x)
-  current_ranking <- two_metric_geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking,  a1=x, a2=1-x)
-  current_ranking <- as.data.frame(current_ranking)
-  integrated_gene_lists[[df_index]] <- current_ranking
-  df_index <- df_index + 1
- }
-
-save(integrated_gene_lists, file = "Data/Exported_data/R_objects/integrated_gene_lists_MAD_SDES.RData")
+two_weight_optimizer <- function(my.start        =0,
+                                 my.finish       =1,
+                                 step.size       =0.1, 
+                                 my.index        =1,
+                                 my.list.length  =11,
+                                 first.metric    =mad.ranking,
+                                 second.metric   =vim.sdes.ranking,
+                                 my.filename     ="Data/Exported-data/R-objects/two_metric_optimization.RData"){
+  
+  #Setting up weights, loop-indexer, and the list that will store the results
+  weights <- seq(from = my.start, to=my.finish, by=step.size)
+  df_index <- my.index
+  integrated_gene_lists <- vector(mode = "list", length = my.list.length)
+  
+  #Doing the grid search
+  for (x in weights) {
+    current_ranking <- two_metric_geneRank(ranking1 = first.metric, ranking2 = second.metric,  a1=x, a2=1-x)
+    current_ranking <- as.data.frame(current_ranking)
+    integrated_gene_lists[[as.character(df_index)]] <- current_ranking
+    df_index <- df_index + 1
+  }
+  
+  #Saving the output of the grid search to a .RData
+  save(integrated_gene_lists, file = my.filename)
+  return(integrated_gene_lists)
+}
 
 #Optimization for all 3 metrics (MAD, SDE and miRNA)----
 # weights <- seq(from = 0, to=1, by=0.1)
@@ -164,6 +177,8 @@ save(all_intersections_cleaned, file = "Data/Exported_data/R_objects/all_interse
 #save(all_intersections_cleaned, file = "Data/Exported_data/R_objects/all_intersections_cleaned_mad_sdes.RData")
 
 
+
+
 #Cox models----
 set.seed(1)
 cox_models <- vector(mode = "list", length = length(all_intersections_cleaned))
@@ -188,11 +203,11 @@ for (x in seq(1:length(all_intersections_cleaned))){
   #For just SDES metric
   # current_formula_data <- rownames(t(vim.sdes.ranking.subset.df))
   # current_formula_data <- intersect(current_formula_data, colnames(merged_df))
-  
+
   #For just MiRNA metric
-  # current_formula_data <- rownames(t(mirna.ranking.subset.df))
-  # current_formula_data <- intersect(current_formula_data, colnames(merged_df))
-  
+  current_formula_data <- rownames(t(mirna.ranking.subset.df))
+  current_formula_data <- intersect(current_formula_data, colnames(merged_df))
+
   
   #For just scDD method
   # scdd_subset <- head(res$gene, n=150)
