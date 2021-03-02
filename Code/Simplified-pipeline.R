@@ -78,54 +78,6 @@ load(file = "Data/Exported_data/R_objects/merged_df_replaced.RData")
 
 
 
-#Optimization for just 2 metrics----
-two_weight_optimizer <- function(my.start        =0,
-                                 my.finish       =1,
-                                 step.size       =0.1, 
-                                 my.index        =1,
-                                 my.list.length  =11,
-                                 first.metric    =mad.ranking,
-                                 second.metric   =vim.sdes.ranking,
-                                 my.filename     ="Data/Exported-data/R-objects/two_metric_optimization.RData"){
-  
-  #Setting up weights, loop-indexer, and the list that will store the results
-  weights <- seq(from = my.start, to=my.finish, by=step.size)
-  df_index <- my.index
-  integrated_gene_lists <- vector(mode = "list", length = my.list.length)
-  
-  #Doing the grid search
-  for (x in weights) {
-    current_ranking <- two_metric_geneRank(ranking1 = first.metric, ranking2 = second.metric,  a1=x, a2=1-x)
-    current_ranking <- as.data.frame(current_ranking)
-    integrated_gene_lists[[as.character(df_index)]] <- current_ranking
-    df_index <- df_index + 1
-  }
-  
-  #Saving the output of the grid search to a .RData
-  save(integrated_gene_lists, file = my.filename)
-  return(integrated_gene_lists)
-}
-
-#Optimization for all 3 metrics (MAD, SDE and miRNA)----
-# weights <- seq(from = 0, to=1, by=0.1)
-# a3_weights <- seq(from = 0, to=1, by=0.1)
-# a3 <- 0
-# df_index <- 1
-# integrated_gene_lists <- vector(mode = "list", length = length(weights)*length(a3_weights))
-# 
-# 
-# 
-# for (x in a3_weights){
-#   for (y in weights) {
-#     current_ranking <- three_metric_geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking, ranking3 = mirna.ranking,  a1=x, a2=1-(x+a3), a3= y)
-#     current_ranking <- as.data.frame(current_ranking)
-#     integrated_gene_lists[[df_index]] <- current_ranking
-#     df_index <- df_index + 1
-#   }
-# }
-# 
-# save(integrated_gene_lists, file = "Data/Exported_data/R_objects/integrated_gene_lists_for_all_three_metricsall_intersections_all_three_metrics_1800_gene_subset.RData")
-
 #Subsetting the integrated lists to just the top N number of genes for each list----
 gene_lists_to_test <- vector(mode = "list", length = length(integrated_gene_lists))
 for (x in seq(1:length(integrated_gene_lists))){

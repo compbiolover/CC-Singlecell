@@ -3,7 +3,8 @@
 #Purpose: Fit an arbitrarily large number of predictors (genes) to a
 #cox model to predict survival time
 
-cox_model_fitter <- function(my.seed       =NULL,
+#cox_model_fitter----
+cox_model_fitter <- function(my.seed       =1,
                              cox.df        =NULL,
                              gene.num      =900,
                              cox.predictors=NULL){
@@ -52,7 +53,11 @@ cox_model_fitter <- function(my.seed       =NULL,
   cox_data <- list()
   
   #The predictors for the cox model----
-  my_predictors <- names(cox.predictors)
+  if(is.numeric(cox.predictors)==TRUE){
+    my_predictors <- names(cox.predictors)
+  }else{
+    my_predictors <- rownames(cox.predictors)
+  }
   my_predictors <- head(my_predictors, n=gene.num)
   my_predictors <- intersect(my_predictors, colnames(cox.df))
   my_predictors <- paste("~", paste(my_predictors[1:length(my_predictors)], collapse = "+"))

@@ -58,7 +58,7 @@ geneRank <- function(ranking1 = NULL, ranking2 = NULL, ranking3 = NULL, a1 = 1,
    res
  }
 
- getRank <- function(ranking = NULL, gn = NULL){
+getRank <- function(ranking = NULL, gn = NULL){
    if (gn %in% names(ranking)) {
      return(ranking[gn])
    }
@@ -194,7 +194,7 @@ glio <- subset(glio, select=c(MGH264_A01:MGH31Tumor))
 
 #Loading the bulk RNA seq files. ----
 #Define query.
-colon_query <- GDCquery(project       = "TCGA-COAD",
+colon_query <- GDCquery(project      = "TCGA-COAD",
                        data.category = "Transcriptome Profiling",
                        data.type     = "Gene Expression Quantification",
                        workflow.type = "HTSeq - Counts")
@@ -243,7 +243,7 @@ save(bulk_rna_df, file = "Data/Exported-data/R-objects/bulk_rna_df.RData")
 #they are stored in the actual rownames. The input of the magic() function requires the data to be in matrix
 #format. We then transpose the results and do some basic filtering. The filtering involves filtering to include 
 #rows that are greater than 0.3 and 0. This mean value is then compared to 0.2 and must be greater than 0.2 to be
-#kept in the dataset. We then convert this output back to a dataframe and include a new name for the first colum
+#kept in the dataset. We then convert this output back to a dataframe and include a new name for the first column
 #Which includes the short names of the genes. Once this is finished then we finally convert the dataframe back to
 #a matrix for future calculations. The end product is a matrix that contains 375 cells (columns) and 23,479 genes (rows).
 all_tumor_cells_fpkm_df <- as.data.frame(all_tumor_cells_fpkm)

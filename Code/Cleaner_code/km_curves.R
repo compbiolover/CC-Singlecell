@@ -9,6 +9,9 @@ library(survminer)
 
 #Doing the hazard ratio calculation----
 hr_calculator <- function(model.coefs=Coefficients, data=merged_df){
+  require(survival)
+  require(survminer)
+  
   hr_return_list <- list()
   
   Active.Index <- which(as.logical(model.coefs) != 0)

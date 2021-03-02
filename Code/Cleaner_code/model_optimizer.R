@@ -4,6 +4,55 @@
 #integrated lists by tuning the weights of our
 #linear model via grid search.
 
+#Function used to rank my linear model with just two metrics----
+two_metric_geneRank <- function(ranking1 = NULL,
+                                ranking2  = NULL,
+                                a1        = 1,
+                                a2        = 0){
+  gns = c(names(ranking1),names(ranking2))
+  gns = unique(gns)
+  res = rep(0, length(gns))
+  names(res) = gns
+  for(i in names(res)) {
+    res[i] = getRank(ranking1, i)*a1+getRank(ranking2, i)*a2
+  }
+  res = res[order(res, decreasing = T)]
+  res
+}
+
+#Function used to rank my linear model with three metrics----
+three_metric_geneRank <- function(ranking1 = NULL, 
+                                  ranking2 = NULL, 
+                                  ranking3 = NULL, 
+                                  a1       = 1,
+                                  a2       = 0,
+                                  a3       = 0){
+  gns = c(names(ranking1),names(ranking2),names(ranking3))
+  gns = unique(gns)
+  res = rep(0, length(gns))
+  names(res) = gns
+  for(i in names(res)) {
+    res[i] = getRank(ranking1, i)*a1+getRank(ranking2, i)*a2+getRank(ranking3, i)*a3
+  }
+  res = res[order(res, decreasing = T)]
+  res
+}
+
+#Helper function for geneRank functions
+getRank <- function(ranking = NULL, 
+                    gn      = NULL){
+  if (gn %in% names(ranking)) {
+    return(ranking[gn])
+  }
+  else return(0.0)
+}
+#Helper function----
+getRank <- function(ranking = NULL, gn = NULL){
+  if (gn %in% names(ranking)) {
+    return(ranking[gn])
+  }
+  else return(0.0)
+}
 #Optimization for just 2 metrics----
 two_weight_optimizer <- function(my.start        =0,
                                  my.finish       =1,
@@ -17,7 +66,7 @@ two_weight_optimizer <- function(my.start        =0,
   #Setting up weights, loop-indexer, and the list that will store the results
   weights <- seq(from = my.start, to=my.finish, by=step.size)
   df_index <- my.index
-  integrated_gene_lists <- vector(mode = "list", length = my.list.length)
+  integrated_gene_lists <- list()
   
   #Doing the grid search
   for (x in weights) {
@@ -31,7 +80,6 @@ two_weight_optimizer <- function(my.start        =0,
   save(integrated_gene_lists, file = my.filename)
   return(integrated_gene_lists)
 }
-
 
 #Optimization for all 3 metrics (MAD, SDE and miRNA)----
 three_weight_optimizer <- function(my.start        =0,
@@ -50,7 +98,7 @@ three_weight_optimizer <- function(my.start        =0,
   a3_weights <- seq(from = my.start, to=my.finish, by=step.size)
   a3 <- a3.start
   df_index <- my.index
-  integrated_gene_lists <- vector(mode = "list", length = my.list.length)
+  integrated_gene_lists <- list()
   
   #Doing the grid search
   for (x in a3_weights){
