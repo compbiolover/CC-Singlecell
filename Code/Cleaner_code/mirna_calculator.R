@@ -4,27 +4,45 @@
 #outputs
 
 #mirna_calculator----
-mirna_calculator <- function(ts.org         ="Human", 
-                             ts.version     ="7.2",
-                             ts.num         =900,
-                             max.miR.targets=NULL){
+mirna_calculator <- function(ts.org          ="Human", 
+                             ts.version      ="7.2",
+                             ts.num          =900,
+                             max.miR.targets =NULL,
+                             cancer.up       =TRUE,
+                             cancer.type1    =TRUE,
+                             cancer.type2    =TRUE,
+                             cancer.type3    =TRUE,
+                             mirna.filename  ="TargetScan_output.RData"){
   
   #Loading required package----
+  require(tidyverse)
   require(hoardeR)
-  
-  #miRNAs from dbDEMC version 2.0----
-  dbDEMC_high <- read.csv(file = "Data/miRNA-data/List-of-dbDEMC-2-0-miRNAs/dbDEMC-2.0-high.txt", sep = '\t')
   
   #miRNAs from miRmap----
   miRmap_mirnas <- read.csv(file = "Data/miRNA-data/MiRMap-data/mirmap201301e_homsap_mirnas.csv", sep = ',')
   
-  #Filtering to just the miRNAs associated with a particular type of cancer. 
-  #dbDEMC_high <- filter(dbDEMC_high, Cancer.Type==cancer.type)
-  dbDEMC_high_miRNAs <- subset(dbDEMC_high, select = miRBase.Update.ID)
-  dbDEMC_high_miRNAs <- as.vector(dbDEMC_high_miRNAs)
-  
-  #Common miRNAs between databases----
-  common_mirnas <- intersect(miRmap_mirnas$mature_name, dbDEMC_high_miRNAs$miRBase.Update.ID)
+  if(cancer.up==TRUE){
+    dbDEMC_high <- read.csv(file = "Data/miRNA-data/List-of-dbDEMC-2-0-miRNAs/dbDEMC-2.0-high.txt", sep = '\t')
+    
+    #Filtering to just the miRNAs associated with a particular type of cancer. 
+    dbDEMC_high <- filter(dbDEMC_high, Cancer.Type==cancer.type1 | Cancer.Type==cancer.type2 | Cancer.Type==cancer.type3)
+    dbDEMC_high_miRNAs <- subset(dbDEMC_high, select = miRBase.Update.ID)
+    dbDEMC_high_miRNAs <- as.vector(dbDEMC_high_miRNAs)
+    
+    #Common mirnas
+    common_mirnas <- intersect(miRmap_mirnas$mature_name, dbDEMC_high_miRNAs$miRBase.Update.ID)
+  }else{
+    dbDEMC_low <- read.csv(file = "Data/miRNA-data/List-of-dbDEMC-2-0-miRNAs/dbDEMC-2.0-low.txt", sep = '\t')
+    colnames(dbDEMC_low)[1] <- "miRNA.ID"
+    
+    #Filtering to just the miRNAs associated with a particular type of cancer. 
+    dbDEMC_low <- filter(dbDEMC_low, Cancer_Type==cancer.type1 | Cancer_Type==cancer.type2 | Cancer_Type==cancer.type3)
+    dbDEMC_low_miRNAs <- subset(dbDEMC_low, select = miRBase_update)
+    dbDEMC_low_miRNAs <- as.vector(dbDEMC_low_miRNAs)
+    
+    #Common miRNAs between databases
+    common_mirnas <- intersect(miRmap_mirnas$mature_name, dbDEMC_low_miRNAs$miRBase_update)
+  }
   
   #Now submitting these miRNAs to TargetScan to get genes to make a gene list for the third metric----
   #testing to see if all of the miRNAs exist in targetscan before getting all submitted at once
@@ -41,7 +59,7 @@ mirna_calculator <- function(ts.org         ="Human",
     my_num <- my_num + 1
   }
   
-  save(miRNA_targets, file = "miRNA_targets.RData")
+  save(miRNA_targets, file = mirna.filename)
   #Simplifying the output of the targetscan commands to 
   #just the Gene name and the mirna columns
   counter <- 1

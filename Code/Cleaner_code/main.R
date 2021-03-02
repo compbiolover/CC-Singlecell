@@ -346,3 +346,88 @@ for (x in hr_calcs_h1_and_gm) {
   hr_plots_h1_and_gm[[as.character(counter)]] <- current_plot
   counter <- counter + 1
 }
+
+
+#CC cell-line all of the cell-lines together----
+rownames(cc_cell_line_fpkm) <- cc_cell_line_fpkm$X
+cc_cell_line_fpkm <- gene_name_cleaner(data.to.clean = cc_cell_line_fpkm)
+cc_cell_line_fpkm <- t(cc_cell_line_fpkm)
+cc_cell_line_fpkm<- subset(cc_cell_line_fpkm, select=c(RHA015__A549__turquoise:RHC2506__H1_B2__brown))
+cc_cell_line_fpkm <- as.data.frame(cc_cell_line_fpkm)
+
+#More pre-processing----
+rownames(cc_cell_line_fpkm) <- cc_cell_line_fpkm$X
+cc_cell_line_fpkm <- gene_name_cleaner(data.to.clean = cc_cell_line_fpkm)
+cc_cell_line_fpkm <- t(cc_cell_line_fpkm)
+cc_cell_line_fpkm<- subset(cc_cell_line_fpkm, select=c(RHA015__A549__turquoise:RHC2506__H1_B2__brown))
+cc_cell_line_fpkm <- as.data.frame(cc_cell_line_fpkm)
+
+#Now denoising the sc-data----
+cc_cell_line_fpkm <- apply(cc_cell_line_fpkm, c(1,2), as.numeric)
+cc_cell_line_fpkm <- magic_denoiser(sc.data = cc_cell_line_fpkm, magic.seed = 123)
+
+
+#Now getting pseudotime info from Moncocle3----
+cds_output <- cell_dataset_builder(vim.genes = "VIM", cell.data = cc_cell_line_fpkm$denoised_sc_dataframe, cell.meta = cc_cell_line_fpkm$cds_gene_names)
+
+#MAD metric----
+mad.genes <- mad_calculator(cc_cell_line_fpkm$denoised_sc_dataframe)
+save(mad.genes, file = "cc_cell_line_fpkm_all_cell_lines_mad.RData")
+
+#Switchde metric----
+sde.genes <- switchde_calculator(cc_cell_line_fpkm$denoised_sc_dataframe, pseudo.time = cds_output$Pseudotime)
+save(sde.genes, file = "cc_cell_line_fpkm_all_cell_lines_sde.RData")
+
+#Mirna metric----
+mirna.genes <- mirna_calculator(ts.org = "Human", ts.version = "7.2", ts.num = 900, max.miR.targets = 10)
+save(mirna.genes, file = "cc_cell_line_fpkm_all_cell_lines_mirna.RData")
+
+#Optimizing the mirna + SDE metric----
+mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "sde_mirna_optimized_cc_cell_line_fpkm_all_cell_lines.RData")
+
+#Load the df_for_train_test_split data frame for use with Cox model----
+load("Data/Exported-data/R-objects/df_for_train_test_split.RData")
+
+#Cox model----
+cox_models_cc_all_cell_lines <- list()
+counter <- 1
+for (x in mirna_sde_optimized) {
+  current_weight <- x
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = df_for_train_test_split, gene.num = 900, cox.predictors = current_weight) 
+  cox_models_cc_all_cell_lines[[as.character(counter)]] <- current_cox
+  counter <- counter + 1
+}
+
+#Loading data.frame needed for KM curves----
+load("Data/Exported-data/R-objects/merged_df_replaced.RData")
+
+#KM curves----
+hr_calcs_cc_all_cell_lines <- list()
+counter <- 1
+for (x in cox_models_cc_all_cell_lines) {
+  current_cox <- x
+  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = merged_df)
+  hr_calcs_cc_all_cell_lines[[as.character(counter)]] <- current_hr
+  counter <- counter + 1
+}
+
+#KM p-values----
+hr_pvalues_cc_all_cell_lines <- list()
+counter <- 1
+for (x in hr_calcs_cc_all_cell_lines) {
+  current_hr <- x
+  current_pvalue <- km_pvalue_calculator(surv.time = current_hr$DF$days.to.last.follow.up, surv.status = current_hr$DF$vital.status, surv.predictors = current_hr$DF$risk, surv.df = current_hr$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+  hr_pvalues_cc_all_cell_lines[[as.character(counter)]] <- current_pvalue
+  counter <- counter + 1
+}
+
+#KM plots----
+hr_plots_cc_all_cell_lines <- list()
+counter <- 1
+for (x in hr_calcs_cc_all_cell_lines) {
+  current_calc <- x
+  current_pvalue <- hr_pvalues_cc_all_cell_lines[counter]
+  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "MiRNA + SDES All Cell-lines")
+  hr_plots_cc_all_cell_lines[[as.character(counter)]] <- current_plot
+  counter <- counter + 1
+}
