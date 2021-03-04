@@ -6,12 +6,13 @@
 #mirna_calculator----
 mirna_calculator <- function(ts.org          ="Human", 
                              ts.version      ="7.2",
-                             ts.num          =900,
                              max.miR.targets =NULL,
                              cancer.up       =TRUE,
                              cancer.type1    =TRUE,
                              cancer.type2    =TRUE,
                              cancer.type3    =TRUE,
+                             print.ts.targets=TRUE,
+                             mirna.remove    ="hsa-miR-129-1-3p",
                              mirna.filename  ="TargetScan_output.RData"){
   
   #Loading required package----
@@ -27,7 +28,12 @@ mirna_calculator <- function(ts.org          ="Human",
     #Filtering to just the miRNAs associated with a particular type of cancer. 
     dbDEMC_high <- filter(dbDEMC_high, Cancer.Type==cancer.type1 | Cancer.Type==cancer.type2 | Cancer.Type==cancer.type3)
     dbDEMC_high_miRNAs <- subset(dbDEMC_high, select = miRBase.Update.ID)
-    dbDEMC_high_miRNAs <- as.vector(dbDEMC_high_miRNAs)
+    if ("unknown" %in% dbDEMC_high_miRNAs$miRBase.Update.ID==TRUE){
+      dbDEMC_high_miRNAs <- filter(dbDEMC_high_miRNAs, miRBase.Update.ID != "unknown")
+      dbDEMC_high_miRNAs <- as.vector(dbDEMC_high_miRNAs)
+    }else{
+      dbDEMC_high_miRNAs <- as.vector(dbDEMC_high_miRNAs)
+    }
     
     #Common mirnas
     common_mirnas <- intersect(miRmap_mirnas$mature_name, dbDEMC_high_miRNAs$miRBase.Update.ID)
@@ -46,9 +52,13 @@ mirna_calculator <- function(ts.org          ="Human",
   
   #Now submitting these miRNAs to TargetScan to get genes to make a gene list for the third metric----
   #testing to see if all of the miRNAs exist in targetscan before getting all submitted at once
+  common_mirnas <- common_mirnas[!common_mirnas %in% mirna.remove]
+  if(print.ts.targets==TRUE){
+    print(length(common_mirnas))
+  }
   my_num <- 1
   miRNA_targets <- vector(mode = "list", length = length(common_mirnas))
-  for (m in common_mirnas[1:ts.num]) {
+  for (m in common_mirnas[1:length(common_mirnas)]) {
     print(m)
     current_target <- targetScan(mirna=common_mirnas[my_num], species=ts.org, release=ts.version, maxOut= max.miR.targets)
     miRNA_name <- m
