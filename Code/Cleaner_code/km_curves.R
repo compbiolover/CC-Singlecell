@@ -25,7 +25,7 @@ hr_calculator <- function(model.coefs=Coefficients, data=merged_df){
   hr_calc <- beta*(subtracted_value)
   risk <- as.vector(apply(hr_calc,1,sum))
   med_hr_value <- median(as.matrix(hr_calc))
-  risk <- ifelse(risk>med_hr_value,"high","low")
+  risk <- ifelse(risk>med_hr_value, "high", "low")
   surv_gene_df <- cbind(risk, surv_gene_df)
   vital.status <- merged_df$vital.status
   days.to.last.follow.up <- merged_df$days.to.last.follow.up
@@ -35,6 +35,11 @@ hr_calculator <- function(model.coefs=Coefficients, data=merged_df){
   
   hr_return_list[["DF"]] <- surv_gene_df
   hr_return_list[["KM"]] <- km_fit
+  hr_return_list[["beta"]] <- beta
+  hr_return_list[["hr_calc"]] <- hr_calc
+  hr_return_list[["risk"]] <- risk
+  hr_return_list[["patient_gene_exp"]] <- patient_gene_expr
+  hr_return_list[["subtracted_value"]] <- subtracted_value
   return(hr_return_list)
 }
 

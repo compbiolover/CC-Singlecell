@@ -54,36 +54,36 @@ cell_lines <- as.data.frame(cell_lines)
 h1_and_gm_cells <- select(cell_lines, contains("H1") | contains("GM"))
 h1_and_gm_cells <- select(h1_and_gm_cells, contains("RHG") | contains("RHC"))
 
-h1_cells <- select(h1_and_gm_cells, contains("H1"))
+a549_cells <- select(cell_lines, contains("A549"))
 gm_cells <- select(h1_and_gm_cells, contains("GM"))
 
-h1_colnames <- paste("C1",seq(1:length(colnames(h1_cells))),sep = ".") 
+a549_colnames <- paste("C1",seq(1:length(colnames(a549_cells))),sep = ".") 
 gm_colnames <- paste("C2",seq(1:length(colnames(gm_cells))),sep = ".")
-colnames(h1_cells) <- h1_colnames
+colnames(a549_cells) <- a549_colnames
 colnames(gm_cells) <- gm_colnames
 
-unique_h1_names <- unique(rownames(h1_cells))
-h1_cells <- h1_cells[unique_h1_names,]
+unique_a549_names <- unique(rownames(a549_cells))
+a549_cells <- a549_cells[unique_a549_names,]
 
 unique_gm_names <- unique(rownames(gm_cells))
 gm_cells <- gm_cells[unique_gm_names,]
 
-condition <- c(rep(1, ncol(h1_cells)), rep(2, ncol(gm_cells)))
+condition <- c(rep(1, ncol(a549_cells)), rep(2, ncol(gm_cells)))
 
-names(condition) <- c(colnames(h1_cells), colnames(gm_cells))
+names(condition) <- c(colnames(a549_cells), colnames(gm_cells))
 
 
-i <- c(1:ncol(h1_cells))  
+i <- c(1:ncol(a549_cells))  
 z <- c(1:ncol(gm_cells))
 
-h1_cells <- apply(h1_cells, c(1,2),           
+a549_cells <- apply(a549_cells, c(1,2),           
                            function(x) as.numeric(as.character(x)))
 
 gm_cells <- apply(gm_cells, c(1,2),            
                               function(x) as.numeric(as.character(x)))
 
 
-sce <- SingleCellExperiment(assays=list(normcounts=cbind(h1_cells,
+sce <- SingleCellExperiment(assays=list(normcounts=cbind(a549_cells,
                                                          gm_cells)),
                             colData=data.frame(condition))
 
@@ -96,7 +96,7 @@ sce_filtered <- preprocess(sce, zero.thresh=0.9)
 prior_param=list(alpha=0.01, mu0=0, s0=0.01, a0=0.01, b0=0.01)
 sce_significance_test<- scDD(sce_filtered, prior_param=prior_param, testZeroes=FALSE, categorize = FALSE)
 scdd_res_cell_line <- results(sce_significance_test)
-scdd_res_cell_line <- res[with(scdd_res_cell_line, order(nonzero.pvalue.adj)), ]
+scdd_res_cell_line <- scdd_res_cell_line[with(scdd_res_cell_line, order(nonzero.pvalue.adj)), ]
 scdd_res_cell_line <- filter(scdd_res_cell_line, nonzero.pvalue.adj<0.05)
 
 
@@ -194,14 +194,14 @@ sce <- SingleCellExperiment(assays=list(counts=cbind(tumor_cells_des,
                                                      nm_cells_des)))
 
 #Setting up MacOS/Linux specific multi-core parameters for this method
-param <- MulticoreParam(workers = 2, progressbar = TRUE)
+param <- MulticoreParam(workers = 4, progressbar = TRUE)
 register(param)
 
 
 des_results <- DEsingle(counts = sce, group = condition, parallel = TRUE, BPPARAM = param)
 #save(des_results, "/home/awillems/Projects/CC_Singlecell/Data/Data-from-pipeline/des_results.RData")
 
-#load("Data/Exported-data/R-objects/des_results.RData")
+load("Data/Exported-data/R-objects/des_results.RData", verbose = TRUE)
 
 
 

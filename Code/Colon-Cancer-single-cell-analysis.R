@@ -924,14 +924,15 @@ cv_master_subset$Mean.10.fold.CV.C.index.Performance <- formatC(cv_master_subset
 p<-ggplot(data=cv_master_subset, aes(x=Method, y=Mean.10.fold.CV.C.index.Performance, fill=Method)) +
   geom_bar(stat="identity")+
   theme_minimal()+
+  theme(title = element_text(size=35), axis.text = element_text(size = 20), axis.text.x = element_text(size = 20, face = "bold"))+
   scale_x_discrete(limits=c("MAD", "SDES", "MiRNA", "MAD + SDES", "MiRNA + SDES", "MAD + SDES + MiRNA"), expand = c(0, 0))+
   labs(title="10-fold CV Performance Across Methods", 
        x="Method", y = "Mean 10-fold CV C-index")+
   scale_y_discrete(expand = expansion(mult = c(0, .1)))+
   theme(plot.title = element_text(hjust = 0.5))+
-  geom_text(aes(label=Mean.10.fold.CV.C.index.Performance), vjust=1.6, color="white", size=3.5)
-  
-p
+  geom_text(aes(label=Mean.10.fold.CV.C.index.Performance), vjust=0.0, color="black", size=15)
+
+p+ theme(legend.position="none")
  
 
 #Comparison to simulated data----

@@ -46,13 +46,7 @@ getRank <- function(ranking = NULL,
   }
   else return(0.0)
 }
-#Helper function----
-getRank <- function(ranking = NULL, gn = NULL){
-  if (gn %in% names(ranking)) {
-    return(ranking[gn])
-  }
-  else return(0.0)
-}
+
 #Optimization for just 2 metrics----
 two_weight_optimizer <- function(my.start        =0,
                                  my.finish       =1,
