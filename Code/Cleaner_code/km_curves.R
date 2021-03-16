@@ -13,7 +13,7 @@ hr_calculator <- function(model.coefs=Coefficients, data=merged_df){
   require(survminer)
   
   hr_return_list <- list()
-  
+
   Active.Index <- which(as.logical(model.coefs) != 0)
   Active.Coefficients  <- model.coefs[Active.Index]
   active_genes <-rownames(model.coefs)[Active.Index]
@@ -27,8 +27,8 @@ hr_calculator <- function(model.coefs=Coefficients, data=merged_df){
   med_hr_value <- median(as.matrix(hr_calc))
   risk <- ifelse(risk>med_hr_value, "high", "low")
   surv_gene_df <- cbind(risk, surv_gene_df)
-  vital.status <- merged_df$vital.status
-  days.to.last.follow.up <- merged_df$days.to.last.follow.up
+  vital.status <- data$vital.status
+  days.to.last.follow.up <- data$days.to.last.follow.up
   surv_gene_df <- cbind(vital.status, surv_gene_df)
   surv_gene_df <- cbind(days.to.last.follow.up, surv_gene_df)
   km_fit <- survfit(Surv(days.to.last.follow.up, vital.status) ~ risk, data = surv_gene_df)
@@ -42,31 +42,6 @@ hr_calculator <- function(model.coefs=Coefficients, data=merged_df){
   hr_return_list[["subtracted_value"]] <- subtracted_value
   return(hr_return_list)
 }
-
-#Only for simulation data----
-alive_patients <- filter(merged_df, vital.status == 0)
-dead_patients <- filter(merged_df, vital.status == 1)
-
-
-surv_gene_df_alive <- filter(surv_gene_df, vital.status==0)
-surv_gene_df_dead <- filter(surv_gene_df, vital.status==1)
-surv_gene_df_alive$days.to.last.follow.up <- NULL
-surv_gene_df_alive$vital.status <- NULL
-positive_multi <- runif(42, min = 1000, max = 10000)
-negative_multi <- runif(42, min = 0, max = 0.1)
-surv_gene_df_alive <- surv_gene_df_alive * positive_multi
-surv_gene_df_dead$days.to.last.follow.up <- NULL
-surv_gene_df_dead$vital.status <- NULL
-surv_gene_df_dead <- surv_gene_df_dead * negative_multi
-surv_gene_df_remade <- surv_gene_df_alive %>% full_join(surv_gene_df_dead, by = c(colnames(surv_gene_df)[3:length(colnames(surv_gene_df))]))
-surv_gene_df <- surv_gene_df_remade
-
-
-# #Setting the value of the days.to.last.follow.up column based on the value of the vital.status column
-# merged_df$days.to.last.follow.up[merged_df$vital.status==0]=runif(length(alive_patients$vital.status), min = 5000, max = 10000)
-# merged_df$days.to.last.follow.up[merged_df$vital.status==1]=runif(length(dead_patients$vital.status), min = 0, max = 0.1)
-
-
 
 #KM p-value calculator----
 km_pvalue_calculator <- function(surv.time         =time,
@@ -108,6 +83,11 @@ km_pvalue_calculator <- function(surv.time         =time,
   
   
   #P-value calculation for KM curves----
+  colname_changes <- sapply(colnames(surv.df), gsub, pattern="-",replacement=".")
+  colname_changes <- sapply(colnames(surv.df), gsub, pattern="_",replacement=".")
+  colname_changes <- sapply(colnames(surv.df), gsub, pattern="/",replacement=".")
+  colname_changes <- unlist(colname_changes)
+  colnames(surv.df) <- colname_changes
   diff=survdiff(Surv(surv.time, surv.status) ~ surv.predictors, data = surv.df)
   p_Value=1-pchisq(diff$chisq,df=1)
   p_Value=signif(p_Value,num.sig.figs)

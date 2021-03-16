@@ -8,9 +8,16 @@ k562_cells <- read.csv("Data/Single-cell-data/Other-cancers/GSE65525_RAW/GSM1599
 glio <- read.csv("Data/Single-cell-data/Other-cancers/GSE57872_GBM_data_matrix.txt", sep='\t')
 cc_cell_line_fpkm <- read.csv("Data/Single-cell-data/FPKM/GSE81861_Cell_Line_FPKM.csv")
 
+#Loading additional bulk colon cancer datasets----
+sw620_sw480 <- read.csv("Data/Datasets-for-comparison/GSE112568_fpkm_table_CRC_C_Williams_Addendum.txt", sep = '\t')
+
 #Loading the types of cancer we can pick from for mirna metric----
 high_choices <- read.csv("Data/Data-from-Cleaner-code/high-dbDEMC-cancer-types.csv")
 low_choices <- read.csv("Data/Data-from-Cleaner-code/low-dbDEMC-cancer-types.csv")
+
+
+#Preporcessing the various bulk datasets for comparision----
+
 
 #Pre-processing for the different sc data files----
 
@@ -43,10 +50,6 @@ colnames(k562_cells) <- seq(from=1,to=239,by=1)
 rownames(glio) <- glio$X
 glio <- subset(glio, select=c(MGH264_A01:MGH31Tumor))
 glio <- abs(glio)
-
-
-
-
 
 #CC tumor patients dataset analysis-----
 #Now denoising the sc-data----
@@ -150,28 +153,70 @@ save(mirna.genes, file = "k562_mirna.RData")
 #Optimizing the mirna + SDE metric----
 mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "sde_mirna_optimized_k562.RData")
 
-#Load the df_for_train_test_split data frame for use with Cox model----
-load("Data/Exported-data/R-objects/df_for_train_test_split.RData")
+#Leukimia TCGA bulk data----
+leuk_query <- GDCquery(project       = "TCGA-LAML",
+                       data.category = "Transcriptome Profiling",
+                       data.type     = "Gene Expression Quantification",
+                       workflow.type = "HTSeq - Counts")
+
+#Downloading the data.
+GDCdownload(query           = leuk_query,
+            method          = "api",
+            files.per.chunk = 10,
+            directory       = "Data/Bulk-data/TCGA-leuk-Dataset")
+
+#Making the summarizedExperiment object and then removing all entries that lacked days_to_last_follow_up information
+Leuk_data_se <- GDCprepare(leuk_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-leuk-Dataset/")
+Leuk_data_df <- as.data.frame(colData(Leuk_data_se))
+Leuk_data_df$vital_status <- factor(Leuk_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
+Leuk_data_df$vital_status <- as.numeric(as.character(Leuk_data_df$vital_status))
+
+#Bulk dataframe for Leuk merged dataframe----
+bulk_rna_df <- Leuk_data_se@assays@data@listData[["HTSeq - Counts"]]
+colnames(bulk_rna_df) <- Leuk_data_se@colData@rownames
+rownames(bulk_rna_df) <- Leuk_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
+bulk_rna_df <- t(bulk_rna_df)
+bulk_rna_df <- as.data.frame(bulk_rna_df)
+bulk_rownames <- rownames(bulk_rna_df)
+bulk_rna_df$barcode <- bulk_rownames
+
+bulk_rna_df_unique <- subset(bulk_rna_df, select = unique(colnames(bulk_rna_df)))
+Leuk_data_df_unique <- subset(Leuk_data_df, select = unique(colnames(Leuk_data_df)))
+merged_df <- merge(bulk_rna_df_unique, Leuk_data_df_unique, by = 'barcode')
+rownames(merged_df) <- merged_df$barcode
+merged_df <- merged_df[,2:length(colnames(merged_df))]
+
+merged_df$days_to_death <- ifelse(is.na(merged_df$days_to_death),0, merged_df$days_to_death)
+merged_df$days_to_last_follow_up <- ifelse(is.na(merged_df$days_to_last_follow_up),0, merged_df$days_to_last_follow_up)
+calculated_days <- merged_df$days_to_death - merged_df$days_to_last_follow_up
+calculated_days <- abs(calculated_days)
+calculated_days[calculated_days==0]=1
+cox_time <- merged_df$days_to_last_follow_up
+cox_event <- merged_df$vital_status
+cox_df <- subset(merged_df, select=c(TSPAN6:AC007389.3))
+cox_df$days.to.last.follow.up <- cox_time
+cox_df$vital.status <- cox_event
+cox_df$days.to.last.follow.up <- as.numeric(cox_df$days.to.last.follow.up)
+cox_df$days.to.last.follow.up <- ifelse(cox_df$days.to.last.follow.up==0,1,cox_df$days.to.last.follow.up)
+
+
 
 #Cox model----
 cox_models_k562 <- list()
 counter <- 1
 for (x in mirna_sde_optimized) {
   current_weight <- x
-  current_cox <- cox_model_fitter(my.seed = 1, cox.df = df_for_train_test_split, gene.num = 900, cox.predictors = current_weight) 
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight) 
   cox_models_k562[[as.character(counter)]] <- current_cox
   counter <- counter + 1
 }
-
-#Loading data.frame needed for KM curves----
-load("Data/Exported-data/R-objects/merged_df_replaced.RData")
 
 #KM curves----
 hr_calcs_k562 <- list()
 counter <- 1
 for (x in cox_models_k562) {
   current_cox <- x
-  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = merged_df)
+  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = cox_df)
   hr_calcs_k562[[as.character(counter)]] <- current_hr
   counter <- counter + 1
 }
@@ -221,8 +266,51 @@ save(mirna.genes, file = "glio_mirna.RData")
 #Optimizing the mirna + SDE metric----
 mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "sde_mirna_optimized_glio.RData")
 
-#Load the df_for_train_test_split data frame for use with Cox model----
-load("Data/Exported-data/R-objects/df_for_train_test_split.RData")
+
+#Glioblastoma TCGA bulk data----
+glio_query <- GDCquery(project        = "TCGA-GBM",
+                        data.category = "Transcriptome Profiling",
+                        data.type     = "Gene Expression Quantification",
+                        workflow.type = "HTSeq - Counts")
+
+#Downloading the data.
+GDCdownload(query           = glio_query,
+            method          = "api",
+            files.per.chunk = 10,
+            directory       = "Data/Bulk-data/TCGA-Glio-Dataset")
+
+#Making the summarizedExperiment object and then removing all entries that lacked days_to_last_follow_up information
+Glio_data_se <- GDCprepare(glio_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-Glio-Dataset/")
+Glio_data_df <- as.data.frame(colData(Glio_data_se))
+Glio_data_df$vital_status <- factor(Glio_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
+Glio_data_df$vital_status <- as.numeric(as.character(Glio_data_df$vital_status))
+
+#Bulk dataframe for glio merged dataframe----
+bulk_rna_df <- Glio_data_se@assays@data@listData[["HTSeq - Counts"]]
+colnames(bulk_rna_df) <- Glio_data_se@colData@rownames
+rownames(bulk_rna_df) <- Glio_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
+bulk_rna_df <- t(bulk_rna_df)
+bulk_rna_df <- as.data.frame(bulk_rna_df)
+bulk_rownames <- rownames(bulk_rna_df)
+bulk_rna_df$barcode <- bulk_rownames
+
+bulk_rna_df_unique <- subset(bulk_rna_df, select = unique(colnames(bulk_rna_df)))
+Glio_data_df_unique <- subset(Glio_data_df, select = unique(colnames(Glio_data_df)))
+merged_df <- merge(bulk_rna_df_unique, Glio_data_df_unique, by = 'barcode')
+rownames(merged_df) <- merged_df$barcode
+merged_df <- merged_df[,2:length(colnames(merged_df))]
+
+calculated_days <- merged_df$days_to_death - merged_df$days_to_last_follow_up
+calculated_days[calculated_days==0]=1
+merged_df <- merged_df[complete.cases(merged_df[, "days_to_last_follow_up"]), ]
+cox_time <- merged_df$days_to_last_follow_up
+cox_event <- merged_df$vital_status
+cox_df <- subset(merged_df, select=c(TSPAN6:AC007389.3))
+cox_df$days.to.last.follow.up <- cox_time
+cox_df$vital.status <- cox_event
+cox_df <- cox_df %>% filter(!is.na(vital.status))
+cox_df$days.to.last.follow.up <- as.numeric(cox_df$days.to.last.follow.up)
+cox_df$days.to.last.follow.up <- ifelse(cox_df$days.to.last.follow.up==0,1,cox_df$days.to.last.follow.up)
 
 #Cox model----
 cox_models_glio <- list()
@@ -234,10 +322,13 @@ for (x in mirna_sde_optimized) {
   counter <- counter + 1
 }
 
-#Loading data.frame needed for KM curves----
-load("Data/Exported-data/R-objects/merged_df_replaced.RData")
+
 
 #KM curves----
+merged_df <- merged_df %>% filter(!is.na(vital_status))
+colnames(merged_df)[colnames(merged_df) == "vital_status"] <- "vital.status"
+colnames(merged_df)[colnames(merged_df) == "days_to_last_follow_up"] <- "days.to.last.follow.up"
+
 hr_calcs_glio <- list()
 counter <- 1
 for (x in cox_models_glio) {
@@ -272,7 +363,7 @@ for (x in hr_calcs_glio) {
 
 
 
-#CC cell-line analysis----
+#A549 cell-line analysis----
 #Loading needed function----
 gene_name_cleaner <- function(data.to.clean=all_tumor_cells_fpkm_denoised_df){
   data.to.clean <-t(data.to.clean)
@@ -290,7 +381,6 @@ gene_name_cleaner <- function(data.to.clean=all_tumor_cells_fpkm_denoised_df){
 rownames(cc_cell_line_fpkm) <- cc_cell_line_fpkm$X
 cc_cell_line_fpkm<- subset(cc_cell_line_fpkm, select=c(RHA015__A549__turquoise:RHC2506__H1_B2__brown))
 cc_cell_line_fpkm <- gene_name_cleaner(data.to.clean = cc_cell_line_fpkm)
-cc_cell_line_fpkm <- t(cc_cell_line_fpkm)
 cc_cell_colnames <- unique(colnames(cc_cell_line_fpkm))
 cc_cell_line_fpkm <- subset(cc_cell_line_fpkm, select=cc_cell_colnames)
 cc_cell_line_fpkm <- t(cc_cell_line_fpkm)
@@ -320,8 +410,48 @@ save(mirna.genes, file = "a549_cells_mirna.RData")
 #Optimizing the mirna + SDE metric----
 mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "sde_mirna_optimized_a549_cells.RData")
 
-#Load the df_for_train_test_split data frame for use with Cox model----
-load("Data/Exported-data/R-objects/df_for_train_test_split.RData")
+#Lung cancer TCGA bulk data----
+lung_query <- GDCquery(project       = "TCGA-LUAD",
+                       data.category = "Transcriptome Profiling",
+                       data.type     = "Gene Expression Quantification",
+                       workflow.type = "HTSeq - Counts")
+
+#Downloading the data.
+GDCdownload(query           = lung_query,
+            method          = "api",
+            files.per.chunk = 10,
+            directory       = "Data/Bulk-data/TCGA-lungaud-Dataset")
+
+#Making the summarizedExperiment object and then removing all entries that lacked days_to_last_follow_up information
+lung_data_se <- GDCprepare(lung_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-lungaud-Dataset/")
+lung_data_df <- as.data.frame(colData(lung_data_se))
+lung_data_df$vital_status <- factor(lung_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
+lung_data_df$vital_status <- as.numeric(as.character(lung_data_df$vital_status))
+
+#Bulk dataframe for lung merged dataframe----
+bulk_rna_df <- lung_data_se@assays@data@listData[["HTSeq - Counts"]]
+colnames(bulk_rna_df) <- lung_data_se@colData@rownames
+rownames(bulk_rna_df) <- lung_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
+bulk_rna_df <- t(bulk_rna_df)
+bulk_rna_df <- as.data.frame(bulk_rna_df)
+bulk_rownames <- rownames(bulk_rna_df)
+bulk_rna_df$barcode <- bulk_rownames
+
+bulk_rna_df_unique <- subset(bulk_rna_df, select = unique(colnames(bulk_rna_df)))
+lung_data_df_unique <- subset(lung_data_df, select = unique(colnames(lung_data_df)))
+merged_df <- merge(bulk_rna_df_unique, lung_data_df_unique, by = 'barcode')
+rownames(merged_df) <- merged_df$barcode
+merged_df <- merged_df[,2:length(colnames(merged_df))]
+
+calculated_days <- merged_df$days_to_death - merged_df$days_to_last_follow_up
+calculated_days[calculated_days==0]=1
+merged_df <- merged_df[complete.cases(merged_df[, "days_to_last_follow_up"]), ]
+merged_df$days_to_last_follow_up <- ifelse(merged_df$days_to_last_follow_up==0,1,merged_df$days_to_last_follow_up)
+cox_time <- merged_df$days_to_last_follow_up
+cox_event <- merged_df$vital_status
+cox_df <- subset(merged_df, select=c(TSPAN6:AC007389.3))
+cox_df$days.to.last.follow.up <- cox_time
+cox_df$vital.status <- cox_event
 
 #Cox model----
 cox_models_a549 <- list()
@@ -333,15 +463,12 @@ for (x in mirna_sde_optimized) {
   counter <- counter + 1
 }
 
-#Loading data.frame needed for KM curves----
-load("Data/Exported-data/R-objects/merged_df_replaced.RData")
-
 #KM curves----
 hr_calcs_a549 <- list()
 counter <- 1
 for (x in cox_models_a549) {
   current_cox <- x
-  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = merged_df)
+  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = cox_df)
   hr_calcs_a549[[as.character(counter)]] <- current_hr
   counter <- counter + 1
 }
@@ -362,7 +489,7 @@ counter <- 1
 for (x in hr_calcs_a549) {
   current_calc <- x
   current_pvalue <- hr_pvalues_a549[counter]
-  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "MiRNA + SDES A549 Cell-line")
+  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "MiRNA + SDES A549 Cell-line with Lung AUD Bulk Dataset")
   hr_plots_a549[[as.character(counter)]] <- current_plot
   counter <- counter + 1
 }

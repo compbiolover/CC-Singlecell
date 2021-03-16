@@ -59,6 +59,13 @@ cox_model_fitter <- function(my.seed       =1,
     my_predictors <- rownames(cox.predictors)
   }
   my_predictors <- head(my_predictors, n=gene.num)
+  my_predictors <- sapply(my_predictors, gsub, pattern="-",replacement=".")
+  my_predictors <- unlist(my_predictors)
+  colname_changes <- sapply(colnames(cox.df), gsub, pattern="-",replacement=".")
+  colname_changes <- sapply(colnames(cox.df), gsub, pattern="_",replacement=".")
+  colname_changes <- sapply(colnames(cox.df), gsub, pattern="/",replacement=".")
+  colname_changes <- unlist(colname_changes)
+  colnames(cox.df) <- colname_changes
   my_predictors <- intersect(my_predictors, colnames(cox.df))
   my_predictors <- paste("~", paste(my_predictors[1:length(my_predictors)], collapse = "+"))
   my_predictors <- as.formula(my_predictors)
