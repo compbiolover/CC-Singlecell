@@ -7,7 +7,10 @@
 cox_model_fitter <- function(my.seed       =1,
                              cox.df        =NULL,
                              gene.num      =900,
-                             cox.predictors=NULL){
+                             cox.predictors=NULL,
+                             tumor.stage   =FALSE,
+                             tumor.m       =FALSE,
+                             tumor.n       =FALSE){
   
   #Doing input sanity checks----
   if(missing(my.seed)){
@@ -68,7 +71,28 @@ cox_model_fitter <- function(my.seed       =1,
   colnames(cox.df) <- colname_changes
   my_predictors <- intersect(my_predictors, colnames(cox.df))
   my_predictors <- paste("~", paste(my_predictors[1:length(my_predictors)], collapse = "+"))
-  my_predictors <- as.formula(my_predictors)
+  if(tumor.stage==TRUE){
+    my_predictors <- paste(my_predictors, "tumor.stage", sep = "+")
+    if(tumor.m==TRUE){
+      my_predictors <- paste(my_predictors,"ajcc.n", sep = "+")
+      if(tumor.n==TRUE){
+        my_predictors <- paste(my_predictors, "ajcc.n", sep = "+")
+        my_predictors <- as.formula(my_predictors)
+      }else{
+        my_predictors <- as.formula(my_predictors)
+      }
+    }else{
+      my_predictors <- as.formula(my_predictors)
+    }
+  }else{
+    if(tumor.m==TRUE){
+      my_predictors <- paste(my_predictors, "ajcc.m", sep = "+")
+      my_predictors <- as.formula(my_predictors)
+    }else{
+      my_predictors <- as.formula(my_predictors)
+    }
+  }
+  #my_predictors <- as.formula(my_predictors)
   my_x <- model.matrix(my_predictors, cox.df)
   
   #The response object for the cox model----
@@ -93,3 +117,12 @@ cox_model_fitter <- function(my.seed       =1,
   #Returning our finished output----
   return(cox_data)
 }
+
+
+#Code for just testing tumor stage and n pathological state
+my_predictors <- paste("~", paste("ajcc.n", sep = "+"), collapse = "+")
+my_predictors <- as.formula(my_predictors)
+my_x <- model.matrix(my_predictors, cox_df)
+my_y <- Surv(time = cox_df$days.to.last.follow.up, event = cox_df$vital.status)
+
+cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C", maxit=100000, family="cox", parallel = TRUE)

@@ -8,7 +8,7 @@ library(survival)
 library(survminer)
 
 #Doing the hazard ratio calculation----
-hr_calculator <- function(model.coefs=Coefficients, data=merged_df){
+hr_calculator <- function(model.coefs=Coefficients, data=merged_df, my.remove=NULL){
   require(survival)
   require(survminer)
   
@@ -17,9 +17,13 @@ hr_calculator <- function(model.coefs=Coefficients, data=merged_df){
   Active.Index <- which(as.logical(model.coefs) != 0)
   Active.Coefficients  <- model.coefs[Active.Index]
   active_genes <-rownames(model.coefs)[Active.Index]
-  surv_gene_df=merged_df[,active_genes]
+  print(active_genes)
+  active_genes <- active_genes[!active_genes %in% my.remove]
+  surv_gene_df=data[,active_genes]
   beta <-Active.Coefficients
   gene_expr <- mean(as.matrix(surv_gene_df))
+  # print(class(surv_gene_df))
+  print(dim(surv_gene_df))
   patient_gene_expr<- surv_gene_df[1:length(rownames(surv_gene_df)),]
   subtracted_value <- patient_gene_expr - gene_expr
   hr_calc <- beta*(subtracted_value)
