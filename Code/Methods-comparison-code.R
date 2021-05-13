@@ -14,6 +14,7 @@ library(SINCERA)
 library(SingleCellExperiment)
 library(tidyverse)
 
+#classes, fdef, mtable
 #Loading needed functions----
 gene_name_cleaner <- function(data.to.clean=all_tumor_cells_fpkm_denoised_df){
   data.to.clean <-t(data.to.clean)
@@ -107,6 +108,9 @@ tumor_colnames <- paste("C1",seq(1:length(colnames(all_tumor_cells_fpkm))),sep =
 nm_colnames <- paste("C2",seq(1:length(colnames(all_nm_cells_fpkm))),sep = ".")
 colnames(all_tumor_cells_fpkm) <- tumor_colnames
 colnames(all_nm_cells_fpkm) <- nm_colnames
+
+condition <- c(rep(1, ncol(all_tumor_cells_fpkm)), rep(2, ncol(all_nm_cells_fpkm)))
+
 names(condition) <- c(colnames(all_tumor_cells_fpkm), colnames(all_nm_cells_fpkm))
 i <- c(1:ncol(all_nm_cells_fpkm))  
 z <- c(1:ncol(all_tumor_cells_fpkm))
@@ -143,16 +147,92 @@ BiocParallel::register(BiocParallel::MulticoreParam())
 prior_param=list(alpha=0.01, mu0=0, s0=0.01, a0=0.01, b0=0.01)
 sce_significance_test<- scDD(sce_filtered, prior_param=prior_param, testZeroes=FALSE, categorize = FALSE)
 scdd_res <- results(sce_significance_test)
-scdd_res <- res[with(scdd_res, order(nonzero.pvalue.adj)), ]
+scdd_res <- scdd_res[with(scdd_res, order(nonzero.pvalue.adj)), ]
 scdd_res <- filter(scdd_res, nonzero.pvalue.adj<0.05)
 
-#save(scdd_res,file = "Data/Exported-data/R-objects/scdd_res.RData")
-#write.csv(scdd_res, file = "Data/Exported-data/Csv-files/scdd_res.csv")
+save(scdd_res,file = "Data/Exported-data/R-objects/scdd_res.RData")
+write.csv(scdd_res, file = "Data/Exported-data/Csv-files/scdd_res.csv")
+
+
+#For Glio dataset----
+#Doing pre-processing to get my data ready to go into the SingleCellExperiment data for scDD method
+#container format
+tumor_colnames <- paste("C1",seq(1:293),sep = ".")
+nm_colnames <- paste("C2",seq(1:2),sep = ".")
+colnames(glio_dg)[1:293] <- tumor_colnames
+colnames(glio_dg)[294:295] <- nm_colnames
+
+condition <- c(rep(1, 293), rep(2, 2))
+
+names(condition) <- c(colnames(glio_dg[1:293]), colnames(glio_dg[294:295]))
+i <- c(1:293)  
+z <- c(1:2)
+
+all_nm_cells_fpkm <- apply(glio_dg[294:295], c(1,2),           
+                           function(x) as.numeric(as.character(x)))
+
+all_tumor_cells_fpkm <- apply(glio_dg[1:293], c(1,2),            
+                              function(x) as.numeric(as.character(x)))
+
+#Making the SingleCellExperiment object of my data---- 
+unique_tumor_names <- unique(rownames(all_tumor_cells_fpkm))
+all_tumor_cells_fpkm <- all_tumor_cells_fpkm[unique_tumor_names,]
+
+unique_nm_names <- unique(rownames(all_nm_cells_fpkm))
+all_nm_cells_fpkm <- all_nm_cells_fpkm[unique_nm_names,]
+
+condition <- c(rep(1, ncol(all_tumor_cells_fpkm)), rep(2, 2))
+
+
+sce <- SingleCellExperiment(assays=list(normcounts=cbind(all_tumor_cells_fpkm,
+                                                         all_nm_cells_fpkm)),
+                            colData=data.frame(condition))
+
+#Filtering the sce object
+sce_filtered <- preprocess(sce, zero.thresh=0.9)
+
+
+#For multiple cores----
+BiocParallel::register(BiocParallel::MulticoreParam())
+
+#scDD function and results----
+prior_param=list(alpha=0.01, mu0=0, s0=0.01, a0=0.01, b0=0.01)
+sce_significance_test<- scDD(sce_filtered, prior_param=prior_param, testZeroes=FALSE, categorize = FALSE, min.size = 3)
+scdd_res <- results(sce_significance_test)
+scdd_res <- scdd_res[with(scdd_res, order(nonzero.pvalue.adj)), ]
+scdd_res <- filter(scdd_res, nonzero.pvalue.adj<0.05)
+
+save(scdd_res,file = "Data/Exported-data/R-objects/scdd_res_glio.RData")
+write.csv(scdd_res, file = "Data/Exported-data/Csv-files/scdd_res_glio.csv")
+
 
 #DESeq2----
 #Reading in the count files
 tumor_cells_ds2 <- read.csv(file = "Data/Single-cell-data/Counts/GSE81861_CRC_tumor_all_cells_COUNT.csv")
 nm_cells_ds2 <- read.csv(file = "Data/Single-cell-data/Counts/GSE81861_CRC_NM_all_cells_COUNT.csv")
+
+#Merging them together into one large dataframe
+deseq2_df <- merge(tumor_cells_ds2, nm_cells_ds2)
+rownames(deseq2_df) <- deseq2_df$X
+deseq2_df <- subset(deseq2_df, select=c(RHC3546__Tcell__.C6E879:RHC6187__Macrophage__.FFFF55))
+
+#Making a summarizedExperiment object from the combined dataframe
+deseq2_se <- SummarizedExperiment(assays=list(counts=deseq2_df))
+
+keep <-  rowSums(assay(deseq2_se)>5)>10
+table(keep)
+
+deseq2_se <- deseq2_se[keep,]
+
+deseq2_se <- deseq2_se[names(deseq2_se)[1:5000],]
+
+assayNames(deseq2_se)[1] <- "counts"
+
+zinb <- zinbwave::zinbFit(deseq2_se, K = 2, epsilon=1e12)
+
+deseq2_zinb <- zinbwave(deseq2_se, K = 2, epsilon=1e12)
+
+
 
 #DEsingle----
 tumor_cells_des <- read.csv(file = "Data/Single-cell-data/Counts/GSE81861_CRC_tumor_all_cells_COUNT.csv")
@@ -199,9 +279,9 @@ register(param)
 
 
 des_results <- DEsingle(counts = sce, group = condition, parallel = TRUE, BPPARAM = param)
-#save(des_results, "/home/awillems/Projects/CC_Singlecell/Data/Data-from-pipeline/des_results.RData")
+save(des_results, file = "Data/Data-from-Cleaner-code/des_results_cc_patients.RData")
 
-load("Data/Exported-data/R-objects/des_results.RData", verbose = TRUE)
+#load("Data/Exported-data/R-objects/des_results.RData", verbose = TRUE)
 
 
 
@@ -212,3 +292,4 @@ load("Data/Exported-data/R-objects/des_results.RData", verbose = TRUE)
 #scde----
 
 #SINCERA----
+

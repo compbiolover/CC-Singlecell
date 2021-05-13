@@ -37,6 +37,7 @@ cox_model_fitter <- function(my.seed       =1,
   #will be loaded. If they are not,
   #the packages will be installed
   #from CRAN and then loaded.
+  require(BiocGenerics)
   require(doParallel)
   require(glmnet)
   require(parallel)
@@ -61,6 +62,12 @@ cox_model_fitter <- function(my.seed       =1,
   }else{
     my_predictors <- rownames(cox.predictors)
   }
+  
+  if(is.character(cox.predictors)==TRUE){
+    my_predictors <- cox.predictors
+  }
+  
+  
   my_predictors <- head(my_predictors, n=gene.num)
   my_predictors <- sapply(my_predictors, gsub, pattern="-",replacement=".")
   my_predictors <- unlist(my_predictors)
@@ -94,10 +101,8 @@ cox_model_fitter <- function(my.seed       =1,
   }
   #my_predictors <- as.formula(my_predictors)
   my_x <- model.matrix(my_predictors, cox.df)
-  
   #The response object for the cox model----
   my_y <- Surv(time = cox.df$days.to.last.follow.up, event = cox.df$vital.status)
-  
   #The 10-fold cross-validation fit----
   cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C", maxit=100000, family="cox", parallel = TRUE)
   
@@ -106,6 +111,8 @@ cox_model_fitter <- function(my.seed       =1,
   Coefficients <- coef(fit, s = cv_fit$lambda.min)
   Active.Index <- which(as.logical(Coefficients) != 0)
   Active.Coefficients  <- Coefficients[Active.Index]
+  
+  
   
   #Adding the relevant data bits to list to return
   cox_data[["CV"]] <- cv_fit
@@ -119,10 +126,12 @@ cox_model_fitter <- function(my.seed       =1,
 }
 
 
-#Code for just testing tumor stage and n pathological state
+#Code for just testing tumor stage and n pathological state----
 my_predictors <- paste("~", paste("ajcc.n", sep = "+"), collapse = "+")
 my_predictors <- as.formula(my_predictors)
 my_x <- model.matrix(my_predictors, cox_df)
 my_y <- Surv(time = cox_df$days.to.last.follow.up, event = cox_df$vital.status)
 
 cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C", maxit=100000, family="cox", parallel = TRUE)
+
+

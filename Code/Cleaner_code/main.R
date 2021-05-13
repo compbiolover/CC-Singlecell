@@ -2,11 +2,43 @@
 #Author: Andrew Willems <awillems@vols.utk.edu>
 #Purpose: The main script for my project.
 
+#Loading needed packages----
+library(SummarizedExperiment)
+library(TCGAbiolinks)
+library(tidyverse)
 #Loading single-cell data----
 cc_tumor_fpkm <- read.csv("Data/Single-cell-data/FPKM/GSE81861_CRC_tumor_all_cells_FPKM.csv")
 k562_cells <- read.csv("Data/Single-cell-data/Other-cancers/GSE65525_RAW/GSM1599500_K562_cells.csv")
 glio <- read.csv("Data/Single-cell-data/Other-cancers/GSE57872_GBM_data_matrix.txt", sep='\t')
+rownames(glio) <- glio$X
+glio_dg <- dplyr::select(glio, contains("MGH2") | contains("MGH26Tumor") | contains("MGH28Tumor") | contains("MGH31Tumor"))
+glio_dg <- abs(glio_dg)
+
 cc_cell_line_fpkm <- read.csv("Data/Single-cell-data/FPKM/GSE81861_Cell_Line_FPKM.csv")
+
+lc_tumor_tpm <- read.csv("Data/Single-cell-data/Other-cancers/GSE69405_PROCESSED_GENE_TPM_ALL.txt", sep = '\t')
+lc_tumor_tpm <- lc_tumor_tpm[!base::duplicated(lc_tumor_tpm$gene_name),]
+rownames(lc_tumor_tpm) <- lc_tumor_tpm$gene_name
+
+#Loading in gene sets from other methods to compare to our method----
+scdd_genes <- read.csv("Data/Exported-data/Csv-files/scdd_res.csv")
+rownames(scdd_genes) <- scdd_genes$X
+scdd_genes <- scdd_genes[,c("gene", "nonzero.pvalue", "nonzero.pvalue.adj")]
+
+
+#DESingle CC patients----
+des_genes <- des_results
+des_genes <- head(rownames(des_genes), n=1800)
+
+
+
+#Log + 1 transforming the cc_tumor sc data to see if it impacts results----
+cc_tumor_fpkm_logged <- log1p(cc_tumor_fpkm[,2:length(colnames(cc_tumor_fpkm))])
+cc_tumor_fpkm_logged$X <- cc_tumor_fpkm$X
+
+cc_cell_line_fpkm_logged <- log1p(cc_cell_line_fpkm[,2:length(colnames(cc_cell_line_fpkm))])
+cc_cell_line_fpkm_logged$X <- cc_cell_line_fpkm$X
+
 
 #Loading additional bulk colon cancer datasets----
 sw620_sw480 <- read.csv("Data/Datasets-for-comparison/GSE112568_fpkm_table_CRC_C_Williams_Addendum.txt", sep = '\t')
@@ -15,8 +47,7 @@ sw620_sw480 <- read.csv("Data/Datasets-for-comparison/GSE112568_fpkm_table_CRC_C
 high_choices <- read.csv("Data/Data-from-Cleaner-code/high-dbDEMC-cancer-types.csv")
 low_choices <- read.csv("Data/Data-from-Cleaner-code/low-dbDEMC-cancer-types.csv")
 
-#Pre-processing for the different sc data files----
-
+#Pre-processing for the different sc data files
 #CC tumor patients----
 rownames(cc_tumor_fpkm) <- cc_tumor_fpkm$X
 current_colname_split <- strsplit(colnames(t(cc_tumor_fpkm)), "_")
@@ -37,6 +68,32 @@ cc_tumor_fpkm <- t(cc_tumor_fpkm)
 cc_tumor_fpkm <- apply(cc_tumor_fpkm, c(1,2), as.numeric)
 cc_tumor_fpkm <- as.matrix(cc_tumor_fpkm)
 
+
+#CC tumor patients logged----
+rownames(cc_tumor_fpkm_logged) <- cc_tumor_fpkm_logged$X
+current_colname_split <- strsplit(colnames(t(cc_tumor_fpkm_logged)), "_")
+finished_gene_list <- c()
+current_list <- current_colname_split
+for (x in seq(1:length(current_list))){
+  finished_gene_list <- c(finished_gene_list, current_list[[x]][2])
+}
+
+cc_tumor_fpkm_logged <- t(cc_tumor_fpkm_logged)
+colnames(cc_tumor_fpkm_logged) <- finished_gene_list
+cc_colnames <- unique(colnames(cc_tumor_fpkm_logged))
+cc_tumor_fpkm_logged <- t(cc_tumor_fpkm_logged)
+cc_tumor_fpkm_logged <- subset(cc_tumor_fpkm_logged, select=c(RHC3546__Tcell__.C6E879:RHC6041__Macrophage__.FFFF55))
+cc_tumor_fpkm_logged <- t(cc_tumor_fpkm_logged)
+cc_tumor_fpkm_logged <- subset(cc_tumor_fpkm_logged, select=cc_colnames)
+cc_tumor_fpkm_logged <- t(cc_tumor_fpkm_logged)
+cc_tumor_fpkm_logged <- apply(cc_tumor_fpkm_logged, c(1,2), as.numeric)
+cc_tumor_fpkm_logged <- as.matrix(cc_tumor_fpkm_logged)
+
+#Lung cancer patients----
+lc_tumor_tpm <- select(lc_tumor_tpm, contains("LC.PT.45" ) | contains("LC.MBT.15"))
+lc_tumor_tpm <- select(lc_tumor_tpm, contains("LC.PT.45_SC") | contains( "LC.MBT.15_SC"))
+lc_names <- c("VIM", "VIMP", "VIMP1")
+
 #K562 leukemia cell line----
 rownames(k562_cells) <- k562_cells$X
 k562_cells <- subset(k562_cells, select=c(X0:X0.238))
@@ -47,66 +104,60 @@ rownames(glio) <- glio$X
 glio <- subset(glio, select=c(MGH264_A01:MGH31Tumor))
 glio <- abs(glio)
 
-#CC tumor patients dataset analysis-----
-#Now denoising the sc-data----
-cc_tumor_fpkm <- magic_denoiser(sc.data = cc_tumor_fpkm,magic.seed = 123)
+#LC tumor patient dataset analysis----
+lc_tumor_tpm <- magic_denoiser(sc.data = lc_tumor_tpm, magic.seed = 123)
+cds_output <- cell_dataset_builder(vim.genes = lc_names, cell.data = lc_tumor_tpm$denoised_sc_dataframe, cell.meta = lc_tumor_tpm$cds_gene_names)
 
-#Now getting pseudotime info from Moncocle3----
-cds_output <- cell_dataset_builder(vim.genes = c("VIM", "VIMP"), cell.data = cc_tumor_fpkm$denoised_sc_dataframe, cell.meta = cc_tumor_fpkm$cds_gene_names)
+mad.genes <- mad_calculator(lc_tumor_tpm$denoised_sc_dataframe)
+save(mad.genes, file = "Data/Data-from-Cleaner-code/lc_tumor_tpm_mad.RData")
 
-#MAD metric----
-mad.genes <- mad_calculator(cc_tumor_fpkm$denoised_sc_dataframe)
-save(mad.genes, file = "cc_tumor_fpkm_mad.RData")
+sde.genes <- switchde_calculator(lc_tumor_tpm$denoised_sc_dataframe, pseudo.time = cds_output$Pseudotime)
+save(sde.genes, file = "Data/Data-from-Cleaner-code/lc_tumor_tpm_sde.RData")
 
-#Switchde metric----
-sde.genes <- switchde_calculator(cc_tumor_fpkm$denoised_sc_dataframe, pseudo.time = cds_output$Pseudotime)
-save(sde.genes, file = "cc_tumor_fpkm_sde.RData")
+mirna.genes <- mirna_calculator(cancer.type1 = "lung cancer", ts.org = "Human", ts.version = "7.2", max.miR.targets = 10, cancer.up = TRUE, mirna.filename = "Data/Data-from-Cleaner-code/TargetScan_lc_tumor.RData", mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"))
+save(mirna.genes, file = "Data/Data-from-Cleaner-code/lc_tumor_tpm_mirna.RData")
 
-#Mirna metric----
-#mirna.genes <- mirna_calculator(cancer.type1 = "colon cancer", cancer.type2 = "colorectal cancer", ts.org = "Human", ts.version = "7.2", max.miR.targets = 10, cancer.up = TRUE, mirna.filename = "TargetScan_cc_tumor_patients.RData")
-#save(mirna.genes, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_mirna.RData")
+mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "Data/Data-from-Cleaner-code/sde_mirna_optimized_lc.RData")
 
-#Optimizing the mirna + SDE metric----
-mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "sde_mirna_optimized.RData")
-#Loading the bulk READ dataset from TCGA----
-read_query <- GDCquery(project       = "TCGA-READ",
+
+#Lung cancer TCGA bulk data----
+lung_query <- GDCquery(project       = "TCGA-LUAD",
                        data.category = "Transcriptome Profiling",
                        data.type     = "Gene Expression Quantification",
                        workflow.type = "HTSeq - Counts")
 
 #Downloading the data.
-GDCdownload(query           = read_query,
+GDCdownload(query           = lung_query,
             method          = "api",
             files.per.chunk = 10,
-            directory       = "Data/Bulk-data/TCGA-read-Dataset")
+            directory       = "Data/Bulk-data/TCGA-lungluad-Dataset")
 
 #Making the summarizedExperiment object and then removing all entries that lacked days_to_last_follow_up information
-Read_data_se <- GDCprepare(read_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-read-Dataset/")
-Read_data_df <- as.data.frame(colData(Read_data_se))
-Read_data_df$vital_status <- factor(Read_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
-Read_data_df$vital_status <- as.numeric(as.character(Read_data_df$vital_status))
+lung_data_se <- GDCprepare(lung_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-lungluad-Dataset/")
+lung_data_df <- as.data.frame(colData(lung_data_se))
+lung_data_df$vital_status <- factor(lung_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
+lung_data_df$vital_status <- as.numeric(as.character(lung_data_df$vital_status))
 
-#Bulk dataframe for Read merged dataframe----
-bulk_rna_df <- Read_data_se@assays@data@listData[["HTSeq - Counts"]]
-colnames(bulk_rna_df) <- Read_data_se@colData@rownames
-rownames(bulk_rna_df) <- Read_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
+#Bulk dataframe for lung merged dataframe----
+bulk_rna_df <- lung_data_se@assays@data@listData[["HTSeq - Counts"]]
+colnames(bulk_rna_df) <- lung_data_se@colData@rownames
+rownames(bulk_rna_df) <- lung_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
 bulk_rna_df <- t(bulk_rna_df)
 bulk_rna_df <- as.data.frame(bulk_rna_df)
 bulk_rownames <- rownames(bulk_rna_df)
 bulk_rna_df$barcode <- bulk_rownames
 
 bulk_rna_df_unique <- subset(bulk_rna_df, select = unique(colnames(bulk_rna_df)))
-Read_data_df_unique <- subset(Read_data_df, select = unique(colnames(Read_data_df)))
-merged_df <- merge(bulk_rna_df_unique, Read_data_df_unique, by = 'barcode')
+lung_data_df_unique <- subset(lung_data_df, select = unique(colnames(lung_data_df)))
+merged_df <- merge(bulk_rna_df_unique, lung_data_df_unique, by = 'barcode')
 rownames(merged_df) <- merged_df$barcode
 merged_df <- merged_df[,2:length(colnames(merged_df))]
 
-merged_df$days_to_death <- ifelse(is.na(merged_df$days_to_death),0, merged_df$days_to_death)
-merged_df$days_to_last_follow_up <- ifelse(is.na(merged_df$days_to_last_follow_up),0, merged_df$days_to_last_follow_up)
 calculated_days <- merged_df$days_to_death - merged_df$days_to_last_follow_up
-calculated_days <- abs(calculated_days)
 calculated_days[calculated_days==0]=1
-cox_time <- calculated_days
+merged_df <- merged_df[complete.cases(merged_df[, "days_to_last_follow_up"]), ]
+merged_df$days_to_last_follow_up <- ifelse(merged_df$days_to_last_follow_up==0,1,merged_df$days_to_last_follow_up)
+cox_time <- merged_df$days_to_last_follow_up
 cox_event <- merged_df$vital_status
 cox_tumor <- merged_df$tumor_stage
 cox_tumor_n <- merged_df$ajcc_pathologic_n
@@ -118,8 +169,257 @@ cox_df$ajcc.n <- cox_tumor_n
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="a", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="b", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="c", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="a", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="b", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
+cox_df <- filter(cox_df, !tumor.stage=="not reported")
+cox_df <- filter(cox_df, !ajcc.n=="NX")
+cox_df <- cox_df[complete.cases(cox_df[, "ajcc.n"]), ]
+
+
+#Cox model----
+cox_models <- list()
+counter <- 1
+for (x in mirna_sde_optimized) {
+  current_weight <- x
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE) 
+  cox_models[[as.character(counter)]] <- current_cox
+  counter <- counter + 1
+}
+
+save(cox_models, file = "Data/Data-from-Cleaner-code/cox_models.RData")
+
+#Cox for individual metrics---
+cox_mad <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mad.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
+save(cox_mad, file = "Data/Data-from-Cleaner-code/cox_mad.RData")
+cox_sdes <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = sde.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
+save(cox_sdes, file = "Data/Data-from-Cleaner-code/cox_sde.RData")
+cox_mirna <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
+save(cox_mirna, file = "Data/Data-from-Cleaner-code/cox_mirna.RData")
+
+#KM curves----
+hr_calcs <- list()
+counter <- 1
+for (x in cox_models[1:11]) {
+  current_cox <- x
+  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = cox_df, include.cat.data = FALSE, tumor.stage = FALSE, n.stage = FALSE)
+  hr_calcs[[as.character(counter)]] <- current_hr
+  counter <- counter + 1
+}
+
+#HR calcs for individual metrics---
+hr_mad <- hr_calculator(model.coefs = cox_mad$Coefficients, data = cox_df, include.cat.data = FALSE, tumor.stage = FALSE, n.stage = FALSE)
+hr_sdes <- hr_calculator(model.coefs = cox_sdes$Coefficients, data = cox_df, include.cat.data = FALSE, tumor.stage = FALSE, n.stage = FALSE)
+hr_mirna <- hr_calculator(model.coefs = cox_mirna$Coefficients, data = cox_df, include.cat.data = FALSE, tumor.stage = FALSE, n.stage = FALSE)
+
+#KM p-values----
+hr_pvalues <- list()
+counter <- 1
+for (x in hr_calcs[7:11]) {
+  current_hr <- x
+  current_pvalue <- km_pvalue_calculator(surv.time = current_hr$DF$days.to.last.follow.up, surv.status = current_hr$DF$vital.status, surv.predictors = current_hr$DF$risk, surv.df = current_hr$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+  hr_pvalues[[as.character(counter)]] <- current_pvalue
+  counter <- counter + 1
+}
+
+#P-values for HR calcs for individual metrics---
+pvalue_mad <- km_pvalue_calculator(surv.time = hr_mad$DF$days.to.last.follow.up, surv.status = hr_mad$DF$vital.status, surv.predictors = hr_mad$DF$risk, surv.df = hr_mad$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+pvalue_sdes <- km_pvalue_calculator(surv.time = hr_sdes$DF$days.to.last.follow.up, surv.status = hr_sdes$DF$vital.status, surv.predictors = hr_sdes$DF$risk, surv.df = hr_sdes$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+pvalue_mirna <- km_pvalue_calculator(surv.time = hr_mirna$DF$days.to.last.follow.up, surv.status = hr_mirna$DF$vital.status, surv.predictors = hr_mirna$DF$risk, surv.df = hr_mirna$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+
+
+#KM plots----
+hr_plots <- list()
+counter <- 1
+for (x in hr_calcs) {
+  current_calc <- x
+  current_pvalue <- hr_pvalues[counter]
+  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "SDES + MiRNA + Tumor Stage + N Stage Lung Cancer Patients Data")
+  hr_plots[[as.character(counter)]] <- current_plot
+  counter <- counter + 1
+}
+
+
+#KM Plots for HR calcs for individual metrics---
+km_mad <- km_plotter(km.fit = hr_mad$KM, data.source = hr_mad$DF, p.value = pvalue_mad, plot.title = "MAD Metric + Tumor Stage + N Stage Alone Lung Cancer Patients")
+km_sdes <- km_plotter(km.fit = hr_sdes$KM, data.source = hr_sdes$DF, p.value = pvalue_sdes, plot.title = "SDES Metric + Tumor Stage + N Stage Alone Lung Cancer Patients")
+km_mirna <- km_plotter(km.fit = hr_mirna$KM, data.source = hr_mirna$DF, p.value = pvalue_mirna, plot.title = "MiRNA Metric + Tumor Stage + N Stage Alone Lung Cancer Patients")
+
+
+#CC tumor patients dataset analysis
+#Now denoising the sc-data----
+cc_tumor_fpkm <- magic_denoiser(sc.data = cc_tumor_fpkm_logged, magic.seed = 123)
+
+#Now getting pseudotime info from Moncocle3----
+cds_output <- cell_dataset_builder(vim.genes = c("VIM", "VIMP"), cell.data = cc_tumor_fpkm$denoised_sc_dataframe, cell.meta = cc_tumor_fpkm$cds_gene_names)
+
+#MAD metric----
+mad.genes <- mad_calculator(cc_tumor_fpkm$denoised_sc_dataframe)
+save(mad.genes, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_mad.RData")
+
+#Switchde metric----
+sde.genes <- switchde_calculator(cc_tumor_fpkm$denoised_sc_dataframe, pseudo.time = cds_output$Pseudotime)
+save(sde.genes, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_sde.RData")
+
+#Mirna metric----
+mirna.genes <- mirna_calculator(cancer.type1 = "colon cancer", cancer.type2 = "colorectal cancer", ts.org = "Human", ts.version = "7.2", max.miR.targets = 10, cancer.up = TRUE, mirna.filename = "TargetScan_cc_tumor_patients_logged.RData", mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"))
+save(mirna.genes, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_mirna.RData")
+
+#Optimizing the mirna + SDE metric----
+mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "sde_mirna_optimized.RData")
+
+#Optimizing the MAD + SDE metric----
+mad_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mad.genes, my.filename = "sde_mad_optimized.RData")
+
+#Loading the bulk READ dataset from TCGA----
+read_query <- GDCquery(project       = "TCGA-READ",
+                       data.category = "Transcriptome Profiling",
+                       data.type     = "Gene Expression Quantification",
+                       workflow.type = "HTSeq - Counts")
+
+combined_query <- GDCquery(project       = c("TCGA-READ", "TCGA-COAD"),
+                           data.category = "Transcriptome Profiling",
+                           data.type     = "Gene Expression Quantification",
+                           workflow.type = "HTSeq - Counts")
+
+#Downloading the data
+GDCdownload(query           = read_query,
+            method          = "api",
+            files.per.chunk = 10,
+            directory       = "Data/Bulk-data/TCGA-read-Dataset")
+
+#Combined download
+GDCdownload(query           = combined_query,
+            method          = "api",
+            files.per.chunk = 10,
+            directory       = "Data/Bulk-data/TCGA-combined-Dataset")
+
+#READ summarizedExperiment object
+read_data_se <- GDCprepare(read_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-read-Dataset/")
+read_data_df <- as.data.frame(colData(read_data_se))
+read_data_df$vital_status <- factor(read_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
+read_data_df$vital_status <- as.numeric(as.character(read_data_df$vital_status))
+
+
+
+#Combined summarizedExperiment object
+combined_data_se <- GDCprepare(combined_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-combined-Dataset/")
+combined_data_df <- as.data.frame(colData(combined_data_se))
+combined_data_df$vital_status <- factor(combined_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
+combined_data_df$vital_status <- as.numeric(as.character(combined_data_df$vital_status))
+
+
+#Bulk data frame for combined merged data frame----
+combined_bulk_rna_df <- combined_data_se@assays@data@listData[["HTSeq - Counts"]]
+colnames(combined_bulk_rna_df) <- combined_data_se@colData@rownames
+rownames(combined_bulk_rna_df) <- combined_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
+combined_bulk_rna_df <- t(combined_bulk_rna_df)
+combined_bulk_rna_df <- as.data.frame(combined_bulk_rna_df)
+bulk_rownames <- rownames(combined_bulk_rna_df)
+combined_bulk_rna_df$barcode <- bulk_rownames
+
+combined_bulk_rna_df_unique <- subset(combined_bulk_rna_df, select = unique(colnames(combined_bulk_rna_df)))
+combined_data_df_unique <- subset(combined_data_df, select = unique(colnames(combined_data_df)))
+merged_df <- merge(combined_bulk_rna_df_unique, combined_data_df_unique, by = 'barcode')
+rownames(merged_df) <- merged_df$barcode
+merged_df <- merged_df[,2:length(colnames(merged_df))]
+
+merged_df$days_to_death <- ifelse(is.na(merged_df$days_to_death),0, merged_df$days_to_death)
+merged_df$days_to_last_follow_up <- ifelse(is.na(merged_df$days_to_last_follow_up),0, merged_df$days_to_last_follow_up)
+
+calculated_days <- merged_df$days_to_death - merged_df$days_to_last_follow_up
+calculated_days <- abs(calculated_days)
+calculated_days[calculated_days==0]=1
+cox_time <- calculated_days
+cox_event <- merged_df$vital_status
+cox_tumor <- merged_df$tumor_stage
+cox_tumor_n <- merged_df$ajcc_pathologic_n
+cox_df <- subset(merged_df, select=c(TSPAN6:V56404))
+cox_df$days.to.last.follow.up <- cox_time
+cox_df$vital.status <- cox_event
+cox_df$tumor.stage <- cox_tumor
+cox_df$ajcc.n <- cox_tumor_n
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="a", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="b", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="c", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="a", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="b", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
 cox_df <- filter(cox_df, !tumor.stage=="not reported")
 cox_df <- cox_df[complete.cases(cox_df[, "ajcc.n"]), ]
+cox_df <- cox_df[complete.cases(cox_df[, "vital.status"]), ]
+
+
+
+#Making the summarizedExperiment object and then removing all entries that lacked days_to_last_follow_up information
+Read_data_se <- GDCprepare(read_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-read-Dataset/")
+Read_data_df <- as.data.frame(colData(Read_data_se))
+Read_data_df$vital_status <- factor(Read_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
+Read_data_df$vital_status <- as.numeric(as.character(Read_data_df$vital_status))
+
+#Bulk data frame for Read merged data frame----
+bulk_rna_df <- read_data_se@assays@data@listData[["HTSeq - Counts"]]
+colnames(bulk_rna_df) <- read_data_se@colData@rownames
+rownames(bulk_rna_df) <- read_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
+bulk_rna_df <- t(bulk_rna_df)
+bulk_rna_df <- as.data.frame(bulk_rna_df)
+bulk_rownames <- rownames(bulk_rna_df)
+bulk_rna_df$barcode <- bulk_rownames
+
+bulk_rna_df_unique <- subset(bulk_rna_df, select = unique(colnames(bulk_rna_df)))
+read_data_df_unique <- subset(read_data_df, select = unique(colnames(read_data_df)))
+merged_df <- merge(bulk_rna_df_unique, read_data_df_unique, by = 'barcode')
+rownames(merged_df) <- merged_df$barcode
+merged_df <- merged_df[,2:length(colnames(merged_df))]
+
+merged_df$days_to_death <- ifelse(is.na(merged_df$days_to_death),0, merged_df$days_to_death)
+merged_df$days_to_last_follow_up <- ifelse(is.na(merged_df$days_to_last_follow_up),0, merged_df$days_to_last_follow_up)
+read_df <- merged_df
+
+merged_df <- read_df
+
+calculated_days <- merged_df$days_to_death - merged_df$days_to_last_follow_up
+calculated_days <- abs(calculated_days)
+calculated_days[calculated_days==0]=1
+cox_time <- calculated_days
+cox_event <- merged_df$vital_status
+cox_tumor <- merged_df$tumor_stage
+cox_tumor_n <- merged_df$ajcc_pathologic_n
+cox_gender <- merged_df$gender
+cox_race <- merged_df$race
+cox_eth <- merged_df$ethnicity
+cox_df <- subset(merged_df, select=c(TSPAN6:V56404))
+cox_df$days.to.last.follow.up <- cox_time
+cox_df$vital.status <- cox_event
+cox_df$tumor.stage <- cox_tumor
+cox_df$ajcc.n <- cox_tumor_n
+cox_df$race <- cox_race
+cox_df$ethnicity <- cox_eth
+cox_df$gender <- cox_gender
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="a", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="b", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="c", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="a", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="b", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
+cox_df <- filter(cox_df, !tumor.stage=="not reported")
+cox_df <- cox_df[complete.cases(cox_df[, "ajcc.n"]), ]
+
+#Subsetting to just black patients
+cox_df <- subset(cox_df, cox_df$race=="black or african american")
+
+#Asians
+cox_df <- subset(cox_df, cox_df$race=="asian")
+
+#Whites
+cox_df <- subset(cox_df, cox_df$race=="white")
+
+#Not reported
+cox_df <- subset(cox_df, cox_df$race=="not reported")
+
+#American indian or alaska native
+cox_df <- subset(cox_df, cox_df$race=="american indian or alaska native")
+
 
 
 
@@ -137,17 +437,43 @@ cox_event <- merged_df$vital.status
 cox_tumor <- merged_df$tumor.stage
 cox_tumor_m <- merged_df$ajcc.pathologic.m
 cox_tumor_n <- merged_df$ajcc.pathologic.n
+cox_gender <- merged_df$gender
+cox_eth <- merged_df$ethnicity
+cox_race <- merged_df$race
 cox_df <- subset(merged_df, select=c(TSPAN6:AC007389.3))
 cox_df$days.to.last.follow.up <- cox_time
 cox_df$vital.status <- cox_event
 cox_df$tumor.stage <- cox_tumor
 cox_df$ajcc.m <- cox_tumor_m
 cox_df$ajcc.n <- cox_tumor_n
+cox_df$race <- cox_race
+cox_df$ethnicity <- cox_eth
+cox_df$gender <- cox_gender
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="a", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="b", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="c", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="a", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="b", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
 cox_df <- filter(cox_df, !tumor.stage=="not reported")
 cox_df <- cox_df[complete.cases(cox_df[, "ajcc.m"]), ]
+
+#Subsetting to just black patients
+cox_df <- subset(cox_df, cox_df$race=="black or african american")
+
+#Asians
+cox_df <- subset(cox_df, cox_df$race=="asian")
+
+#Whites
+cox_df <- subset(cox_df, cox_df$race=="white")
+
+#Not reported
+cox_df <- subset(cox_df, cox_df$race=="not reported")
+
+#American indian or alaska native
+cox_df <- subset(cox_df, cox_df$race=="american indian or alaska native")
+
+
 
 
 #List from the comparison paper----
@@ -165,6 +491,38 @@ for (x in mirna_sde_optimized) {
   counter <- counter + 1
 }
 
+
+for(x in cox_models){
+  print(x$CV)
+}
+
+
+
+#Cox for individual metrics---
+cox_mad <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mad.genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+cox_sdes <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = sde.genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+cox_mirna <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna.genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+
+
+#Cox for scDD genes----
+scdd_genes <- scdd_res
+scdd_genes <- intersect(scdd_genes$gene, colnames(cox_df))
+scdd_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 511, cox.predictors = scdd_genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
+
+
+#Cox for DESingle----
+desingle_genes <- intersect(des_genes, colnames(cox_df))
+desingle_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1568, cox.predictors = desingle_genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+
+
+
+
+#Subset to a particular race
+cox_df <- subset(cox_df, cox_df$race=="black or african american")
+
+
+
+
 #Filtering the merged df to just stage I and II patients----
 load("Data/Exported-data/R-objects/COA_data_df.RData", verbose = TRUE)
 COA_data_df_sub <- filter(COA_data_df, tumor_stage=="stage i" | tumor_stage=="stage ia" | tumor_stage=="stage ii" | tumor_stage=="stage iia" | tumor_stage=="stage iib" | tumor_stage=="stage iic")
@@ -178,10 +536,23 @@ hr_calcs <- list()
 counter <- 1
 for (x in cox_models[1:11]) {
   current_cox <- x
-  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = cox_df, my.remove = c("tumor.stagestge iii","tumor.stagestge iv", "tumor.stagestge ii","ajcc.mM1", "ajcc.nN2", "ajcc.nN2a", "ajcc.nN1"))
+  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = cox_df, include.cat.data = TRUE, tumor.stage = TRUE, n.stage = TRUE)
   hr_calcs[[as.character(counter)]] <- current_hr
   counter <- counter + 1
 }
+
+#HR calcs for individual metrics---
+hr_mad <- hr_calculator(model.coefs = cox_mad$Coefficients, data = cox_df, include.cat.data = TRUE, tumor.stage = TRUE, n.stage = TRUE)
+hr_sdes <- hr_calculator(model.coefs = cox_sdes$Coefficients, data = cox_df, include.cat.data = TRUE, tumor.stage = TRUE, n.stage = TRUE)
+hr_mirna <- hr_calculator(model.coefs = cox_mirna$Coefficients, data = cox_df, include.cat.data = TRUE, tumor.stage = TRUE, n.stage = TRUE)
+
+#HR calcs for scDD----
+hr_scdd <- hr_calculator(model.coefs = scdd_cox$Coefficients, data = cox_df, include.cat.data = FALSE, tumor.stage = FALSE, n.stage = FALSE)
+
+#HR calcs for DESingle----
+hr_desingle <- hr_calculator(model.coefs = desingle_cox$Coefficients, data = cox_df, include.cat.data = TRUE, tumor.stage = TRUE, n.stage = TRUE)
+
+
 
 #KM p-values----
 hr_pvalues <- list()
@@ -193,22 +564,48 @@ for (x in hr_calcs) {
   counter <- counter + 1
 }
 
+#P-values for HR calcs for individual metrics---
+pvalue_mad <- km_pvalue_calculator(surv.time = hr_mad$DF$days.to.last.follow.up, surv.status = hr_mad$DF$vital.status, surv.predictors = hr_mad$DF$risk, surv.df = hr_mad$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+pvalue_sdes <- km_pvalue_calculator(surv.time = hr_sdes$DF$days.to.last.follow.up, surv.status = hr_sdes$DF$vital.status, surv.predictors = hr_sdes$DF$risk, surv.df = hr_sdes$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+pvalue_mirna <- km_pvalue_calculator(surv.time = hr_mirna$DF$days.to.last.follow.up, surv.status = hr_mirna$DF$vital.status, surv.predictors = hr_mirna$DF$risk, surv.df = hr_mirna$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+
+#P-value for scDD----
+pvalue_scdd <- km_pvalue_calculator(surv.time = hr_scdd$DF$days.to.last.follow.up, surv.status = hr_scdd$DF$vital.status, surv.predictors = hr_scdd$DF$risk, surv.df = hr_scdd$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+ 
+
+#P-value for DESingle----
+pvalue_desingle <- km_pvalue_calculator(surv.time = hr_desingle$DF$days.to.last.follow.up, surv.status = hr_desingle$DF$vital.status, surv.predictors = hr_desingle$DF$risk, surv.df = hr_desingle$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+
+
+
 #KM plots----
 hr_plots <- list()
 counter <- 1
 for (x in hr_calcs) {
   current_calc <- x
   current_pvalue <- hr_pvalues[counter]
-  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "Gene Signature + Tumor Stage + N Path Stage Rectal Cancer Patients")
+  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "SDES + MiRNA + Tumor Stage + N Stage Rectal Cancer Patients Race Not Reported")
   hr_plots[[as.character(counter)]] <- current_plot
   counter <- counter + 1
 }
 
 
+#KM Plots for HR calcs for individual metrics---
+km_mad <- km_plotter(km.fit = hr_mad$KM, data.source = hr_mad$DF, p.value = pvalue_mad, plot.title = "MAD Metric + Tumor Stage + N Stage Alone Log + 1 Transformed Data Rectal Cancer Patients")
+km_sdes <- km_plotter(km.fit = hr_sdes$KM, data.source = hr_sdes$DF, p.value = pvalue_sdes, plot.title = "SDES Metric + Tumor Stage + N Stage Alone Log + 1 Transformed Data Rectal Cancer Patients")
+km_mirna <- km_plotter(km.fit = hr_mirna$KM, data.source = hr_mirna$DF, p.value = pvalue_mirna, plot.title = "MiRNA Metric + Tumor Stage + N Stage Alone Log + 1 Transformed Data Rectal Cancer Patients")
+
+#KM plot for scDD----
+km_scdd <- km_plotter(km.fit = hr_scdd$KM, data.source = hr_scdd$DF, p.value = pvalue_scdd, plot.title = "scDD Colon Cancer Patients")
+
+
+#KM plot for DESingle----
+km_desingle <- km_plotter(km.fit = hr_desingle$KM, data.source = hr_desingle$DF, p.value = pvalue_desingle, plot.title = "DESingle + Tumor Stage + N Stage Colon & Rectal Cancer Patients")
 
 
 
-#K562 cell-line analysis----
+
+#K562 cell-line analysis
 #Now denoising the sc-data----
 k562_cells <- magic_denoiser(sc.data = k562_cells,magic.seed = 123)
 
@@ -280,10 +677,18 @@ cox_models_k562 <- list()
 counter <- 1
 for (x in mirna_sde_optimized) {
   current_weight <- x
-  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight) 
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE) 
   cox_models_k562[[as.character(counter)]] <- current_cox
   counter <- counter + 1
 }
+
+#Cox for individual metrics---
+cox_mad <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mad.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
+cox_sdes <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = sde.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
+cox_mirna <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
+
+
+
 
 #KM curves----
 hr_calcs_k562 <- list()
@@ -295,6 +700,12 @@ for (x in cox_models_k562[6:10]) {
   counter <- counter + 1
 }
 
+#HR calcs for individual metrics---
+hr_mad <- hr_calculator(model.coefs = cox_mad$Coefficients, data = cox_df)
+hr_sdes <- hr_calculator(model.coefs = cox_sdes$Coefficients, data = cox_df)
+hr_mirna <- hr_calculator(model.coefs = cox_mirna$Coefficients, data = cox_df)
+
+
 #KM p-values----
 hr_pvalues_k562 <- list()
 counter <- 1
@@ -304,6 +715,12 @@ for (x in hr_calcs_k562) {
   hr_pvalues_k562[[as.character(counter)]] <- current_pvalue
   counter <- counter + 1
 }
+
+#P-values for HR calcs for individual metrics---
+pvalue_mad <- km_pvalue_calculator(surv.time = hr_mad$DF$days.to.last.follow.up, surv.status = hr_mad$DF$vital.status, surv.predictors = hr_mad$DF$risk, surv.df = hr_mad$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+pvalue_sdes <- km_pvalue_calculator(surv.time = hr_sdes$DF$days.to.last.follow.up, surv.status = hr_sdes$DF$vital.status, surv.predictors = hr_sdes$DF$risk, surv.df = hr_sdes$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+pvalue_mirna <- km_pvalue_calculator(surv.time = hr_mirna$DF$days.to.last.follow.up, surv.status = hr_mirna$DF$vital.status, surv.predictors = hr_mirna$DF$risk, surv.df = hr_mirna$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+
 
 #KM plots----
 hr_plots_k562 <- list()
@@ -316,9 +733,15 @@ for (x in hr_calcs_k562) {
   counter <- counter + 1
 }
 
+#KM Plots for HR calcs for individual metrics---
+km_mad <- km_plotter(km.fit = hr_mad$KM, data.source = hr_mad$DF, p.value = pvalue_mad, plot.title = "MAD Metric Alone")
+km_sdes <- km_plotter(km.fit = hr_sdes$KM, data.source = hr_sdes$DF, p.value = pvalue_sdes, plot.title = "SDES Metric Alone")
+km_mirna <- km_plotter(km.fit = hr_mirna$KM, data.source = hr_mirna$DF, p.value = pvalue_mirna, plot.title = "MiRNA Metric Alone")
 
 
-#Glio analysis----
+
+
+#Glio analysis
 #Now denoising the sc-data----
 glio <- magic_denoiser(sc.data = glio,magic.seed = 123)
 
@@ -379,7 +802,7 @@ merged_df <- merged_df[complete.cases(merged_df[, "days_to_last_follow_up"]), ]
 cox_time <- merged_df$days_to_last_follow_up
 cox_event <- merged_df$vital_status
 cox_tumor <- merged_df$tumor_grade
-cox_df <- subset(merged_df, select=c(TSPAN6:AC007389.3))
+cox_df <- subset(merged_df, select=c(TSPAN6:V56404))
 cox_df$days.to.last.follow.up <- cox_time
 cox_df$vital.status <- cox_event
 cox_df <- cox_df %>% filter(!is.na(vital.status))
@@ -393,12 +816,20 @@ cox_models_glio <- list()
 counter <- 1
 for (x in mirna_sde_optimized) {
   current_weight <- x
-  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight) 
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE) 
   cox_models_glio[[as.character(counter)]] <- current_cox
   counter <- counter + 1
 }
 
+#Cox for individual metrics---
+cox_mad <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mad.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
+cox_sdes <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = sde.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
+cox_mirna <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
 
+#Cox for just scDD ----
+scdd_genes <- scdd_res
+scdd_genes <- intersect(scdd_genes$gene, colnames(cox_df))
+cox_scdd_glio <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = , tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE) 
 
 #KM curves----
 merged_df <- merged_df %>% filter(!is.na(vital_status))
@@ -409,10 +840,16 @@ hr_calcs_glio <- list()
 counter <- 1
 for (x in cox_models_glio) {
   current_cox <- x
-  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = merged_df)
+  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = cox_df)
   hr_calcs_glio[[as.character(counter)]] <- current_hr
   counter <- counter + 1
 }
+
+#HR calcs for individual metrics---
+hr_mad <- hr_calculator(model.coefs = cox_mad$Coefficients, data = cox_df)
+hr_sdes <- hr_calculator(model.coefs = cox_sdes$Coefficients, data = cox_df)
+hr_mirna <- hr_calculator(model.coefs = cox_mirna$Coefficients, data = cox_df)
+
 
 #KM p-values----
 hr_pvalues_glio <- list()
@@ -423,6 +860,12 @@ for (x in hr_calcs_glio) {
   hr_pvalues_glio[[as.character(counter)]] <- current_pvalue
   counter <- counter + 1
 }
+
+#P-values for HR calcs for individual metrics---
+pvalue_mad <- km_pvalue_calculator(surv.time = hr_mad$DF$days.to.last.follow.up, surv.status = hr_mad$DF$vital.status, surv.predictors = hr_mad$DF$risk, surv.df = hr_mad$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+pvalue_sdes <- km_pvalue_calculator(surv.time = hr_sdes$DF$days.to.last.follow.up, surv.status = hr_sdes$DF$vital.status, surv.predictors = hr_sdes$DF$risk, surv.df = hr_sdes$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+pvalue_mirna <- km_pvalue_calculator(surv.time = hr_mirna$DF$days.to.last.follow.up, surv.status = hr_mirna$DF$vital.status, surv.predictors = hr_mirna$DF$risk, surv.df = hr_mirna$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+
 
 #KM plots----
 hr_plots_glio <- list()
@@ -439,7 +882,7 @@ for (x in hr_calcs_glio) {
 
 
 
-#A549 cell-line analysis----
+#A549 cell-line analysis
 #Loading needed function----
 gene_name_cleaner <- function(data.to.clean=all_tumor_cells_fpkm_denoised_df){
   data.to.clean <-t(data.to.clean)
@@ -487,7 +930,7 @@ save(mirna.genes, file = "a549_cells_mirna.RData")
 mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "sde_mirna_optimized_a549_cells.RData")
 
 #Lung cancer TCGA bulk data----
-lung_query <- GDCquery(project       = "TCGA-LUSC",
+lung_query <- GDCquery(project       = "TCGA-LUAD",
                        data.category = "Transcriptome Profiling",
                        data.type     = "Gene Expression Quantification",
                        workflow.type = "HTSeq - Counts")
@@ -496,10 +939,10 @@ lung_query <- GDCquery(project       = "TCGA-LUSC",
 GDCdownload(query           = lung_query,
             method          = "api",
             files.per.chunk = 10,
-            directory       = "Data/Bulk-data/TCGA-lunglusc-Dataset")
+            directory       = "Data/Bulk-data/TCGA-lungluad-Dataset")
 
 #Making the summarizedExperiment object and then removing all entries that lacked days_to_last_follow_up information
-lung_data_se <- GDCprepare(lung_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-lunglusc-Dataset/")
+lung_data_se <- GDCprepare(lung_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-lungluad-Dataset/")
 lung_data_df <- as.data.frame(colData(lung_data_se))
 lung_data_df$vital_status <- factor(lung_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
 lung_data_df$vital_status <- as.numeric(as.character(lung_data_df$vital_status))
@@ -535,7 +978,11 @@ cox_df$ajcc.n <- cox_tumor_n
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="a", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="b", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="c", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="a", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="b", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
 cox_df <- filter(cox_df, !tumor.stage=="not reported")
+cox_df <- filter(cox_df, !ajcc.n=="NX")
 cox_df <- cox_df[complete.cases(cox_df[, "ajcc.n"]), ]
 
 #Cox model----
@@ -548,15 +995,26 @@ for (x in mirna_sde_optimized) {
   counter <- counter + 1
 }
 
+#Cox for individual metrics---
+cox_mad <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mad.genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+cox_sdes <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = sde.genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+cox_mirna <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna.genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+
 #KM curves----
 hr_calcs_a549 <- list()
 counter <- 1
 for (x in cox_models_a549[1:11]) {
   current_cox <- x
-  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = cox_df, my.remove = c("tumor.stagestge ii", "tumor.stagestge iii", "tumor.stagestge iv", "ajcc.nN1", "ajcc.nN2", "ajcc.nNX"))
+  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = cox_df, include.cat.data = TRUE, tumor.stage = TRUE, n.stage = TRUE)
   hr_calcs_a549[[as.character(counter)]] <- current_hr
   counter <- counter + 1
 }
+
+#HR calcs for individual metrics---
+hr_mad <- hr_calculator(model.coefs = cox_mad$Coefficients, data = cox_df)
+hr_sdes <- hr_calculator(model.coefs = cox_sdes$Coefficients, data = cox_df)
+hr_mirna <- hr_calculator(model.coefs = cox_mirna$Coefficients, data = cox_df)
+
 
 #KM p-values----
 hr_pvalues_a549 <- list()
@@ -568,13 +1026,20 @@ for (x in hr_calcs_a549) {
   counter <- counter + 1
 }
 
+#P-values for HR calcs for individual metrics---
+pvalue_mad <- km_pvalue_calculator(surv.time = hr_mad$DF$days.to.last.follow.up, surv.status = hr_mad$DF$vital.status, surv.predictors = hr_mad$DF$risk, surv.df = hr_mad$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+pvalue_sdes <- km_pvalue_calculator(surv.time = hr_sdes$DF$days.to.last.follow.up, surv.status = hr_sdes$DF$vital.status, surv.predictors = hr_sdes$DF$risk, surv.df = hr_sdes$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+pvalue_mirna <- km_pvalue_calculator(surv.time = hr_mirna$DF$days.to.last.follow.up, surv.status = hr_mirna$DF$vital.status, surv.predictors = hr_mirna$DF$risk, surv.df = hr_mirna$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+
+
+
 #KM plots----
 hr_plots_a549 <- list()
 counter <- 1
 for (x in hr_calcs_a549) {
   current_calc <- x
   current_pvalue <- hr_pvalues_a549[counter]
-  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "MiRNA + SDES A549 Cell-line with Lung AUD Bulk Dataset")
+  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "MiRNA + SDES + Tumor Stage + N Stage A549 Cell-line with Lung AUD Bulk Dataset")
   hr_plots_a549[[as.character(counter)]] <- current_plot
   counter <- counter + 1
 }
@@ -593,27 +1058,38 @@ cc_cell_line_fpkm <- as.data.frame(cc_cell_line_fpkm)
 hct116_cells <- select(cc_cell_line_fpkm, contains("HCT116"))
 
 
+#Logged data----
+rownames(cc_cell_line_fpkm_logged) <- cc_cell_line_fpkm_logged$X
+cc_cell_line_fpkm_logged<- subset(cc_cell_line_fpkm_logged, select=c(RHA015__A549__turquoise:RHC2506__H1_B2__brown))
+cc_cell_line_fpkm_logged <- gene_name_cleaner(data.to.clean = cc_cell_line_fpkm_logged)
+cc_cell_colnames <- unique(colnames(cc_cell_line_fpkm_logged))
+cc_cell_line_fpkm_logged <- subset(cc_cell_line_fpkm_logged, select=cc_cell_colnames)
+cc_cell_line_fpkm_logged <- t(cc_cell_line_fpkm_logged)
+cc_cell_line_fpkm_logged <- as.data.frame(cc_cell_line_fpkm_logged)
+hct116_cells <- select(cc_cell_line_fpkm_logged, contains("HCT116"))
+
+
 #Now denoising the sc-data----
 hct116_cells <- apply(hct116_cells, c(1,2), as.numeric)
 hct116_cells <- magic_denoiser(sc.data = hct116_cells, magic.seed = 123)
 
 #Now getting pseudotime info from Moncocle3----
-cds_output <- cell_dataset_builder(vim.genes = "VIM", cell.data = hct116_cells$denoised_sc_dataframe, cell.meta = hct116_cells$cds_gene_names)
+cds_output <- cell_dataset_builder(vim.genes = NULL, cell.data = hct116_cells$denoised_sc_dataframe, cell.meta = hct116_cells$cds_gene_names)
 
 #MAD metric----
 mad.genes <- mad_calculator(hct116_cells$denoised_sc_dataframe)
-save(mad.genes, file = "hct116_cells_mad.RData")
+save(mad.genes, file = "Data/Data-from-Cleaner-code/hct116_cells_mad_logged.RData")
 
 #Switchde metric----
 sde.genes <- switchde_calculator(hct116_cells$denoised_sc_dataframe, pseudo.time = cds_output$Pseudotime)
-save(sde.genes, file = "hct116_cells_sde.RData")
+save(sde.genes, file = "Data/Data-from-Cleaner-code/hct116_cells_sde_logged.RData")
 
 #Mirna metric----
-mirna.genes <- mirna_calculator(ts.org = "Human", ts.version = "7.2", max.miR.targets = 10, cancer.up = TRUE, cancer.type1 = "colon cancer", cancer.type2 = "colorectal cancer", mirna.filename = "TargetScane_hct116_cell_mirna.RData", print.ts.targets = TRUE, mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"))
-save(mirna.genes, file = "hct116_cells_mirna.RData")
+mirna.genes <- mirna_calculator(ts.org = "Human", ts.version = "7.2", max.miR.targets = 10, cancer.up = TRUE, cancer.type1 = "colon cancer", cancer.type2 = "colorectal cancer", mirna.filename = "TargetScane_hct116_cell_mirna_logged.RData", print.ts.targets = TRUE, mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"))
+save(mirna.genes, file = "Data/Data-from-Cleaner-code/hct116_cells_mirna_logged.RData")
 
 #Optimizing the mirna + SDE metric----
-mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "sde_mirna_optimized_hct116_cells.RData")
+mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "sde_mirna_optimized_hct116_cells_logged.RData")
 
 load("Data/Exported-data/R-objects/merged_df_replaced.RData", verbose = TRUE)
 calculated_days <- merged_df$days.to.death - merged_df$days.to.last.follow.up
@@ -622,7 +1098,6 @@ merged_df$days.to.last.follow.up <- ifelse(is.na(calculated_days), merged_df$day
 merged_df$days.to.last.follow.up <- ifelse(merged_df$days.to.last.follow.up==0, 1, merged_df$days.to.last.follow.up)
 
 
-#Test
 calculated_days <- merged_df$days.to.death - merged_df$days.to.last.follow.up
 calculated_days[calculated_days==0]=1
 merged_df$days.to.last.follow.up <- ifelse(is.na(calculated_days), merged_df$days.to.last.follow.up, calculated_days)
@@ -650,16 +1125,27 @@ for (x in mirna_sde_optimized) {
   counter <- counter + 1
 }
 
+#Cox for individual metrics---
+cox_mad <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mad.genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+cox_sdes <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = sde.genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+cox_mirna <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna.genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+
 
 #KM curves----
 hr_calcs_hct116 <- list()
 counter <- 1
 for (x in cox_models_hct116[1:11]) {
   current_cox <- x
-  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = cox_df, my.remove = c("tumor.stagestge iii","tumor.stagestge iv", "tumor.stagestge ii", "ajcc.nN2"))
+  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = cox_df, include.cat.data = TRUE, tumor.stage = TRUE, n.stage = TRUE)
   hr_calcs_hct116[[as.character(counter)]] <- current_hr
   counter <- counter + 1
 }
+
+#HR calcs for individual metrics---
+hr_mad <- hr_calculator(model.coefs = cox_mad$Coefficients, data = cox_df)
+hr_sdes <- hr_calculator(model.coefs = cox_sdes$Coefficients, data = cox_df)
+hr_mirna <- hr_calculator(model.coefs = cox_mirna$Coefficients, data = cox_df)
+
 
 #KM p-values----
 hr_pvalues_hct116 <- list()
@@ -671,18 +1157,27 @@ for (x in hr_calcs_hct116) {
   counter <- counter + 1
 }
 
+#P-values for HR calcs for individual metrics---
+pvalue_mad <- km_pvalue_calculator(surv.time = hr_mad$DF$days.to.last.follow.up, surv.status = hr_mad$DF$vital.status, surv.predictors = hr_mad$DF$risk, surv.df = hr_mad$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+pvalue_sdes <- km_pvalue_calculator(surv.time = hr_sdes$DF$days.to.last.follow.up, surv.status = hr_sdes$DF$vital.status, surv.predictors = hr_sdes$DF$risk, surv.df = hr_sdes$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+pvalue_mirna <- km_pvalue_calculator(surv.time = hr_mirna$DF$days.to.last.follow.up, surv.status = hr_mirna$DF$vital.status, surv.predictors = hr_mirna$DF$risk, surv.df = hr_mirna$DF, num.sig.figs = 4, scientific.p.value = TRUE)
+
+
 #KM plots----
 hr_plots_hct116 <- list()
 counter <- 1
 for (x in hr_calcs_hct116) {
   current_calc <- x
   current_pvalue <- hr_pvalues_hct116[counter]
-  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "MiRNA + SDES + Tumor Stage + N Path Stage HCT116 Cell-line")
+  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "MiRNA + SDES + Tumor Stage + N Stage HCT116 Cell-line Log Transformed Data")
   hr_plots_hct116[[as.character(counter)]] <- current_plot
   counter <- counter + 1
 }
 
-
+#KM Plots for HR calcs for individual metrics---
+km_mad <- km_plotter(km.fit = hr_mad$KM, data.source = hr_mad$DF, p.value = pvalue_mad, plot.title = "MAD + Tumor Stage + N Stage HCT116 Log Transformed Data Metric Alone")
+km_sdes <- km_plotter(km.fit = hr_sdes$KM, data.source = hr_sdes$DF, p.value = pvalue_sdes, plot.title = "SDES + Tumor Stage + N Stage HCT116 Log Transformed Data Metric Alone")
+km_mirna <- km_plotter(km.fit = hr_mirna$KM, data.source = hr_mirna$DF, p.value = pvalue_mirna, plot.title = "MiRNA + Tumor Stage + N Stage HCT116 Log Transformed Data Metric Alone")
 
 
 #H1437 cell-line analysis---

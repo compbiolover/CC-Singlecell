@@ -3,31 +3,115 @@
 #Purpose: Efficiently take in my cox model
 #output and plot the Kaplan-Meir curves.
 
-#Loading needed packages----
-library(survival)
-library(survminer)
-
 #Doing the hazard ratio calculation----
-hr_calculator <- function(model.coefs=Coefficients, data=merged_df, my.remove=NULL){
+hr_calculator <- function(model.coefs            =Coefficients, 
+                          data                   =merged_df, 
+                          my.remove              =c("tumor.stagestge i","tumor.stagestge ii", "tumor.stagestge iii", "tumor.stagestge iv", "ajcc.nN0","ajcc.nN1", "ajcc.nN2", "ajcc.nN3", "ajcc.nNX"), 
+                          include.cat.data       =TRUE, 
+                          tumor.stage            =TRUE, 
+                          n.stage                =TRUE,
+                          early.tumor.stage.multi=10,
+                          early.n.stage.multi    =10,
+                          late.tumor.stage.multi =10000, 
+                          late.n.stage.multi     =10000){
+  require(tidyverse)
   require(survival)
   require(survminer)
   
   hr_return_list <- list()
 
-  Active.Index <- which(as.logical(model.coefs) != 0)
-  Active.Coefficients  <- model.coefs[Active.Index]
-  active_genes <-rownames(model.coefs)[Active.Index]
-  print(active_genes)
-  active_genes <- active_genes[!active_genes %in% my.remove]
+  
+  
+  
+  if (include.cat.data==TRUE){
+    print("Categorical data included in HR calculation.")
+    if(tumor.stage==TRUE){
+      print("Tumor stage data included in HR calculation.")
+      data$tumor.stage <- gsub(data$tumor.stage, pattern="stge iv", replacement=4)
+      data$tumor.stage <- gsub(data$tumor.stage, pattern="stge iii", replacement=3)
+      data$tumor.stage <- gsub(data$tumor.stage, pattern="stge ii", replacement=2)
+      data$tumor.stage <- gsub(data$tumor.stage, pattern="stge i", replacement=1)
+      data$tumor.stage <- gsub(data$tumor.stage, pattern=4, replacement=4*late.tumor.stage.multi)
+      data$tumor.stage <- gsub(data$tumor.stage, pattern=3, replacement=3*late.tumor.stage.multi)
+      data$tumor.stage <- gsub(data$tumor.stage, pattern=2, replacement=2*early.tumor.stage.multi)
+      data$tumor.stage <- gsub(data$tumor.stage, pattern=1, replacement=1*early.tumor.stage.multi)
+      
+      Active.Index <- which(as.logical(model.coefs) != 0)
+      Active.Coefficients  <- model.coefs[Active.Index]
+      active_genes <-rownames(model.coefs)[Active.Index]
+      active_genes <- active_genes[!active_genes %in% my.remove]
+      print(active_genes)
+      surv_gene_df <- data[,active_genes]
+      gene_expr <- mean(as.matrix(surv_gene_df))
+      if(is.null(dim(surv_gene_df))==TRUE){
+        surv_gene_df <- as.data.frame(surv_gene_df)
+      }
+      patient_gene_expr<- surv_gene_df[1:length(rownames(surv_gene_df)),]
+      rm(surv_gene_df)
+      active_genes <- c(active_genes, "tumor.stage")
+      
+      if(n.stage==TRUE){
+        print("N stage data included in HR calculation.")
+        data$ajcc.n <- gsub(data$ajcc.n, pattern="N0", replacement=1)
+        data$ajcc.n <- gsub(data$ajcc.n, pattern="N1", replacement=2)
+        data$ajcc.n <- gsub(data$ajcc.n, pattern="N2", replacement=3)
+        data$ajcc.n <- gsub(data$ajcc.n, pattern="N3", replacement=4)
+        data$ajcc.n <- gsub(data$ajcc.n, pattern=4, replacement=4*late.n.stage.multi)
+        data$ajcc.n <- gsub(data$ajcc.n, pattern=3, replacement=3*late.n.stage.multi)
+        data$ajcc.n <- gsub(data$ajcc.n, pattern=2, replacement=2*early.n.stage.multi)
+        data$ajcc.n <- gsub(data$ajcc.n, pattern=1, replacement=1*early.n.stage.multi)
+        
+        Active.Index <- which(as.logical(model.coefs) != 0)
+        Active.Coefficients  <- model.coefs[Active.Index]
+        active_genes <-rownames(model.coefs)[Active.Index]
+        active_genes <- active_genes[!active_genes %in% my.remove]
+        surv_gene_df <- data[,active_genes]
+        gene_expr <- mean(as.matrix(surv_gene_df))
+        if(is.null(dim(surv_gene_df))==TRUE){
+          surv_gene_df <- as.data.frame(surv_gene_df)
+          View(surv_gene_df)
+        }
+        patient_gene_expr<- surv_gene_df[1:length(rownames(surv_gene_df)),]
+        rm(surv_gene_df)
+        active_genes <- c(active_genes, "ajcc.n", "tumor.stage")
+        print(active_genes)
+        
+      }else{
+        print("N stage data is NOT included in HR calculation.")
+      }
+      
+      
+    }else{
+      print("Tumor stage data is NOT included in HR calculation.")
+    }
+    
+    
+  }else{
+    Active.Index <- which(as.logical(model.coefs) != 0)
+    Active.Coefficients  <- model.coefs[Active.Index]
+    active_genes <-rownames(model.coefs)[Active.Index]
+    active_genes <- active_genes[!active_genes %in% my.remove]
+  }
+  
   surv_gene_df=data[,active_genes]
+  if(is.null(dim(surv_gene_df))==TRUE){
+    surv_gene_df <- as.data.frame(surv_gene_df)
+  }
+  surv_gene_df <- apply(surv_gene_df, c(1,2), as.numeric)
+  View(surv_gene_df)
   beta <-Active.Coefficients
   gene_expr <- mean(as.matrix(surv_gene_df))
-  # print(class(surv_gene_df))
+  #print(class(surv_gene_df))
   print(dim(surv_gene_df))
   patient_gene_expr<- surv_gene_df[1:length(rownames(surv_gene_df)),]
   subtracted_value <- patient_gene_expr - gene_expr
   hr_calc <- beta*(subtracted_value)
-  risk <- as.vector(apply(hr_calc,1,sum))
+  if(is.null(dim(hr_calc))){
+    risk <- hr_calc
+  }else{
+    risk <- as.vector(apply(hr_calc,1,sum))
+  }
+  
   med_hr_value <- median(as.matrix(hr_calc))
   risk <- ifelse(risk>med_hr_value, "high", "low")
   surv_gene_df <- cbind(risk, surv_gene_df)
@@ -35,6 +119,10 @@ hr_calculator <- function(model.coefs=Coefficients, data=merged_df, my.remove=NU
   days.to.last.follow.up <- data$days.to.last.follow.up
   surv_gene_df <- cbind(vital.status, surv_gene_df)
   surv_gene_df <- cbind(days.to.last.follow.up, surv_gene_df)
+  surv_gene_df <- as.data.frame(surv_gene_df)
+  View(surv_gene_df)
+  surv_gene_df$days.to.last.follow.up <- as.numeric(surv_gene_df$days.to.last.follow.up)
+  surv_gene_df$vital.status <- as.numeric(surv_gene_df$vital.status)
   km_fit <- survfit(Surv(days.to.last.follow.up, vital.status) ~ risk, data = surv_gene_df)
   
   hr_return_list[["DF"]] <- surv_gene_df
