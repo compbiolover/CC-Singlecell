@@ -47,7 +47,7 @@ cell_dataset_builder <- function(vim.genes=vim,
   #Returning our objects----
   cds_return_list[["CDS"]] <- cds
   cds_return_list[["Pseudotime"]] <- pseudotime_data
-  cds_return_list[["VIM Graph"]] <- vim_plot
+  cds_return_list[["Cell Progression Graph"]] <- vim_plot
   cds_return_list[["PT Graph"]] <- pt_graph
   return(cds_return_list)
 }

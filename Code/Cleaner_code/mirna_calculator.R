@@ -4,16 +4,17 @@
 #outputs
 
 #mirna_calculator----
-mirna_calculator <- function(ts.org          ="Human", 
-                             ts.version      ="7.2",
-                             max.miR.targets =NULL,
-                             cancer.up       =TRUE,
-                             cancer.type1    =TRUE,
-                             cancer.type2    =TRUE,
-                             cancer.type3    =TRUE,
-                             print.ts.targets=TRUE,
-                             mirna.remove    ="hsa-miR-129-1-3p",
-                             mirna.filename  ="TargetScan_output.RData"){
+mirna_calculator <- function(ts.org             ="Human", 
+                             ts.version         ="7.2",
+                             max.miR.targets    =NULL,
+                             cancer.up          =TRUE,
+                             cancer.type1       =TRUE,
+                             cancer.type2       =TRUE,
+                             cancer.type3       =TRUE,
+                             print.ts.targets   =TRUE,
+                             mirna.remove       ="hsa-miR-129-1-3p",
+                             mirna.filename     ="TargetScan_output.RData",
+                             max.mirnas         =1559){
   
   #Loading required package----
   require(tidyverse)
@@ -53,6 +54,15 @@ mirna_calculator <- function(ts.org          ="Human",
   #Now submitting these miRNAs to TargetScan to get genes to make a gene list for the third metric----
   #testing to see if all of the miRNAs exist in targetscan before getting all submitted at once
   common_mirnas <- common_mirnas[!common_mirnas %in% mirna.remove]
+  if(length(common_mirnas)>= length(common_mirnas[1:max.mirnas])){
+    common_mirnas <- common_mirnas[1:max.mirnas]
+  }else{
+    print("There are fewer target mirnas available than your input. Using the largest number of common mirnas for this submission to TargetScan")
+    common_mirnas <- common_mirnas[1:length(common_mirnas)]
+    print("The number of common mirnas is")
+    print(length(common_mirnas))
+  }
+  
   if(print.ts.targets==TRUE){
     print(length(common_mirnas))
   }
@@ -69,7 +79,7 @@ mirna_calculator <- function(ts.org          ="Human",
     my_num <- my_num + 1
   }
   
-  save(miRNA_targets, file = mirna.filename)
+  #save(miRNA_targets, file = mirna.filename)
   #Simplifying the output of the targetscan commands to 
   #just the Gene name and the mirna columns
   counter <- 1
@@ -119,7 +129,6 @@ mirna_calculator <- function(ts.org          ="Human",
   mirna_gene_list <- rowSums(miRNA_score)
   mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
   mirna.ranking <- sort(mirna.ranking, decreasing = TRUE)
-  
   #Return object----
   return(mirna.ranking)
 }

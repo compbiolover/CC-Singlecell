@@ -1,0 +1,43 @@
+﻿Number,scRNA-seq dataset,Bulk dataset,Method,C-index,glmnet_se,glmnet_active_genes
+1,GSE81861_CRC_tumor,TCGA-COAD,MiRNA + SDES,0.6393,,
+2,GSE81861_CRC_tumor,TCGA-COAD,MiRNA + MAD,0.6536,,
+3,GSE81861_CRC_tumor,TCGA-COAD,MiRNA + SDES + Tumor stage,0.7012,,
+4,GSE81861_CRC_tumor,TCGA-COAD,MiRNA + SDES Metric + Tumor Stage + N Stage,0.7132,,
+5,GSE81861_CRC_tumor,TCGA-READ,MiRNA + SDES,0.667,,
+6,GSE81861_CRC_tumor,TCGA-READ,MiRNA + MAD,0.6784,,
+7,GSE81861_CRC_tumor,TCGA-READ,MiRNA + MAD + Tumor Stage,0.7309,0.07579,57
+8,GSE81861_CRC_tumor,TCGA-READ,MiRNA + MAD + Tumor stage + N Stage,0.7292,0.07575,57
+9,GSE81861_CRC_tumor,TCGA-COAD,MiRNA + MAD + Tumor stage,0.6996,0.02791,34
+10,GSE81861_CRC_tumor,TCGA-COAD,MiRNA + MAD + Tumor stage + N Stage,0.7075,0.01904,16
+11,GSE81861_CRC_tumor,TCGA-READ,MiRNA + SDES + Tumor stage,0.7076,,
+12,GSE81861_CRC_tumor,TCGA-READ,MiRNA + SDES Metric + Tumor Stage + N Stage,0.7293,,
+13,GSE81861_CRC_tumor,TCGA-COAD + TCGA-READ,MiRNA + MAD,0.6513,0.02306,153
+14,GSE81861_CRC_tumor,TCGA-COAD + TCGA-READ,MiRNA + MAD + Tumor Stage,0.6582,0.02051,164
+15,GSE81861_CRC_tumor,TCGA-COAD + TCGA-READ,MiRNA + MAD + Tumor stage + N Stage,0.6852,0.02227,3
+16,GSE81861_CRC_tumor,TCGA-COAD + TCGA-READ,MiRNA + SDES,0.6513,0.02306,153
+17,GSE81861_CRC_tumor,TCGA-COAD + TCGA-READ,MiRNA + SDES + Tumor stage,0.6596,0.01954,198
+18,GSE81861_CRC_tumor,TCGA-COAD + TCGA-READ,MiRNA + SDES Metric + Tumor Stage + N Stage,0.6883,0.0229,3
+19,scDD,TCGA-COAD,scDD (genes only),0.6116,,
+20,scDD,TCGA-COAD,scDD (genes + tumor stage),0.667,,
+21,scDD,TCGA-COAD,scDD (genes + tumor stage + N stage),0.6974,,
+22,scDD,TCGA-READ,scDD (genes only),0.5805,,
+23,scDD,TCGA-READ,scDD (genes + tumor stage),0.6371,,
+24,scDD,TCGA-READ,scDD (genes + tumor stage + N stage),0.6293,,
+25,scDD,TCGA-COAD + TCGA-READ,scDD (genes only),0.6512,,
+26,scDD,TCGA-COAD + TCGA-READ,scDD (genes + tumor stage),0.6902,,
+27,scDD,TCGA-COAD + TCGA-READ,scDD (genes + tumor stage + N stage),0.704,,
+28,Desingle,TCGA-COAD,DEsingle (genes only),0.6041,,
+29,Desingle,TCGA-COAD,DEsingle (genes + tumor stage),0.6512,,
+30,Desingle,TCGA-COAD,DEsingle (genes + tumor stage + N stage),0.6845,,
+31,Desingle,TCGA-READ,DEsingle (genes only),0.5796,,
+32,Desingle,TCGA-READ,DEsingle (genes + tumor stage),0.676,,
+33,Desingle,TCGA-READ,DEsingle (genes + tumor stage + N stage),0.6632,,
+34,Desingle,TCGA-COAD + TCGA-READ,DEsingle (genes only),0.5946,,
+35,Desingle,TCGA-COAD + TCGA-READ,DEsingle (genes + tumor stage),0.6457,,
+36,Desingle,TCGA-COAD + TCGA-READ,DEsingle (genes + tumor stage + N stage),0.6762,,
+37,GSE81861_Cell_line_hct116,TCGA-COAD,MiRNA + SDES,0.6405,0.0245,17
+38,GSE81861_Cell_line_hct116,TCGA-COAD,MiRNA + SDES + Tumor stage,0.7017,0.02945,13
+39,GSE81861_Cell_line_hct116,TCGA-COAD,MiRNA + SDES Metric + Tumor Stage + N Stage,0.7104,0.02298,12
+40,GSE81861_Cell_line_hct116,TCGA-COAD,MiRNA + MAD,0.6097,0.0264,29
+41,GSE81861_Cell_line_hct116,TCGA-COAD,MiRNA + MAD + Tumor Stage,0.6871,0.03665,18
+42,GSE81861_Cell_line_hct116,TCGA-COAD,MiRNA + MAD + Tumor stage + N Stage,0.7041,0.01971,4

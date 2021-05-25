@@ -9,10 +9,11 @@ library(SummarizedExperiment)
 library(TCGAbiolinks)
 library(tidyverse)
 
-
 #Loading single-cell data----
 cc_tumor_fpkm <- read.csv("Data/Single-cell-data/FPKM/GSE81861_CRC_tumor_all_cells_FPKM.csv")
+
 k562_cells <- read.csv("Data/Single-cell-data/Other-cancers/GSE65525_RAW/GSM1599500_K562_cells.csv")
+
 glio <- read.csv("Data/Single-cell-data/Other-cancers/GSE57872_GBM_data_matrix.txt", sep='\t')
 rownames(glio) <- glio$X
 glio_dg <- dplyr::select(glio, contains("MGH2") | contains("MGH26Tumor") | contains("MGH28Tumor") | contains("MGH31Tumor"))
@@ -30,6 +31,16 @@ rownames(scdd_genes) <- scdd_genes$X
 scdd_genes <- scdd_genes[,c("gene", "nonzero.pvalue", "nonzero.pvalue.adj")]
 
 
+#A method to extract the active genes from the cox models----
+active_gene_extractor <- function(cox.num=1){
+  Active.Index <- which(as.logical(cox_models[[cox.num]][2]$Coefficients) != 0)
+  Active.Coefficients  <- cox_models[[cox.num]][2]$Coefficients[Active.Index]
+  active_genes <-rownames(cox_models[[cox.num]][2]$Coefficients)[Active.Index]
+  return_df <- data.frame(active_genes=active_genes, betas=Active.Coefficients)
+  return_df<- return_df[base::order(return_df$betas, decreasing = TRUE),]
+  rownames(return_df) <- 1:length(return_df$betas)
+  return(return_df)
+}
 #DESingle CC patients----
 des_genes <- des_results
 des_genes <- head(rownames(des_genes), n=1800)
@@ -165,7 +176,7 @@ cox_time <- merged_df$days_to_last_follow_up
 cox_event <- merged_df$vital_status
 cox_tumor <- merged_df$tumor_stage
 cox_tumor_n <- merged_df$ajcc_pathologic_n
-cox_df <- subset(merged_df, select=c(TSPAN6:AC007389.3))
+cox_df <- subset(merged_df, select=c(TSPAN6:V56404))
 cox_df$days.to.last.follow.up <- cox_time
 cox_df$vital.status <- cox_event
 cox_df$tumor.stage <- cox_tumor
@@ -252,10 +263,10 @@ km_mirna <- km_plotter(km.fit = hr_mirna$KM, data.source = hr_mirna$DF, p.value 
 
 #CC tumor patients dataset analysis
 #Now denoising the sc-data----
-cc_tumor_fpkm <- magic_denoiser(sc.data = cc_tumor_fpkm_logged, magic.seed = 123)
+cc_tumor_fpkm <- magic_denoiser(sc.data = cc_tumor_fpkm, magic.seed = 123)
 
 #Now getting pseudotime info from Moncocle3----
-cds_output <- cell_dataset_builder(vim.genes = c("VIM", "VIMP"), cell.data = cc_tumor_fpkm$denoised_sc_dataframe, cell.meta = cc_tumor_fpkm$cds_gene_names)
+cds_output <- cell_dataset_builder(vim.genes = c("VIM", "VIMP", "CDH1", "CDH2", "SNAI1", "SNAI2", "TWIST1", "ZEB1"), cell.data = cc_tumor_fpkm$denoised_sc_dataframe, cell.meta = cc_tumor_fpkm$cds_gene_names)
 
 #MAD metric----
 mad.genes <- mad_calculator(cc_tumor_fpkm$denoised_sc_dataframe)
@@ -263,11 +274,42 @@ save(mad.genes, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_mad.RData")
 
 #Switchde metric----
 sde.genes <- switchde_calculator(cc_tumor_fpkm$denoised_sc_dataframe, pseudo.time = cds_output$Pseudotime)
-save(sde.genes, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_sde.RData")
+save(sde.genes, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_sde_twist1-redo.RData")
 
 #Mirna metric----
-mirna.genes <- mirna_calculator(cancer.type1 = "colon cancer", cancer.type2 = "colorectal cancer", ts.org = "Human", ts.version = "7.2", max.miR.targets = 10, cancer.up = TRUE, mirna.filename = "TargetScan_cc_tumor_patients_logged.RData", mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"))
-save(mirna.genes, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_mirna.RData")
+mirna_sizes1 <- seq(5, 50, by=10)
+mirna_sizes2 <- seq(50, 200, by=50)
+mirna_sizes3 <- seq(200, 1555, by=200)
+mirna_sizes4 <- seq(1400, 1550, by=100)
+mirna_sizes <- c(mirna_sizes1, mirna_sizes2, mirna_sizes3, mirna_sizes4)
+mirna_sizes <- unique(mirna_sizes)
+mirna_master_list <- list()
+counter <- 1
+for(y in mirna_sizes){
+  print(y)
+  current_mirna <- mirna_calculator(cancer.type1 = "colon cancer", cancer.type2 = "colorectal cancer", ts.org = "Human", ts.version = "7.2", max.miR.targets = 10, cancer.up = TRUE, mirna.filename = NULL, mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"), max.mirnas = y)
+  mirna_master_list[[as.character(counter)]] <- current_mirna
+  counter <- counter + 1
+}
+
+
+
+#For lung cancer----
+mirna_master_list <- list()
+counter <- 1
+for(y in mirna_sizes){
+  print(y)
+  current_mirna <- mirna_calculator(cancer.type1 = "lung cancer", ts.org = "Human", ts.version = "7.2", max.miR.targets = 10, cancer.up = TRUE, mirna.filename = NULL, mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"), max.mirnas = y, print.ts.targets = TRUE)
+  mirna_master_list[[as.character(counter)]] <- current_mirna
+  counter <- counter + 1
+}
+
+
+
+
+
+mirna.genes <- mirna_calculator(cancer.type1 = "colon cancer", cancer.type2 = "colorectal cancer", ts.org = "Human", ts.version = "7.2", max.miR.targets = y, cancer.up = TRUE, mirna.filename = "Data/Data-from-Cleaner-code/TargetScan_cc_tumor_patients_all_targets.RData", mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"))
+save(mirna_master_list, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_first_200_mirna_at_10_targets_data.RData")
 
 #Optimizing the mirna + SDE metric----
 mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "Data/Data-from-Cleaner-code/sde_mirna_optimized.RData")
@@ -487,27 +529,265 @@ names(compared_list) <- c("SPOCK1", "VIM", "C5AR1", "WWTR1", "SERPINE1", "EFEMP1
 
 #Cox model----
 cox_models <- list()
+my_cindicies <- c()
+my_gene_sizes <- c()
 counter <- 1
-gene_sizes <- seq(from=100, to=300, by=100)
+gene_sizes <- seq(from=100, to=1800, by=50)
 for (y in gene_sizes){
   print(y)
-  for (x in mirna_sde_optimized) {
+  for (x in mirna_mad_optimized) {
     current_weight <- x
     current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = y, cox.predictors = current_weight, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE) 
     cox_models[[as.character(counter)]] <- current_cox
     counter <- counter + 1
     
-    my_df <- data.frame(geneNum=c("100", "200", "300", "400", "500", "600", "700", "800", "900", "1000", "1100", "1200", "1300", "1400", "1500", "1600", "1700", "1800"),
-                      size=c("100", "200", "300", "400", "500", "600", "700", "800", "900", "1000", "1100", "1200", "1300", "1400", "1500", "1600", "1700", "1800"),
-                      my_cindex=c(6.8, 15, 33, 4.2, 10, 29.5, 30, 30.5, 12.5, 14.7,16, 8.9, 6.5, 10.2, 10, 11, 12.4, 13.7))
-    
-    p<-ggplot(my_df, aes(x=size, y=my_cindex, group=geneNum)) +
-      geom_line(aes(color=geneNum))+
-      geom_point(aes(color=geneNum))
-    p
+    #Storing all of the c-index values in a vector that we can use later to build the plot
+    c_finder <-current_cox$CV$index[1]
+    current_c <- current_cox$CV$cvm[c_finder]
+    current_c <- round(current_c, digits = 4)
+    my_cindicies <- c(my_cindicies, current_c)
+    my_gene_sizes <- c(my_gene_sizes, y)
     
   }
 }
+
+
+#Just regular cox model, not changing gene size----
+cox_models <- list()
+my_cindicies <- c()
+my_gene_sizes <- c()
+counter <- 1
+for (x in mirna_sde_optimized) {
+  current_weight <- x
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1000, cox.predictors = current_weight, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE) 
+  cox_models[[as.character(counter)]] <- current_cox
+  counter <- counter + 1
+  
+  #Storing all of the c-index values in a vector that we can use later to build the plot
+  c_finder <-current_cox$CV$index[1]
+  current_c <- current_cox$CV$cvm[c_finder]
+  current_c <- round(current_c, digits = 4)
+  my_cindicies <- c(my_cindicies, current_c)
+  my_gene_sizes <- c(my_gene_sizes, y)
+  
+}
+
+
+#Just cox for the mirna metric at different sizes----
+cox_models <- list()
+my_cindicies <- c()
+counter <- 1
+for (x in mirna_master_list[1:14]) {
+  current_mirnas <- x
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = length(current_mirnas), cox.predictors = current_mirnas, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE) 
+  cox_models[[as.character(counter)]] <- current_cox
+  counter <- counter + 1
+  
+  #Storing all of the c-index values in a vector that we can use later to build the plot
+  c_finder <-current_cox$CV$index[1]
+  current_c <- current_cox$CV$cvm[c_finder]
+  current_c <- round(current_c, digits = 4)
+  my_cindicies <- c(my_cindicies, current_c)
+  
+}
+
+
+
+my_df <- data.frame(mirna_num=as.numeric(names(mirna_master_list)), concordance_index=my_cindicies)
+my_df$cindex_se <- sqrt(my_df$concordance_index/sqrt(length(my_df$concordance_index)))
+write.csv(my_df, file = "Data/Data-from-Cleaner-code/leukimia_patients_different_mirna_size_data_from_optimal_model.csv")
+#my_df$mean_c_index <- mean(my_df$concordance_index)
+df_to_plot <- data.frame(data=aggregate(x = my_df$concordance_index,              
+          by = list(my_df$gene_num),              
+          FUN = mean))    
+
+
+colnames(df_to_plot) <- c("mirna_num", "concordance_index")
+
+des_res <- filter(des_res, gene_num<600)
+my_df <- filter(my_df, gene_num<600)
+all_methods_across_gene_size_df <- merge(des_res,my_df, by = "gene_num")
+all_methods_across_gene_size_df <- read.csv("Data/Data-from-Cleaner-code/Graphs-for-c-index-performance/all_methods_across_gene_size_data.csv")
+#all_methods_across_gene_size_df <- filter(all_methods_across_gene_size_df, method!="scDD")
+
+coad_df <- filter(my_df, dataset=="TCGA-COAD")
+coad_df <- select(coad_df, mirna_num:dataset)
+
+read_df <- filter(my_df, dataset=="TCGA-READ")
+read_df <- select(read_df,mirna_num:dataset)
+
+
+#read only
+read_gene_num <-ggplot(read_df, aes(x=mirna_num, y=concordance_index, group=1)) +
+    geom_line(colour="#00BFC4")+
+    geom_point(colour="#00BFC4")
+
+
+res_aov_read <- aov(concordance_index~mirna_num, data = read_df)
+aov_sum_read <- summary(res_aov_read)
+pvalue_to_plot_read <- round(aov_sum_read[[1]][["Pr(>F)"]][1], digits = 5)
+
+read_plot <- read_gene_num + ggtitle("TCGA-READ") +
+  xlab("Number of MiRNAs Used in Model") +
+  ylab("C-index")+
+  ylim(0.40, 0.65)+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+        legend.position = "none", panel.background = element_blank(),
+        axis.line = element_line(colour = "grey"))+
+  annotate(geom = 'text', label = paste0("ANOVA, p=", pvalue_to_plot_read), x = 500, y = 0.42, hjust = 0, vjust = 1, size=4)
+#scale_color_discrete(name = "Dataset", labels = c("TCGA-COAD", "TCGA-READ"))
+
+
+
+#coad only
+coad_gene_num <- ggplot(coad_df, aes(x=mirna_num, y=concordance_index, group=1)) +
+  geom_line(color="#f8766d")+
+  geom_point(colour="#f8766d")
+
+
+
+res_aov_coad <- aov(concordance_index~mirna_num, data = coad_df)
+aov_sum_coad <- summary(res_aov_coad)
+pvalue_to_plot_coad <- round(aov_sum_coad[[1]][["Pr(>F)"]][1], digits = 5)
+
+
+
+coad_plot <- coad_gene_num + ggtitle("TCGA-COAD") +
+  xlab("Number of MiRNAs Used in Model") +
+  ylab("C-index")+
+  ylim(0.40, 0.65)+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+        legend.position = "none", panel.background = element_blank(),
+        axis.line = element_line(colour = "grey"))+
+  annotate(geom = 'text', label = paste0("ANOVA, p=", pvalue_to_plot_coad), x = 500, y = 0.42, hjust = 0, vjust = 1, size=4)
+#scale_color_discrete(name = "Dataset", labels = c("TCGA-COAD", "TCGA-READ"))
+
+
+
+
+#LC only
+lc_gene_num <-ggplot(my_df, aes(x=mirna_num, y=concordance_index, group=1)) +
+  geom_line(colour="#00BFC4")+
+  geom_point(colour="#00BFC4")
+
+
+res_aov_lc <- aov(concordance_index~mirna_num, data = my_df)
+aov_sum_lc <- summary(res_aov_lc)
+pvalue_to_plot_lc <- round(aov_sum_lc[[1]][["Pr(>F)"]][1], digits = 5)
+
+lc_plot <- lc_gene_num + ggtitle("TCGA-LUAD") +
+  xlab("Number of MiRNAs Used in Model") +
+  ylab("C-index")+
+  ylim(0.40, 0.66)+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+        legend.position = "none", panel.background = element_blank(),
+        axis.line = element_line(colour = "grey"))+
+  annotate(geom = 'text', label = paste0("ANOVA, p=", pvalue_to_plot_lc), x = 400, y = 0.42, hjust = 0, vjust = 1, size=4)
+#scale_color_discrete(name = "Dataset", labels = c("TCGA-COAD", "TCGA-READ"))
+
+
+#Leukemia only----
+leuk_gene_num <-ggplot(my_df, aes(x=mirna_num, y=concordance_index, group=1)) +
+  geom_line(colour="#f8766d")+
+  geom_point(colour="#f8766d")
+
+
+res_aov_leuk <- aov(concordance_index~mirna_num, data = my_df)
+aov_sum_leuk <- summary(res_aov_leuk)
+pvalue_to_plot_leuk <- round(aov_sum_leuk[[1]][["Pr(>F)"]][1], digits = 5)
+
+leuk_plot <- leuk_gene_num + ggtitle("TCGA-DLBC") +
+  xlab("Number of MiRNAs Used in Model") +
+  ylab("C-index")+
+  ylim(0.40, 0.67)+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+        legend.position = "none", panel.background = element_blank(),
+        axis.line = element_line(colour = "grey"))+
+  annotate(geom = 'text', label = paste0("ANOVA, p=", pvalue_to_plot_leuk), x = 500, y = 0.42, hjust = 0, vjust = 1, size=4)
+#scale_color_discrete(name = "Dataset", labels = c("TCGA-COAD", "TCGA-READ"))
+
+
+
+#both DLBC and LUAD on same plot
+both_leuk_and_luad_data <- read.csv("Data/Data-from-Cleaner-code/Graphs-for-c-index-performance/Different-mirna-sizes/leuk_and_luad_datasets.csv")
+both_other_dataset_plot <- ggplot(both_leuk_and_luad_data, aes(x=mirna_num, y=concordance_index, group=dataset)) +
+  geom_line(aes(color=dataset))+
+  geom_point(aes(color=dataset))
+
+
+res_aov_both <- aov(concordance_index~dataset, data = both_leuk_and_luad_data)
+aov_sum_both <- summary(res_aov_both)
+pvalue_to_plot_both <- round(aov_sum_both[[1]][["Pr(>F)"]][1], digits = 5)
+
+both_plot <- both_other_dataset_plot + ggtitle("TCGA-DLBC vs. TCGA-LUAD") +
+  xlab("Number of MiRNAs Used in Model") +
+  ylab("C-index")+
+  ylim(0.40, 0.67)+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+        legend.position = "none", panel.background = element_blank(),
+        axis.line = element_line(colour = "grey"))+
+  annotate(geom = 'text', label = paste0("ANOVA, p=", pvalue_to_plot_both), x = 500, y = 0.43, hjust = 0, vjust = 1, size=4)+
+  scale_color_discrete(name = "Dataset", labels = c("TCGA-DLBC", "TCGA-LUAD"))
+
+
+
+#both COAD and READ on same plot
+both_gene_num <- ggplot(my_df, aes(x=mirna_num, y=concordance_index, group=dataset)) +
+  geom_line(aes(color=dataset))+
+  geom_point(aes(color=dataset))
+
+
+
+res_aov_both <- aov(concordance_index~dataset, data = my_df)
+aov_sum_both <- summary(res_aov_both)
+pvalue_to_plot_both <- round(aov_sum_both[[1]][["Pr(>F)"]][1], digits = 5)
+
+
+
+both_plot <- both_gene_num + ggtitle("TCGA-COAD vs. TCGA-READ") +
+  xlab("Number of MiRNAs Used in Model") +
+  ylab("C-index")+
+  ylim(0.40, 0.65)+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+        legend.position = "none", panel.background = element_blank(),
+        axis.line = element_line(colour = "grey"))+
+  annotate(geom = 'text', label = paste0("ANOVA, p=", pvalue_to_plot_both), x = 1000, y = 0.43, hjust = 0, vjust = 1, size=4)+
+  scale_color_discrete(name = "Dataset", labels = c("TCGA-COAD", "TCGA-READ"))
+
+
+
+
+
+
+
+#Figure of the mirna size panels----
+mirna_figure <- ggarrange(both_plot, ggarrange(coad_plot, read_plot, ncol = 2, labels = c("B.", "C.")), nrow = 2, labels = "A.")
+mirna_figure2 <- ggarrange(both_plot, ggarrange(lc_plot, leuk_plot, ncol = 2, labels = c("B.", "C.")), nrow = 2, labels = "A.")
+
+#Code to plot different pseudotime markers----
+pt_different_markers_coad <- read.csv("~/Desktop/different_sdes_markers_for_server/different_sdes_markers_cc_patients.csv")
+pt_different_markers_coad$method <- c("snai1", "twist1", "twist1-redo", "zeb1", "vim")
+
+
+res_aov <- aov(concordance_index~method, data = pt_different_markers)
+aov_sum <- summary(res_aov)
+pvalue_to_plot <- round(aov_sum[[1]][["Pr(>F)"]][1], digits = 5)
+
+
+pt_average_df <- merge(pt_different_markers, pt_different_markers_coad, by="method")
+
+pt_average_df$mean_performance <- c(0.58065, 0.5897, 0.56025, 0.5897, 0.56025)
+
+
+res_aov <- aov(mean_performance~method, data = pt_average_df)
+aov_sum <- summary(res_aov)
+pvalue_to_plot <- round(aov_sum[[1]][["Pr(>F)"]][1], digits = 5)
+
+
+
+p <- ggplot(pt_average_df, aes(x=method, y=mean_performance)) + geom_point()
+p+ ggtitle("Concordance Index Performance for Different SDES Markers CC & RC Patients") + xlab("Marker") + ylab("Mean Concordance Index") + theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16), panel.background = element_blank())
+
 
 for(x in cox_models){
   print(x$CV)
@@ -530,15 +810,128 @@ cox_sdes <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.
 cox_mirna <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
 
 
-#Cox for scDD genes----
+#Cox for scDD genes across gene sizes----
 scdd_genes <- scdd_res
 scdd_genes <- intersect(scdd_genes$gene, colnames(cox_df))
+
+
+cox_models <- list()
+my_cindicies <- c()
+my_gene_sizes <- c()
+counter <- 1
+gene_sizes <- seq(from=100, to=500, by=50)
+for (y in gene_sizes) {
+  print(y)
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = y, cox.predictors = scdd_genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
+  cox_models[[as.character(counter)]] <- current_cox
+  counter <- counter + 1
+  
+  #Storing all of the c-index values in a vector that we can use later to build the plot
+  c_finder <-current_cox$CV$index[1]
+  current_c <- current_cox$CV$cvm[c_finder]
+  current_c <- round(current_c, digits = 4)
+  my_cindicies <- c(my_cindicies, current_c)
+  my_gene_sizes <- c(my_gene_sizes, y)
+}
+
+
+my_df <- data.frame(gene_num=my_gene_sizes, concordance_index=my_cindicies)
+my_df$cindex_se <- sqrt(my_df$concordance_index/sqrt(length(my_df$concordance_index)))
+write.csv(my_df, file = "Data/Data-from-Cleaner-code/mirna_sde_cc_patients_gene_size_data.csv")
+df_to_plot <- data.frame(data=aggregate(x = my_df$concordance_index,              
+                                        by = list(my_df$gene_num),              
+                                        FUN = mean))    
+
+
+colnames(df_to_plot) <- c("gene_num", "concordance_index")
+
+
+#df_to_plot$gene_num <- factor(df_to_plot$gene_num)
+res_aov <- aov(concordance_index~gene_num, data = df_to_plot)
+aov_sum <- summary(res_aov)
+pvalue_to_plot <- round(aov_sum[[1]][["Pr(>F)"]][1], digits = 5)
+
+
+p<-ggplot(df_to_plot, aes(x=gene_num, y=concordance_index, group=1)) +
+  geom_line(aes(color="red"))+
+  geom_point()
+
+p + ggtitle("scDD Concordance Index Across Gene Number") +
+  xlab("Number of Genes Used in Model") +
+  ylab("Mean Concordance Index")+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+        legend.position = "none", panel.background = element_blank(),
+        axis.line = element_line(colour = "grey"))+
+  annotate(geom = 'text', label = paste0("P=", pvalue_to_plot), x = 400, y = 0.58, hjust = 0, vjust = 1, size=5)
+
+
+
+#Just for testing scDD active genes----
 scdd_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 511, cox.predictors = scdd_genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
 
 
 #Cox for DESingle----
-desingle_genes <- intersect(des_genes, colnames(cox_df))
-desingle_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1568, cox.predictors = desingle_genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+desingle_genes <- intersect(rownames(des_results), colnames(cox_df))
+
+
+cox_models <- list()
+my_cindicies <- c()
+my_gene_sizes <- c()
+counter <- 1
+gene_sizes <- seq(from=100, to=1800, by=50)
+for (y in gene_sizes) {
+  print(y)
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = y, cox.predictors = scdd_genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
+  cox_models[[as.character(counter)]] <- current_cox
+  counter <- counter + 1
+  
+  #Storing all of the c-index values in a vector that we can use later to build the plot
+  c_finder <-current_cox$CV$index[1]
+  current_c <- current_cox$CV$cvm[c_finder]
+  current_c <- round(current_c, digits = 4)
+  my_cindicies <- c(my_cindicies, current_c)
+  my_gene_sizes <- c(my_gene_sizes, y)
+}
+
+
+my_df <- data.frame(gene_num=my_gene_sizes, concordance_index=my_cindicies)
+my_df$cindex_se <- sqrt(my_df$concordance_index/sqrt(length(my_df$concordance_index)))
+write.csv(my_df, file = "Data/Data-from-Cleaner-code/desingle_cc_patients_gene_size_data.csv")
+df_to_plot <- data.frame(data=aggregate(x = my_df$concordance_index,              
+                                        by = list(my_df$gene_num),              
+                                        FUN = mean))    
+
+
+colnames(df_to_plot) <- c("gene_num", "concordance_index")
+
+
+#df_to_plot$gene_num <- factor(df_to_plot$gene_num)
+res_aov <- aov(concordance_index~gene_num, data = df_to_plot)
+aov_sum <- summary(res_aov)
+pvalue_to_plot <- round(aov_sum[[1]][["Pr(>F)"]][1], digits = 5)
+
+
+p<-ggplot(df_to_plot, aes(x=gene_num, y=concordance_index, group=1)) +
+  geom_line(aes(color="red"))+
+  geom_point()
+
+p + ggtitle("DEsingle Concordance Index Across Gene Number") +
+  xlab("Number of Genes Used in Model") +
+  ylab("Mean Concordance Index")+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+        legend.position = "none", panel.background = element_blank(),
+        axis.line = element_line(colour = "grey"))+
+  annotate(geom = 'text', label = paste0("P=", pvalue_to_plot), x = 1500, y = 0.58, hjust = 0, vjust = 1, size=5)
+
+
+
+
+
+
+
+
+
+desingle_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1568, cox.predictors = desingle_genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
 
 
 
@@ -656,6 +1049,16 @@ sde.genes <- switchde_calculator(k562_cells$denoised_sc_dataframe, pseudo.time =
 save(sde.genes, file = "k562_sde.RData")
 
 #Mirna metric----
+counter <- 1
+mirna_master_list <- list()
+
+for (y in mirna_sizes) {
+  print(y)
+  current_mirna <- mirna_calculator(ts.org = "Human", ts.version = "7.2", max.miR.targets = 10, cancer.up = TRUE, cancer.type1 = "gastric cancer", mirna.filename = NULL, mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"), max.mirnas = y)
+  mirna_master_list[[as.character(counter)]] <- current_mirna
+  counter <- counter+1
+}
+
 mirna.genes <- mirna_calculator(ts.org = "Human", ts.version = "7.2", ts.num = 900, max.miR.targets = 10, cancer.up = TRUE, cancer.type1 = "gastric cancer", mirna.filename = "k562_cells_mirnas_dbdemc_up.RData")
 save(mirna.genes, file = "k562_mirna.RData")
 
