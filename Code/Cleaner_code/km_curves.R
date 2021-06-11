@@ -25,7 +25,7 @@ hr_calculator <- function(model.coefs            =Coefficients,
   
   if (include.cat.data==TRUE){
     print("Categorical data included in HR calculation.")
-    if(tumor.stage==TRUE){
+    if(tumor.stage==TRUE & n.stage==FALSE){
       print("Tumor stage data included in HR calculation.")
       data$tumor.stage <- gsub(data$tumor.stage, pattern="stge iv", replacement=4)
       data$tumor.stage <- gsub(data$tumor.stage, pattern="stge iii", replacement=3)
@@ -39,7 +39,14 @@ hr_calculator <- function(model.coefs            =Coefficients,
       Active.Index <- which(as.logical(model.coefs) != 0)
       Active.Coefficients  <- model.coefs[Active.Index]
       active_genes <-rownames(model.coefs)[Active.Index]
+      print("Active length genes before....")
+      print(length(active_genes))
+      print("Active genes before removal....")
+      print(active_genes)
       active_genes <- active_genes[!active_genes %in% my.remove]
+      print("Active length genes after....")
+      print(length(active_genes))
+      print("Active genes after removal....")
       print(active_genes)
       surv_gene_df <- data[,active_genes]
       gene_expr <- mean(as.matrix(surv_gene_df))
@@ -49,8 +56,10 @@ hr_calculator <- function(model.coefs            =Coefficients,
       patient_gene_expr<- surv_gene_df[1:length(rownames(surv_gene_df)),]
       rm(surv_gene_df)
       active_genes <- c(active_genes, "tumor.stage")
+      print(active_genes)
+      #####Check this also!!!
       
-      if(n.stage==TRUE){
+      if(tumor.stage==TRUE & n.stage==TRUE){
         print("N stage data included in HR calculation.")
         data$ajcc.n <- gsub(data$ajcc.n, pattern="N0", replacement=1)
         data$ajcc.n <- gsub(data$ajcc.n, pattern="N1", replacement=2)
@@ -69,7 +78,7 @@ hr_calculator <- function(model.coefs            =Coefficients,
         gene_expr <- mean(as.matrix(surv_gene_df))
         if(is.null(dim(surv_gene_df))==TRUE){
           surv_gene_df <- as.data.frame(surv_gene_df)
-          View(surv_gene_df)
+          #View(surv_gene_df)
         }
         patient_gene_expr<- surv_gene_df[1:length(rownames(surv_gene_df)),]
         rm(surv_gene_df)
@@ -98,14 +107,18 @@ hr_calculator <- function(model.coefs            =Coefficients,
     surv_gene_df <- as.data.frame(surv_gene_df)
   }
   surv_gene_df <- apply(surv_gene_df, c(1,2), as.numeric)
-  View(surv_gene_df)
+  #View(surv_gene_df)
   beta <-Active.Coefficients
   gene_expr <- mean(as.matrix(surv_gene_df))
   #print(class(surv_gene_df))
   print(dim(surv_gene_df))
   patient_gene_expr<- surv_gene_df[1:length(rownames(surv_gene_df)),]
   subtracted_value <- patient_gene_expr - gene_expr
+  #print(dim(subtracted_value))
+  print(length(beta))
+  print(beta)
   hr_calc <- beta*(subtracted_value)
+  #print(hr_calc)
   if(is.null(dim(hr_calc))){
     risk <- hr_calc
   }else{
@@ -120,7 +133,7 @@ hr_calculator <- function(model.coefs            =Coefficients,
   surv_gene_df <- cbind(vital.status, surv_gene_df)
   surv_gene_df <- cbind(days.to.last.follow.up, surv_gene_df)
   surv_gene_df <- as.data.frame(surv_gene_df)
-  View(surv_gene_df)
+  #View(surv_gene_df)
   surv_gene_df$days.to.last.follow.up <- as.numeric(surv_gene_df$days.to.last.follow.up)
   surv_gene_df$vital.status <- as.numeric(surv_gene_df$vital.status)
   km_fit <- survfit(Surv(days.to.last.follow.up, vital.status) ~ risk, data = surv_gene_df)

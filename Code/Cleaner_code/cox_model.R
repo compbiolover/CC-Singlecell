@@ -9,8 +9,8 @@ cox_model_fitter <- function(my.seed       =1,
                              gene.num      =900,
                              cox.predictors=NULL,
                              tumor.stage   =FALSE,
-                             tumor.m       =FALSE,
-                             tumor.n       =FALSE){
+                             tumor.n       =FALSE,
+                             tumor.m       =FALSE){
   
   #Doing input sanity checks----
   if(missing(my.seed)){
@@ -78,28 +78,19 @@ cox_model_fitter <- function(my.seed       =1,
   colnames(cox.df) <- colname_changes
   my_predictors <- intersect(my_predictors, colnames(cox.df))
   my_predictors <- paste("~", paste(my_predictors[1:length(my_predictors)], collapse = "+"))
-  if(tumor.stage==TRUE){
+  if(tumor.stage==TRUE & tumor.n==FALSE & tumor.m==FALSE){
     my_predictors <- paste(my_predictors, "tumor.stage", sep = "+")
-    if(tumor.m==TRUE){
+    my_predictors <- as.formula(my_predictors)
+    else if (tumor.stage==TRUE & tumor.n==TRUE & tumor.m==FALSE){
       my_predictors <- paste(my_predictors,"ajcc.n", sep = "+")
-      if(tumor.n==TRUE){
-        my_predictors <- paste(my_predictors, "ajcc.n", sep = "+")
-        my_predictors <- as.formula(my_predictors)
-      }else{
-        my_predictors <- as.formula(my_predictors)
-      }
-    }else{
       my_predictors <- as.formula(my_predictors)
-    }
-  }else{
-    if(tumor.m==TRUE){
+    }else if (tumor.stage==TRUE & tumor.n==TRUE & tumor.m==TRUE){
       my_predictors <- paste(my_predictors, "ajcc.m", sep = "+")
       my_predictors <- as.formula(my_predictors)
     }else{
       my_predictors <- as.formula(my_predictors)
+      print("This is the genes only predictor....")
     }
-  }
-  #my_predictors <- as.formula(my_predictors)
   my_x <- model.matrix(my_predictors, cox.df)
   #The response object for the cox model----
   my_y <- Surv(time = cox.df$days.to.last.follow.up, event = cox.df$vital.status)

@@ -2,60 +2,156 @@
 #Simply reading in the file and plotting it.
 #Loading needed packages----
 library(ggplot2)
+library(ggpubr)
 
 #Setting the working directory----
 setwd("~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/")
 
 #Reading in the file----
-my_file <- read.csv("Documentation/c-index-across-datasets-formatted-correctly-for-graphs.csv")
-res_aov_1 <- aov(C.index~Method, data = my_file)
+my_file <- read.csv("Completed_KM_Curves/Final-c-index-and-km-curve-document.csv")
+my_file$pvalue_trans <- -log10(my_file$pvalue_finished)
+res_aov_1 <- aov(cindex_finished~Method, data = my_file)
 aov_sum_1 <- summary(res_aov_1)
 pvalue_to_plot_1 <- round(aov_sum_1[[1]][["Pr(>F)"]][1], digits = 5)
 tukey_aov_1 <- TukeyHSD(res_aov_1)
 
 
-other_file <- read.csv("Documentation/other-methods-reordered.csv")
-other_file <- filter(other_file, Bulk.dataset!="TCGA-COAD + TCGA-READ")
+#genes only
+my_file <- filter(my_file, Method=="MiRNA + SDES" | Method== "MiRNA + MAD" | Method== "scDD (genes only)" | Method== "DESeq2 (genes only)" | Method== "DESeq2 (genes only)" | Method=="edgeR (genes only)" | Method=="DEsingle (genes only)" | Method=="MAD" | Method=="MiRNA" | Method=="SDES")
+#genes + tumor stage
+my_file <- filter(my_file, Method=="MiRNA + SDES + Tumor stage" | Method== "MiRNA + MAD + Tumor stage" | Method== "scDD (genes + Tumor stage)" | Method== "DESeq2 (genes only + Tumor stage)" | Method=="edgeR (genes only + Tumor stage)" | Method=="DEsingle (genes + Tumor stage)" | Method=="MAD + Tumor stage" | Method=="MiRNA + Tumor stage" | Method=="SDES + Tumor stage")
+#genes + tumor and N stage
+my_file <- filter(my_file, Method=="MiRNA + SDES + Tumor stage + N stage" | Method== "MiRNA + MAD + Tumor stage + N stage" | Method== "scDD (genes + Tumor stage + N stage)" | Method== "DESeq2 (genes only + Tumor stage + N stage)" | Method=="edgeR (genes only + Tumor stage + N stage)" | Method=="DEsingle (genes + Tumor stage + N stage)" | Method=="MAD + Tumor stage + N stage" | Method=="MiRNA + Tumor stage + N stage" | Method=="SDES + Tumor stage + N stage")
+my_file <- my_file %>% group_by(Method)
+my_file[c(1,4,6), "Method"] <- "CC Singlecell MS"
+my_file[c(2,3,5), "Method"] <- "CC Singlecell MM"
+my_file[7:9,"Method"] <- "scDD"
+my_file[10:12,"Method"] <- "DEsingle"
+my_file[19:21, "Method"] <- "DESeq2"
+my_file[22:24, "Method"] <- "edgeR"
+my_file[25:27, "Method"] <- "MAD"
+my_file[28:30, "Method"] <- "SDES"
+my_file[31:33, "Method"] <- "MiRNA"
 
-res_aov <- aov(C.index~Method, data = my_file)
-aov_sum <- summary(res_aov)
-pvalue_to_plot <- round(aov_sum[[1]][["Pr(>F)"]][1], digits = 5)
-
-tukey_aov <- TukeyHSD(res_aov)
+#For removing the cell-line sc data----
+my_file <- my_file[-c(13:18),]
 
 
-#my_file <- filter(my_file, Method=="scDD (genes only)" | Method== "DEsingle (genes only)" | Method== "MiRNA + MAD" | Method== "MiRNA + SDES")
-my_file <- filter(my_file, Method=="MiRNA + SDES Metric + Tumor Stage + N Stage" | Method== "scDD (genes + tumor stage + N stage)" | Method== "DEsingle (genes + tumor stage + N stage)" | Method== " MiRNA + MAD + Tumor stage + N Stage")
-my_file[1:18, "Method"] <- "CC Singlecell"
-my_file[19:27,"Method"] <- "scDD"
-my_file[28:36,"Method"] <- "DEsingle"
-my_file[37:42, "Method"] <- "CC Singlecell"
-my_file <- filter(my_file, Bulk.dataset== "TCGA-COAD" | Bulk.dataset=="TCGA-READ")
-my_comparisons <- list(c("DEsingle, MiRNA + MAD"), c("DEsingle, MiRNA + SDES"), c("scDD, MiRNA + MAD"), c("scDD, MiRNA + SDES"))
 
-p<- ggplot(my_file, aes(x=Method, y=C.index, fill=Method))+
-  geom_boxplot(data=my_file, aes(x=Method, y=C.index))+
+
+
+
+#my_file <- filter(my_file, Bulk.dataset== "TCGA-COAD" | Bulk.dataset=="TCGA-READ")
+#my_comparisons <- list(c("DEsingle, MiRNA + MAD"), c("DEsingle, MiRNA + SDES"), c("scDD, MiRNA + MAD"), c("scDD, MiRNA + SDES"))
+#my_file$Method <- factor(my_file$Method, levels = c("MAD","SDES","MiRNA","MiRNA + SDES","MiRNA + MAD","DEsingle","scDD","DESeq2","edgeR"))
+my_file$Method <- factor(my_file$Method, levels = c("MAD", "SDES", "MiRNA", "CC Singlecell MS", "CC Singlecell MM", "DEsingle", "scDD", "DESeq2", "edgeR"))
+my_file$Bulk.dataset <- factor(my_file$Bulk.dataset, levels = c("TCGA-COAD", "TCGA-READ", "TCGA-COAD + TCGA-READ"))
+
+
+cindex_bar <- ggplot(my_file, aes(x=Method, y = cindex_finished, fill=Bulk.dataset))+
+  geom_bar(stat= "identity",position = position_dodge())+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "grey"))+
+  ggtitle("Gene Signature + All Clinical Factor C-indices")+
+  xlab("Method")+
+  ylab("Concordance Index")+
+  scale_fill_discrete("Bulk Dataset")+
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
+  geom_hline(yintercept = 0.70)
+
+
+
+cindex_bar <- cindex_bar + coord_cartesian(ylim = c(0.5, 0.7))
+
+
+
+#P-value graph----
+pvalue_bar <- ggplot(my_file, aes(x=Method, y =pvalue_trans, fill=Bulk.dataset))+
+  geom_bar(stat = "identity", position = position_dodge())+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "grey"))+
+  ggtitle("Gene Signature + All Clinical Factor P-values")+
+  xlab("Method")+
+  ylab("-log(P-value)")+
+  scale_fill_discrete("Bulk Dataset")+
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
+  geom_hline(yintercept = -log10(0.05))
+
+
+pvalue_bar
+
+
+big_graph <- ggarrange(cindex_bar, pvalue_bar, cindex_bar2, pvalue_bar2, cindex_bar3, pvalue_bar3, labels = c("A.", "B.", "C.", "D.", "E.", "F."), ncol = 2, nrow = 3, common.legend = TRUE)
+
+
+p<- ggplot(my_file, aes(x=Method, y=cindex_finished, fill=Method))+
+  geom_boxplot(data=my_file, aes(x=Method, y=cindex_finished))+
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
         legend.position = "none", panel.background = element_blank(),
         axis.line = element_line(colour = "grey"))+
-  ggtitle("Concordance Index Performance Across Methods for All Datasets & Combinations")+
+  ggtitle("Gene Signatures Only")+
   xlab("Method")+
   ylab("Concordance Index")
 
 p
 
 
-p+ geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5)+
-  stat_compare_means(method = "anova", label.x = 1, label.y = 0.60)+
+finished_plot <- p+ geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5)+
+  stat_compare_means(method = "anova", label.x = 1, label.y = 0.56)+
   stat_compare_means(label = "p.signif", method = "t.test",
-                     ref.group = "CC Singlecell")
+                     ref.group = "MiRNA + MAD", vjust = -0.8)
   #scale_x_discrete(guide = guide_axis(check.overlap = TRUE))
   #scale_x_discrete(guide = guide_axis(n.dodge = 3))
   
+#Power analysis----
+summary_df <- my_file %>% dplyr::group_by(Method) %>% dplyr::summarise(m=median(C.index_at_1800_genes))
+groupmedians <- summary_df$m
+
+power_analysis <- power.anova.test(groups = length(groupmedians), 
+                      between.var = var(groupmedians), within.var = 0.03, 
+                      power=0.95,sig.level=0.05,n=NULL)
+power_analysis
 
 
 
 
+
+
+#Now doing simulating datasets to try and see if we get better performance for stats----
+library(SPsimSeq)
+set.seed(1)
+
+cox_df_cc_counts <-subset(cox_df, select=(TSPAN6:AC007389.3))
+cox_df_cc_counts <- t(cox_df_cc_counts)
+cox_df_cc_counts <- as.data.frame(cox_df_cc_counts)
+
+sim.data.bulk <- SPsimSeq(n.sim = 1, s.data = cox_df_cc_counts,
+                          group = 1, n.genes = 55317,
+                          tot.samples = 501, 
+                          pDE = 0.1, lfc.thrld = 0.5, 
+                          result.format = "list", verbose = TRUE)
+
+
+
+library(seqgendiff)
+set.seed(1)
+
+
+
+
+library(splatter)
+params <- splatEstimate(cc_tumor_fpkm)
+sim <- splatSimulate(params, nGenes = 55186)
+
+
+
+
+#Plotting pvalues----
+
+
+pvalue_plot <- ggplot(data = my_file, aes(x=Method, y=))
 
 #cv_master_subset$Method <- factor(cv_master_subset$Method, levels = c("MAD", "SDES", "MiRNA", "MAD + SDES", "MiRNA + SDES", "MAD + SDES + MiRNA"))
 my_file$MAD.Metric <- formatC(my_file$MAD.Metric, format="f", digits=2)
