@@ -311,7 +311,7 @@ for(y in mirna_sizes){
 mirna.genes <- mirna_calculator(cancer.type1 = "colon cancer", cancer.type2 = "colorectal cancer", ts.org = "Human", ts.version = "7.2", max.miR.targets = y, cancer.up = TRUE, mirna.filename = "Data/Data-from-Cleaner-code/TargetScan_cc_tumor_patients_all_targets.RData", mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"))
 save(mirna_master_list, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_first_200_mirna_at_10_targets_data.RData")
 
-#Optimizing the mirna + SDE metric----
+#Optimizing the MiRNA + SDE metric----
 mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "Data/Data-from-Cleaner-code/sde_mirna_optimized.RData")
 
 #Optimizing the MAD + MiRNA metric----
@@ -380,7 +380,7 @@ cox_time <- calculated_days
 cox_event <- merged_df$vital_status
 cox_tumor <- merged_df$tumor_stage
 cox_tumor_n <- merged_df$ajcc_pathologic_n
-cox_df <- subset(merged_df, select=c(TSPAN6:V56404))
+cox_df <- subset(merged_df, select=c(TSPAN6:AC007389.5))
 cox_df$days.to.last.follow.up <- cox_time
 cox_df$vital.status <- cox_event
 cox_df$tumor.stage <- cox_tumor
@@ -388,9 +388,16 @@ cox_df$ajcc.n <- cox_tumor_n
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="a", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="b", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="c", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge iv", replacement = 4)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge iii", replacement = 3)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge ii", replacement = 2)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge i", replacement = 1)
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="a", replacement="")
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="b", replacement="")
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N0", replacement=0)
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N1", replacement=1)
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N2", replacement=2)
 cox_df <- filter(cox_df, !tumor.stage=="not reported")
 cox_df <- cox_df[complete.cases(cox_df[, "ajcc.n"]), ]
 cox_df <- cox_df[complete.cases(cox_df[, "vital.status"]), ]
@@ -445,29 +452,19 @@ cox_df$gender <- cox_gender
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="a", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="b", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="c", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge iv", replacement = 4)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge iii", replacement = 3)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge ii", replacement = 2)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge i", replacement = 1)
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="a", replacement="")
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="b", replacement="")
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N0", replacement=0)
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N1", replacement=1)
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N2", replacement=2)
 cox_df <- filter(cox_df, !tumor.stage=="not reported")
 cox_df <- cox_df[complete.cases(cox_df[, "ajcc.n"]), ]
-
-#Subsetting to just black patients
-cox_df <- subset(cox_df, cox_df$race=="black or african american")
-
-#Asians
-cox_df <- subset(cox_df, cox_df$race=="asian")
-
-#Whites
-cox_df <- subset(cox_df, cox_df$race=="white")
-
-#Not reported
-cox_df <- subset(cox_df, cox_df$race=="not reported")
-
-#American indian or alaska native
-cox_df <- subset(cox_df, cox_df$race=="american indian or alaska native")
-
-
-
 
 
 #Merged data frame for the normal/main colon cancer dataset
@@ -498,26 +495,18 @@ cox_df$gender <- cox_gender
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="a", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="b", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="c", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge iv", replacement = 4)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge iii", replacement = 3)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge ii", replacement = 2)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge i", replacement = 1)
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="a", replacement="")
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="b", replacement="")
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N0", replacement=0)
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N1", replacement=1)
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N2", replacement=2)
 cox_df <- filter(cox_df, !tumor.stage=="not reported")
 cox_df <- cox_df[complete.cases(cox_df[, "ajcc.m"]), ]
-
-#Subsetting to just black patients
-cox_df <- subset(cox_df, cox_df$race=="black or african american")
-
-#Asians
-cox_df <- subset(cox_df, cox_df$race=="asian")
-
-#Whites
-cox_df <- subset(cox_df, cox_df$race=="white")
-
-#Not reported
-cox_df <- subset(cox_df, cox_df$race=="not reported")
-
-#American indian or alaska native
-cox_df <- subset(cox_df, cox_df$race=="american indian or alaska native")
 
 
 
@@ -531,10 +520,10 @@ cox_models <- list()
 my_cindicies <- c()
 my_gene_sizes <- c()
 counter <- 1
-gene_sizes <- seq(from=100, to=1800, by=50)
+gene_sizes <- seq(from=100, to=2500, by=250)
 for (y in gene_sizes){
   print(y)
-  for (x in mirna_mad_optimized) {
+  for (x in mirna_sde_optimized) {
     current_weight <- x
     current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = y, cox.predictors = current_weight, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE) 
     cox_models[[as.character(counter)]] <- current_cox
@@ -551,13 +540,15 @@ for (y in gene_sizes){
 }
 
 
+
+
 #Just regular cox model, not changing gene size----
 cox_models <- list()
 my_cindicies <- c()
 counter <- 1
-for (x in mirna_sde_optimized) {
+for (x in mirna_sde_optimized[6]) {
   current_weight <- x
-  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1200, cox.predictors = current_weight, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE) 
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = TRUE, tumor.n = FALSE, tumor.m = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/coad_and_read_regular_cox_genes_tumor_1800.csv") 
   cox_models[[as.character(counter)]] <- current_cox
   counter <- counter + 1
   
@@ -566,8 +557,15 @@ for (x in mirna_sde_optimized) {
   current_c <- current_cox$CV$cvm[c_finder]
   current_c <- round(current_c, digits = 4)
   my_cindicies <- c(my_cindicies, current_c)
-  #my_gene_sizes <- c(my_gene_sizes, y)
-  
+}
+
+all_dfs <- list()
+counter <- 1
+for(x in cox_models){
+  current_cox <- x
+  current_df <- km_data_generator(data.source = current_cox$`Active Genes`, data.betas = current_cox$`Active Coefficients`)
+  all_dfs[[as.character(counter)]] <- current_df
+  counter <- counter + 1
 }
 
 
@@ -595,12 +593,12 @@ my_df <- data.frame(mirna_num=as.numeric(names(mirna_master_list)), concordance_
 my_df$cindex_se <- sqrt(my_df$concordance_index/sqrt(length(my_df$concordance_index)))
 write.csv(my_df, file = "Data/Data-from-Cleaner-code/leukimia_patients_different_mirna_size_data_from_optimal_model.csv")
 #my_df$mean_c_index <- mean(my_df$concordance_index)
-df_to_plot <- data.frame(data=aggregate(x = my_df$concordance_index,              
-          by = list(my_df$gene_num),              
+df_to_plot <- data.frame(data=aggregate(x = coad_df$c_index,              
+          by = list(coad_df$gene_size),              
           FUN = mean))    
 
 
-colnames(df_to_plot) <- c("mirna_num", "concordance_index")
+colnames(df_to_plot) <- c("gene_num", "concordance_index")
 
 des_res <- filter(des_res, gene_num<600)
 my_df <- filter(my_df, gene_num<600)
@@ -638,13 +636,13 @@ read_plot <- read_gene_num + ggtitle("TCGA-READ") +
 
 
 #coad only
-coad_gene_num <- ggplot(coad_df, aes(x=mirna_num, y=concordance_index, group=1)) +
+coad_gene_num <- ggplot(coad_df, aes(x=gene_size, y=c_index, group=1)) +
   geom_line(color="#f8766d")+
   geom_point(colour="#f8766d")
 
 
 
-res_aov_coad <- aov(concordance_index~mirna_num, data = coad_df)
+res_aov_coad <- aov(concordance_index~gene_size, data = coad_df)
 aov_sum_coad <- summary(res_aov_coad)
 pvalue_to_plot_coad <- round(aov_sum_coad[[1]][["Pr(>F)"]][1], digits = 5)
 
@@ -690,7 +688,10 @@ cox_deseq2 <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, co
 
 #Cox for edgeR----
 edger_df_done <- read.csv("Data/Data-from-Cleaner-code/finished_edgeR_genes.csv")
-cox_edger <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = edger_df_done$gene, tumor.stage = TRUE, tumor.m =TRUE, tumor.n = FALSE)
+clean_edger_names <- gene_vector_cleaner(edger_df_done$X)
+edger_df_done$X <- clean_edger_names
+colnames(edger_df_done)[1] <- "gene"
+cox_edger2 <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = edger_df_done$gene, tumor.stage = FALSE, tumor.n =FALSE, tumor.m = FALSE)
 
 
 #Leukemia only----
@@ -960,7 +961,7 @@ merged_df_stageI_II <- filter(merged_df, )
 #KM curves----
 hr_calcs <- list()
 counter <- 1
-for (x in cox_models[8]) {
+for (x in cox_models[1:11]) {
   current_cox <- x
   current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = cox_df, include.cat.data = TRUE, tumor.stage = TRUE, n.stage = FALSE)
   hr_calcs[[as.character(counter)]] <- current_hr
@@ -1033,7 +1034,7 @@ counter <- 1
 for (x in hr_calcs) {
   current_calc <- x
   current_pvalue <- hr_pvalues[counter]
-  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "MiRNA + SDES + Tumor Stage + N Stage Rectal Cancer Patients")
+  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "MiRNA + SDES + Tumor Stage Rectal Cancer Patients")
   hr_plots[[as.character(counter)]] <- current_plot
   counter <- counter + 1
 }
@@ -1056,7 +1057,7 @@ km_desingle <- km_plotter(km.fit = hr_desingle$KM, data.source = hr_desingle$DF,
 km_deseq2 <- km_plotter(km.fit = hr_deseq2$KM, data.source = hr_deseq2$DF, p.value = pvalue_deseq2, plot.title = "DESeq2 + Tumor Stage + N Stage Colon & Rectal Cancer Patients")
 
 #KM plot for edgeR----
-km_edger <- km_plotter(km.fit = hr_edger$KM, data.source = hr_edger$DF, p.value = pvalue_edger, plot.title = "edgeR + Tumor Stage + N Stage Rectal Cancer Patients")
+km_edger <- km_plotter(km.fit = hr_edger$KM, data.source = hr_edger$DF, p.value = TRUE, plot.title = "edgeR Rectal Cancer Patients")
 
 #KM plot for active genes----
 km_active <- km_plotter(km.fit = hr_active_genes$KM, data.source = hr_active_genes$DF, p.value = pvalue_active, plot.title = "Active Genes Only SDES + MiRNA Leukemia Patients from K562 Cell-line")

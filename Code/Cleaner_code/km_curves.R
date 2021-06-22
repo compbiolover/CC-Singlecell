@@ -27,6 +27,7 @@ hr_calculator <- function(model.coefs            =Coefficients,
     print("Categorical data included in HR calculation.")
     if(tumor.stage==TRUE & n.stage==FALSE){
       print("Tumor stage data included in HR calculation.")
+      print("N stage data is NOT included in HR calculation.")
       data$tumor.stage <- gsub(data$tumor.stage, pattern="stge iv", replacement=4)
       data$tumor.stage <- gsub(data$tumor.stage, pattern="stge iii", replacement=3)
       data$tumor.stage <- gsub(data$tumor.stage, pattern="stge ii", replacement=2)
@@ -49,7 +50,7 @@ hr_calculator <- function(model.coefs            =Coefficients,
       print("Active genes after removal....")
       print(active_genes)
       surv_gene_df <- data[,active_genes]
-      gene_expr <- mean(as.matrix(surv_gene_df))
+      gene_expr <- median(as.matrix(surv_gene_df))
       if(is.null(dim(surv_gene_df))==TRUE){
         surv_gene_df <- as.data.frame(surv_gene_df)
       }
@@ -57,9 +58,7 @@ hr_calculator <- function(model.coefs            =Coefficients,
       rm(surv_gene_df)
       active_genes <- c(active_genes, "tumor.stage")
       print(active_genes)
-      #####Check this also!!!
-      
-      if(tumor.stage==TRUE & n.stage==TRUE){
+      }else if (tumor.stage==TRUE & n.stage==TRUE){
         print("N stage data included in HR calculation.")
         data$ajcc.n <- gsub(data$ajcc.n, pattern="N0", replacement=1)
         data$ajcc.n <- gsub(data$ajcc.n, pattern="N1", replacement=2)
@@ -75,7 +74,7 @@ hr_calculator <- function(model.coefs            =Coefficients,
         active_genes <-rownames(model.coefs)[Active.Index]
         active_genes <- active_genes[!active_genes %in% my.remove]
         surv_gene_df <- data[,active_genes]
-        gene_expr <- mean(as.matrix(surv_gene_df))
+        gene_expr <- median(as.matrix(surv_gene_df))
         if(is.null(dim(surv_gene_df))==TRUE){
           surv_gene_df <- as.data.frame(surv_gene_df)
           #View(surv_gene_df)
@@ -84,23 +83,20 @@ hr_calculator <- function(model.coefs            =Coefficients,
         rm(surv_gene_df)
         active_genes <- c(active_genes, "ajcc.n", "tumor.stage")
         print(active_genes)
-        
-      }else{
-        print("N stage data is NOT included in HR calculation.")
+      }else if (tumor.stage==FALSE & n.stage==TRUE){
+        print("Tumor data not included in HR calculation.")
+        print("N stage data is included in HR calculation.")
+        print("This section is still under construction.")
+        quit()
       }
-      
-      
-    }else{
-      print("Tumor stage data is NOT included in HR calculation.")
-    }
-    
-    
   }else{
+    print("No categorical data is included in HR calculation.")
     Active.Index <- which(as.logical(model.coefs) != 0)
     Active.Coefficients  <- model.coefs[Active.Index]
     active_genes <-rownames(model.coefs)[Active.Index]
     active_genes <- active_genes[!active_genes %in% my.remove]
-  }
+    }
+    
   
   surv_gene_df=data[,active_genes]
   if(is.null(dim(surv_gene_df))==TRUE){
@@ -109,20 +105,22 @@ hr_calculator <- function(model.coefs            =Coefficients,
   surv_gene_df <- apply(surv_gene_df, c(1,2), as.numeric)
   #View(surv_gene_df)
   beta <-Active.Coefficients
-  gene_expr <- mean(as.matrix(surv_gene_df))
+  gene_expr <- median(as.matrix(surv_gene_df))
   #print(class(surv_gene_df))
   print(dim(surv_gene_df))
   patient_gene_expr<- surv_gene_df[1:length(rownames(surv_gene_df)),]
   subtracted_value <- patient_gene_expr - gene_expr
   #print(dim(subtracted_value))
-  print(length(beta))
-  print(beta)
+  #print(length(beta))
+  #print(beta)
   hr_calc <- beta*(subtracted_value)
   #print(hr_calc)
   if(is.null(dim(hr_calc))){
     risk <- hr_calc
+    #print(risk)
   }else{
     risk <- as.vector(apply(hr_calc,1,sum))
+    #print(risk)
   }
   
   med_hr_value <- median(as.matrix(hr_calc))
@@ -194,7 +192,7 @@ km_pvalue_calculator <- function(surv.time         =time,
   colname_changes <- unlist(colname_changes)
   colnames(surv.df) <- colname_changes
   diff=survdiff(Surv(surv.time, surv.status) ~ surv.predictors, data = surv.df)
-  p_Value=1-pchisq(diff$chisq,df=1)
+  p_Value=1-pchisq(diff$chisq, length(diff$n) - 1)
   p_Value=signif(p_Value,num.sig.figs)
   p_Value=format(p_Value, scientific = scientific.p.value)
   
@@ -205,7 +203,7 @@ km_pvalue_calculator <- function(surv.time         =time,
 #KM plotter----
 km_plotter <- function(km.fit        =km_fit,
                        data.source   =surv_gene_df,
-                       p.value       =p_Value,
+                       p.value       =TRUE,
                        pval.digits   =4,
                        confidence.int=FALSE,
                        legend.labs   =c("High risk", "Low risk"),
@@ -220,7 +218,8 @@ km_plotter <- function(km.fit        =km_fit,
   #KM Curves plotting code----
   sur_Plot<-ggsurvplot(km.fit,
                        data=data.source,
-                       pval=paste0("p=",p.value),
+                       pval=TRUE,
+                       pval.method = FALSE,
                        pval.size=pval.digits,
                        conf.int = confidence.int,
                        legend.labs=legend.labs,
@@ -231,4 +230,19 @@ km_plotter <- function(km.fit        =km_fit,
     
   #Returning our finished KM plot----
   return(sur_Plot)
+}
+
+#Convenient function----
+km_data_generator <- function(data.source=cox_models$`5`$`Active Genes`, data.betas=cox_models$`5`$`Active Coefficients`){
+  test_df <- cox_df[,data.source]
+  my_df <-data.frame(gene_name=data.source, beta=data.betas)
+  my_df$risk_direction <- ifelse(my_df$beta<0, "decrease", "increase")
+  my_df$med_expression <- apply(test_df, 2, median)
+  
+  return(my_df)
+}
+#Second convenient function-----
+km_risk_generator <- function(active.df=my_df, bulk.df=cox_df){
+  test_df <- bulk.df[,active.df$gene_name]
+  
 }
