@@ -163,71 +163,241 @@ cox_model_fitter <- function(my.seed       =1,
 
 
 
-#Risk score calculator.R-----
-require(survival)
-my_file <- read.csv("Data/Data-from-Cleaner-code/Regular_cox_model_outputs/coad_and_read_regular_cox_genes_tumor_1800.csv")
-colnames(my_file)[c(1,6)] <- c("gene","p.value")
-# my_file <- filter(my_file, p.value<0.001)
-
-risk_df <- cox_df[,my_file$gene[1:240]]
-risk_df$tumorstage2 <- ifelse(cox_df$tumor.stage==2, 10,0)
-risk_df$tumorstage3 <- ifelse(cox_df$tumor.stage==3, 15,0)
-risk_df$tumorstage4 <- ifelse(cox_df$tumor.stage==4, 30,0)
-risk_df <- as.matrix(risk_df)
-gene_sign <- ifelse(my_file$coef>0, 1, -1)
-risk_df <- risk_df%*%diag(gene_sign)
-risk_df <- as.data.frame(risk_df)
-colnames(risk_df) <- my_file$gene
-gene_info <- data.frame(med_expression=apply(risk_df, 2, median))
-gene_info <- t(gene_info)
-gene_info <- as.data.frame(gene_info)
-risk_df$vital.status <- cox_df$vital.status
-risk_df$time <- cox_df$days.to.last.follow.up
-
-
-
-my_genes <- colnames(risk_df[1:243])
-risk_converter <-function(my.name=my_genes[1], my.data=risk_df, my.med.exp=gene_info){
-  if(my.med.exp[counter]>0){
-    my.data[,my.name]<- ifelse(my.data[,my.name]> my.med.exp[,my.name], 1, 0)
-  }else{
-    my.data[,my.name]<- ifelse(my.data[,my.name]< my.med.exp[,my.name], -1, 0)
+#risk_score_calculator-----
+risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_cox_model_outputs/coad_and_read_regular_cox_genes_1800.csv", tumor.data=FALSE, n.data=FALSE, my.title="Finished KM Plot", cox.df=cox_df){
+  #Required packages----
+  require(survival)
+  
+  #Required functions----
+  risk_converter <-function(my.name=my_genes[1], my.data=risk_df, my.med.exp=gene_info){
+    if(my.med.exp[counter]>0){
+      my.data[,my.name]<- ifelse(my.data[,my.name]> my.med.exp[,my.name], 1, 0)
+    }else{
+      my.data[,my.name]<- ifelse(my.data[,my.name]< my.med.exp[,my.name], -1, 0)
+    }
+    return(my.data[,my.name])
   }
-  return(my.data[,my.name])
+  km_plotter <- function(km.fit        =km_fit,
+                         data.source   =surv_gene_df,
+                         p.value       =TRUE,
+                         pval.digits   =4,
+                         confidence.int=FALSE,
+                         legend.labs   =c("High risk", "Low risk"),
+                         legend.title  ="Risk",
+                         x.lab         ="Time (days)",
+                         plot.title    ="MiRNA",
+                         color.pal     =c("red", "blue")){
+    
+    #Loading the needed package. If not installed it is automatically done.----
+    require(survminer)
+    
+    #KM Curves plotting code----
+    sur_Plot<-ggsurvplot(km.fit,
+                         data=data.source,
+                         pval=TRUE,
+                         pval.method = FALSE,
+                         pval.size=pval.digits,
+                         conf.int = confidence.int,
+                         legend.labs=legend.labs,
+                         legend.title=legend.title,
+                         xlab=x.lab,
+                         title=plot.title,
+                         palette=color.pal)
+    
+    #Returning our finished KM plot----
+    return(sur_Plot)
+  }
+  
+  
+  
+  #Read in the data----
+  my_file <- read.csv(my.file)
+  colnames(my_file)[c(1,6)] <- c("gene","p.value")
+  if(tumor.data==FALSE & n.data==FALSE){
+    risk_df <- cox_df[,my_file$gene]
+  }
+  
+  #Only for if there is tumor data included----
+  if(tumor.data==TRUE & n.data==FALSE){
+    tumor_info <- filter(my_file, gene=="tumor.stage1" | gene=="tumor.stage2" | gene=="tumor.stage3" | gene=="tumor.stage4")
+    tumor_names <- tumor_info$gene
+    print(tumor_names)
+    tumor_info <- length(tumor_info$gene)
+    just_genes <- length(my_file$gene) - tumor_info
+    risk_df <- cox.df[,my_file$gene[1:just_genes]]
+    for(x in tumor_names){
+      if(x=="tumor.stage1"){
+        risk_df$tumorstage1 <- ifelse(cox_df$tumor.stage==1, 5,0)
+      }else if(x=="tumor.stage2"){
+        risk_df$tumorstage2 <- ifelse(cox_df$tumor.stage==2, 10,0)
+      }else if(x=="tumor.stage3"){
+        risk_df$tumorstage3 <- ifelse(cox_df$tumor.stage==3, 15,0)
+      }else if(x=="tumor.stage4"){
+        risk_df$tumorstage4 <- ifelse(cox_df$tumor.stage==4, 30,0)
+      }
+    }
+    #risk_df$tumorstage1 <- ifelse(cox_df$tumor.stage==1, 5,0)
+    # risk_df$tumorstage2 <- ifelse(cox_df$tumor.stage==2, 10,0)
+    # risk_df$tumorstage3 <- ifelse(cox_df$tumor.stage==3, 15,0)
+    # risk_df$tumorstage4 <- ifelse(cox_df$tumor.stage==4, 30,0)
+    risk_df <- as.matrix(risk_df)
+    gene_sign <- ifelse(my_file$coef>0, 1, -1)
+    print(length(gene_sign))
+    print(dim(risk_df))
+    View(risk_df)
+    risk_df <- risk_df%*%diag(gene_sign)
+    risk_df <- as.data.frame(risk_df)
+    colnames(risk_df) <- my_file$gene
+    gene_info <- data.frame(med_expression=apply(risk_df, 2, median))
+    gene_info <- t(gene_info)
+    gene_info <- as.data.frame(gene_info)
+    my_genes <- colnames(risk_df[1:length(colnames(risk_df))])
+    risk_df$vital.status <- cox.df$vital.status
+    risk_df$time <- cox.df$days.to.last.follow.up
+    counter <- 1
+    my_converted_scores <- list()
+    total_risk_length <- length(colnames(risk_df))
+    risk_length <- total_risk_length-2
+    for(x in my_genes){
+      current_risk <- risk_converter(my.name = my_genes[counter], my.data = risk_df[1:risk_length], my.med.exp = gene_info[1:risk_length])
+      my_converted_scores[[as.character(my_genes[counter])]] <- current_risk
+      counter <- counter + 1
+    }
+    #Making a dataframe of the converted scores
+    converted_df <- data.frame(my_df=1:dim(cox.df)[1])
+    counter <- 1
+    for (x in my_converted_scores) {
+      converted_df <- cbind(my_converted_scores[my_genes[counter]], converted_df)
+      counter <- counter + 1
+    }
+    
+    converted_df[,"my_df"] <- NULL
+    rownames(converted_df) <- rownames(cox.df)
+    converted_df$vital.status <- cox.df$vital.status
+    converted_df$time <- cox.df$days.to.last.follow.up
+    converted_df <- apply(converted_df, 2, as.numeric)
+    patient_risks <- rowSums(x=converted_df[,1:risk_length])
+    converted_df <- as.data.frame(converted_df)
+    converted_df$risk <- patient_risks
+    converted_df <- apply(converted_df, 2, as.numeric)
+    median_risk <- median(abs(converted_df[,1:risk_length]))
+    converted_df <- as.data.frame(converted_df)
+    converted_df$risk <- ifelse(converted_df$risk>median_risk, "high", "low")
+    km_fit <- survfit(Surv(time, vital.status) ~ risk, data = converted_df)
+    
+    km_plotter(km.fit = km_fit, data.source = converted_df, p.value = TRUE, plot.title = my.title)
+    
+    
+  #For just the genes only----
+  }else{
+    risk_df <- cox.df[,my_file$gene]
+    risk_df <- as.matrix(risk_df)
+    gene_sign <- ifelse(my_file$coef>0, 1,-1)
+    risk_df <- risk_df%*%diag(gene_sign)
+    risk_df <- as.data.frame(risk_df)
+    colnames(risk_df) <- my_file$gene
+    gene_info <- data.frame(med_expression=apply(risk_df, 2, median))
+    gene_info <- t(gene_info)
+    gene_info <- as.data.frame(gene_info)
+    my_genes <- colnames(risk_df[1:length(colnames(risk_df))])
+    risk_df$vital.status <- cox.df$vital.status
+    risk_df$time <- cox.df$days.to.last.follow.up
+    counter <- 1
+    my_converted_scores <- list()
+    total_risk_length <- length(colnames(risk_df))
+    risk_length <- total_risk_length-2
+    for(x in my_genes){
+      current_risk <- risk_converter(my.name = my_genes[counter], my.data = risk_df[1:risk_length], my.med.exp = gene_info[1:risk_length])
+      my_converted_scores[[as.character(my_genes[counter])]] <- current_risk
+      counter <- counter + 1
+    }
+    #Making a dataframe of the converted scores
+    converted_df <- data.frame(my_df=1:dim(cox.df)[1])
+    counter <- 1
+    for (x in my_converted_scores) {
+      converted_df <- cbind(my_converted_scores[my_genes[counter]], converted_df)
+      counter <- counter + 1
+    }
+    
+    converted_df[,"my_df"] <- NULL
+    rownames(converted_df) <- rownames(cox.df)
+    converted_df$vital.status <- cox.df$vital.status
+    converted_df$time <- cox.df$days.to.last.follow.up
+    converted_df <- apply(converted_df, 2, as.numeric)
+    patient_risks <- rowSums(x=converted_df[,1:risk_length])
+    converted_df <- as.data.frame(converted_df)
+    converted_df$risk <- patient_risks
+    converted_df <- apply(converted_df, 2, as.numeric)
+    median_risk <- median(abs(converted_df[,1:risk_length]))
+    converted_df <- as.data.frame(converted_df)
+    converted_df$risk <- ifelse(converted_df$risk>median_risk, "high", "low")
+    km_fit <- survfit(Surv(time, vital.status) ~ risk, data = converted_df)
+    
+    km_plotter(km.fit = km_fit, data.source = converted_df, p.value = TRUE, plot.title = my.title)
+    
+  }
+  
+  
 }
 
-counter <- 1
-my_converted_scores <- list()
-for(x in my_genes){
-  current_risk <- risk_converter(my.name = my_genes[counter], my.data = risk_df[1:243], my.med.exp = gene_info[1:243])
-  my_converted_scores[[as.character(my_genes[counter])]] <- current_risk
-  counter <- counter + 1
-}
 
-#Making a dataframe of the converted scores
-converted_df <- data.frame(my_df=1:673)
-counter <- 1
-for (x in my_converted_scores) {
-  converted_df <- cbind(my_converted_scores[my_genes[counter]], converted_df)
-  counter <- counter + 1
-}
 
-converted_df[,"my_df"] <- NULL
-rownames(converted_df) <- rownames(cox_df)
-converted_df$vital.status <- cox_df$vital.status
-converted_df$time <- cox_df$days.to.last.follow.up
-converted_df <- apply(converted_df, 2, as.numeric)
-patient_risks <- rowSums(x=converted_df[,1:243])
-converted_df <- as.data.frame(converted_df)
-converted_df$risk <- patient_risks
-converted_df <- apply(converted_df, 2, as.numeric)
-median_risk <- median(abs(converted_df[,1:243]))
-converted_df <- as.data.frame(converted_df)
-converted_df$risk <- ifelse(converted_df$risk>median_risk, "high", "low")
-km_fit <- survfit(Surv(time, vital.status) ~ risk, data = converted_df)
 
-km_plotter(km.fit = km_fit, data.source = converted_df, p.value = TRUE, plot.title = "CC Singlecell MS + Tumor Stage COAD + READ")
-
+# require(survival)
+# my_file <- read.csv("Data/Data-from-Cleaner-code/Regular_cox_model_outputs/coad_and_read_regular_cox_genes_tumor_1800.csv")
+# colnames(my_file)[c(1,6)] <- c("gene","p.value")
+# 
+# risk_df <- cox_df[,my_file$gene[1:240]]
+# risk_df$tumorstage2 <- ifelse(cox_df$tumor.stage==2, 10,0)
+# risk_df$tumorstage3 <- ifelse(cox_df$tumor.stage==3, 15,0)
+# risk_df$tumorstage4 <- ifelse(cox_df$tumor.stage==4, 30,0)
+# risk_df <- as.matrix(risk_df)
+# gene_sign <- ifelse(my_file$coef>0, 1, -1)
+# risk_df <- risk_df%*%diag(gene_sign)
+# risk_df <- as.data.frame(risk_df)
+# colnames(risk_df) <- my_file$gene
+# gene_info <- data.frame(med_expression=apply(risk_df, 2, median))
+# gene_info <- t(gene_info)
+# gene_info <- as.data.frame(gene_info)
+# risk_df$vital.status <- cox_df$vital.status
+# risk_df$time <- cox_df$days.to.last.follow.up
+# 
+# 
+# 
+# my_genes <- colnames(risk_df[1:243])
+# 
+# counter <- 1
+# my_converted_scores <- list()
+# for(x in my_genes){
+#   current_risk <- risk_converter(my.name = my_genes[counter], my.data = risk_df[1:243], my.med.exp = gene_info[1:243])
+#   my_converted_scores[[as.character(my_genes[counter])]] <- current_risk
+#   counter <- counter + 1
+# }
+# 
+# #Making a dataframe of the converted scores
+# converted_df <- data.frame(my_df=1:673)
+# counter <- 1
+# for (x in my_converted_scores) {
+#   converted_df <- cbind(my_converted_scores[my_genes[counter]], converted_df)
+#   counter <- counter + 1
+# }
+# 
+# converted_df[,"my_df"] <- NULL
+# rownames(converted_df) <- rownames(cox_df)
+# converted_df$vital.status <- cox_df$vital.status
+# converted_df$time <- cox_df$days.to.last.follow.up
+# converted_df <- apply(converted_df, 2, as.numeric)
+# patient_risks <- rowSums(x=converted_df[,1:243])
+# converted_df <- as.data.frame(converted_df)
+# converted_df$risk <- patient_risks
+# converted_df <- apply(converted_df, 2, as.numeric)
+# median_risk <- median(abs(converted_df[,1:243]))
+# converted_df <- as.data.frame(converted_df)
+# converted_df$risk <- ifelse(converted_df$risk>median_risk, "high", "low")
+# km_fit <- survfit(Surv(time, vital.status) ~ risk, data = converted_df)
+# 
+# km_plotter(km.fit = km_fit, data.source = converted_df, p.value = TRUE, plot.title = "CC Singlecell MS + Tumor Stage COAD + READ")
+# 
 
 #Code for just testing tumor stage and n pathological state----
 my_predictors <- paste("~", paste("ajcc.n", sep = "+"), collapse = "+")
