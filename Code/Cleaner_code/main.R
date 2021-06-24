@@ -546,9 +546,9 @@ for (y in gene_sizes){
 cox_models <- list()
 my_cindicies <- c()
 counter <- 1
-for (x in mirna_sde_optimized[6]) {
+for (x in mirna_sde_optimized[5]) {
   current_weight <- x
-  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = TRUE, tumor.n = FALSE, tumor.m = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/coad_and_read_regular_cox_genes_tumor_1800.csv") 
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1200, cox.predictors = current_weight, tumor.stage = TRUE, tumor.n = FALSE, tumor.m = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/read_regular_cox_genes_ms_tumor_1200.csv") 
   cox_models[[as.character(counter)]] <- current_cox
   counter <- counter + 1
   
@@ -558,6 +558,14 @@ for (x in mirna_sde_optimized[6]) {
   current_c <- round(current_c, digits = 4)
   my_cindicies <- c(my_cindicies, current_c)
 }
+
+
+risk_score_calculator(my.file = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/read_regular_cox_genes_ms_tumor_1200.csv",
+                      my.title = "CC Singlecell MS + Tumor Stage READ",
+                      tumor.data = TRUE, n.data = FALSE, cox.df = cox_df)
+
+
+
 
 all_dfs <- list()
 counter <- 1
@@ -684,14 +692,14 @@ lc_plot <- lc_gene_num + ggtitle("TCGA-LUAD") +
 
 #Cox for DESeq2----
 resOrdered_subset_finished <- read.csv("Data/Data-from-Cleaner-code/deseq2_top1800_genes_cc_patients.csv")
-cox_deseq2 <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = resOrdered_subset_finished$gene, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+cox_deseq2 <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = resOrdered_subset_finished$gene, tumor.stage = TRUE, tumor.m = FALSE, tumor.n = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/deseq2_read_tumor.csv")
 
 #Cox for edgeR----
 edger_df_done <- read.csv("Data/Data-from-Cleaner-code/finished_edgeR_genes.csv")
 clean_edger_names <- gene_vector_cleaner(edger_df_done$X)
 edger_df_done$X <- clean_edger_names
 colnames(edger_df_done)[1] <- "gene"
-cox_edger2 <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = edger_df_done$gene, tumor.stage = FALSE, tumor.n =FALSE, tumor.m = FALSE)
+cox_edger2 <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = edger_df_done$gene, tumor.stage = TRUE, tumor.n =FALSE, tumor.m = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/edger_read_tumor.csv")
 
 
 #Leukemia only----
@@ -875,7 +883,7 @@ p + ggtitle("scDD Concordance Index Across Gene Number") +
 
 
 #Just for testing scDD active genes----
-scdd_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 511, cox.predictors = scdd_genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
+scdd_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 521, cox.predictors = scdd_genes, tumor.stage = TRUE, tumor.m = FALSE, tumor.n = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/scdd_read_genes_tumor.csv")
 
 
 #Cox for DESingle----
@@ -938,16 +946,9 @@ p + ggtitle("DEsingle Concordance Index Across Gene Number") +
 
 
 
-
-desingle_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = desingle_genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
-
-
-
-
-#Subset to a particular race
-cox_df <- subset(cox_df, cox_df$race=="black or african american")
-
-
+desingle_genes <- des_results
+desingle_genes <- intersect(rownames(desingle_genes), colnames(cox_df))
+desingle_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = desingle_genes, tumor.stage = TRUE, tumor.m = FALSE, tumor.n = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/desingle_read_tumor.csv")
 
 
 #Filtering the merged df to just stage I and II patients----
