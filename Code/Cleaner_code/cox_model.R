@@ -464,62 +464,6 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
   }
 
 
-# require(survival)
-# my_file <- read.csv("Data/Data-from-Cleaner-code/Regular_cox_model_outputs/coad_and_read_regular_cox_genes_tumor_1800.csv")
-# colnames(my_file)[c(1,6)] <- c("gene","p.value")
-# 
-# risk_df <- cox_df[,my_file$gene[1:240]]
-# risk_df$tumorstage2 <- ifelse(cox_df$tumor.stage==2, 10,0)
-# risk_df$tumorstage3 <- ifelse(cox_df$tumor.stage==3, 15,0)
-# risk_df$tumorstage4 <- ifelse(cox_df$tumor.stage==4, 30,0)
-# risk_df <- as.matrix(risk_df)
-# gene_sign <- ifelse(my_file$coef>0, 1, -1)
-# risk_df <- risk_df%*%diag(gene_sign)
-# risk_df <- as.data.frame(risk_df)
-# colnames(risk_df) <- my_file$gene
-# gene_info <- data.frame(med_expression=apply(risk_df, 2, median))
-# gene_info <- t(gene_info)
-# gene_info <- as.data.frame(gene_info)
-# risk_df$vital.status <- cox_df$vital.status
-# risk_df$time <- cox_df$days.to.last.follow.up
-# 
-# 
-# 
-# my_genes <- colnames(risk_df[1:243])
-# 
-# counter <- 1
-# my_converted_scores <- list()
-# for(x in my_genes){
-#   current_risk <- risk_converter(my.name = my_genes[counter], my.data = risk_df[1:243], my.med.exp = gene_info[1:243])
-#   my_converted_scores[[as.character(my_genes[counter])]] <- current_risk
-#   counter <- counter + 1
-# }
-# 
-# #Making a dataframe of the converted scores
-# converted_df <- data.frame(my_df=1:673)
-# counter <- 1
-# for (x in my_converted_scores) {
-#   converted_df <- cbind(my_converted_scores[my_genes[counter]], converted_df)
-#   counter <- counter + 1
-# }
-# 
-# converted_df[,"my_df"] <- NULL
-# rownames(converted_df) <- rownames(cox_df)
-# converted_df$vital.status <- cox_df$vital.status
-# converted_df$time <- cox_df$days.to.last.follow.up
-# converted_df <- apply(converted_df, 2, as.numeric)
-# patient_risks <- rowSums(x=converted_df[,1:243])
-# converted_df <- as.data.frame(converted_df)
-# converted_df$risk <- patient_risks
-# converted_df <- apply(converted_df, 2, as.numeric)
-# median_risk <- median(abs(converted_df[,1:243]))
-# converted_df <- as.data.frame(converted_df)
-# converted_df$risk <- ifelse(converted_df$risk>median_risk, "high", "low")
-# km_fit <- survfit(Surv(time, vital.status) ~ risk, data = converted_df)
-# 
-# km_plotter(km.fit = km_fit, data.source = converted_df, p.value = TRUE, plot.title = "CC Singlecell MS + Tumor Stage COAD + READ")
-# 
-
 #Code for just testing tumor stage and n pathological state----
 my_predictors <- paste("~", paste("ajcc.n", sep = "+"), collapse = "+")
 my_predictors <- as.formula(my_predictors)
