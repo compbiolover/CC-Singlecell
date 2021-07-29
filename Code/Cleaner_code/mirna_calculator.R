@@ -14,7 +14,9 @@ mirna_calculator <- function(ts.org             ="Human",
                              print.ts.targets   =TRUE,
                              mirna.remove       ="hsa-miR-129-1-3p",
                              mirna.filename     ="TargetScan_output.RData",
-                             max.mirnas         =1559){
+                             max.mirnas         =1559,
+                             write.heatmap.data =TRUE,
+                             heatmap.data.name  ="~/Desktop/my_heatmap_data.csv"){
   
   #Loading required package----
   require(tidyverse)
@@ -123,6 +125,10 @@ mirna_calculator <- function(ts.org             ="Human",
       }
       
     }
+  }
+  
+  if(write.heatmap.data==TRUE){
+    write.csv(miRNA_score, file = heatmap.data.name)
   }
   
   #Now calculating the rowsums of each gene for total number of miRNA interactions----

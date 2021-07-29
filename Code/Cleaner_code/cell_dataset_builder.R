@@ -6,7 +6,10 @@
 #cell_dataset_builder----
 cell_dataset_builder <- function(vim.genes=vim,
                                  cell.data=denoised_sc,
-                                 cell.meta=gene_metadata){
+                                 cell.meta=gene_metadata,
+                                 graph.root=1.5,
+                                 show.traj=TRUE,
+                                 point.size=2.5){
   #Required packages----
   require(monocle3)
   
@@ -24,12 +27,14 @@ cell_dataset_builder <- function(vim.genes=vim,
   vim_plot <- plot_cells(cds, genes=vim_genes, cell_size=0.50)
   cds <- learn_graph(cds)
   cds <- order_cells(cds)
-  pt_graph <-plot_cells(cds                 = cds,
+  pt_graph <-plot_cells(cds      = cds,
              color_cells_by      = "pseudotime",
              label_cell_groups   = FALSE,
              label_leaves        = FALSE,
              label_branch_points = FALSE,
-             graph_label_size    = 1.5)
+             graph_label_size    = graph.root,
+             show_trajectory_graph = show.traj,
+             cell_size = point.size)
   
   
   #Integrating the new pseudotime data into the count matrix.----

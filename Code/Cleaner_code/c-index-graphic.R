@@ -9,8 +9,10 @@ setwd("~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/")
 
 #Reading in the file----
 my_file <- read.csv("Completed_KM_Curves/Final-c-index-and-km-curve-document.csv")
-my_file$pvalue_trans <- -log10(my_file$pvalue_finished)
-res_aov_1 <- aov(cindex_finished~Method, data = my_file)
+my_file <- subset(my_file, select=c(1:4, 19:23))
+my_file <- filter(my_file, scRNA.seq.dataset != "GSE81861_Cell_line_hct116")
+my_file$pvalue_trans <- -log10(my_file$pvalue_finished_corrected_risk)
+res_aov_1 <- aov(C.index_at_optimal_genes_corrected_risk~Method, data = my_file)
 aov_sum_1 <- summary(res_aov_1)
 pvalue_to_plot_1 <- round(aov_sum_1[[1]][["Pr(>F)"]][1], digits = 5)
 tukey_aov_1 <- TukeyHSD(res_aov_1)
@@ -22,38 +24,33 @@ my_file <- filter(my_file, Method=="MiRNA + SDES" | Method== "MiRNA + MAD" | Met
 my_file <- filter(my_file, Method=="MiRNA + SDES + Tumor stage" | Method== "MiRNA + MAD + Tumor stage" | Method== "scDD (genes + Tumor stage)" | Method== "DESeq2 (genes only + Tumor stage)" | Method=="edgeR (genes only + Tumor stage)" | Method=="DEsingle (genes + Tumor stage)" | Method=="MAD + Tumor stage" | Method=="MiRNA + Tumor stage" | Method=="SDES + Tumor stage")
 #genes + tumor and N stage
 my_file <- filter(my_file, Method=="MiRNA + SDES + Tumor stage + N stage" | Method== "MiRNA + MAD + Tumor stage + N stage" | Method== "scDD (genes + Tumor stage + N stage)" | Method== "DESeq2 (genes only + Tumor stage + N stage)" | Method=="edgeR (genes only + Tumor stage + N stage)" | Method=="DEsingle (genes + Tumor stage + N stage)" | Method=="MAD + Tumor stage + N stage" | Method=="MiRNA + Tumor stage + N stage" | Method=="SDES + Tumor stage + N stage")
+#Making the names cleaner
 my_file <- my_file %>% group_by(Method)
-my_file[c(1,4,6), "Method"] <- "CC Singlecell MS"
-my_file[c(2,3,5), "Method"] <- "CC Singlecell MM"
+my_file[c(1,3,6), "Method"] <- "CC Singlecell MS"
+my_file[c(2,4,5), "Method"] <- "CC Singlecell MM"
 my_file[7:9,"Method"] <- "scDD"
 my_file[10:12,"Method"] <- "DEsingle"
-my_file[19:21, "Method"] <- "DESeq2"
-my_file[22:24, "Method"] <- "edgeR"
-my_file[25:27, "Method"] <- "MAD"
-my_file[28:30, "Method"] <- "SDES"
-my_file[31:33, "Method"] <- "MiRNA"
-
-#For removing the cell-line sc data----
-my_file <- my_file[-c(13:18),]
+my_file[13:15, "Method"] <- "DESeq2"
+my_file[16:18, "Method"] <- "edgeR"
+my_file[19:21, "Method"] <- "MAD"
+my_file[22:24, "Method"] <- "SDES"
+my_file[25:27, "Method"] <- "MiRNA"
 
 
-
-
-
-
+#Making nicer graphs----
 #my_file <- filter(my_file, Bulk.dataset== "TCGA-COAD" | Bulk.dataset=="TCGA-READ")
 #my_comparisons <- list(c("DEsingle, MiRNA + MAD"), c("DEsingle, MiRNA + SDES"), c("scDD, MiRNA + MAD"), c("scDD, MiRNA + SDES"))
 #my_file$Method <- factor(my_file$Method, levels = c("MAD","SDES","MiRNA","MiRNA + SDES","MiRNA + MAD","DEsingle","scDD","DESeq2","edgeR"))
 my_file$Method <- factor(my_file$Method, levels = c("MAD", "SDES", "MiRNA", "CC Singlecell MS", "CC Singlecell MM", "DEsingle", "scDD", "DESeq2", "edgeR"))
 my_file$Bulk.dataset <- factor(my_file$Bulk.dataset, levels = c("TCGA-COAD", "TCGA-READ", "TCGA-COAD + TCGA-READ"))
 
-
-cindex_bar <- ggplot(my_file, aes(x=Method, y = cindex_finished, fill=Bulk.dataset))+
+#C-index graph----
+cindex_bar3 <- ggplot(my_file, aes(x=Method, y = C.index_at_optimal_genes_corrected_risk, fill=Bulk.dataset))+
   geom_bar(stat= "identity",position = position_dodge())+
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
         panel.background = element_blank(),
         axis.line = element_line(colour = "grey"))+
-  ggtitle("Gene Signature + All Clinical Factor C-indices")+
+  ggtitle("Gene Signature & All Clinical Data C-indices")+
   xlab("Method")+
   ylab("Concordance Index")+
   scale_fill_discrete("Bulk Dataset")+
@@ -62,17 +59,17 @@ cindex_bar <- ggplot(my_file, aes(x=Method, y = cindex_finished, fill=Bulk.datas
 
 
 
-cindex_bar <- cindex_bar + coord_cartesian(ylim = c(0.5, 0.7))
-
+cindex_bar3 <- cindex_bar3 + coord_cartesian(ylim = c(0.5, 0.7))
+cindex_bar3
 
 
 #P-value graph----
-pvalue_bar <- ggplot(my_file, aes(x=Method, y =pvalue_trans, fill=Bulk.dataset))+
+pvalue_bar3 <- ggplot(my_file, aes(x=Method, y =pvalue_trans, fill=Bulk.dataset))+
   geom_bar(stat = "identity", position = position_dodge())+
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
         panel.background = element_blank(),
         axis.line = element_line(colour = "grey"))+
-  ggtitle("Gene Signature + All Clinical Factor P-values")+
+  ggtitle("Gene Signature & All Clinical Data P-values")+
   xlab("Method")+
   ylab("-log(P-value)")+
   scale_fill_discrete("Bulk Dataset")+
@@ -80,31 +77,61 @@ pvalue_bar <- ggplot(my_file, aes(x=Method, y =pvalue_trans, fill=Bulk.dataset))
   geom_hline(yintercept = -log10(0.05))
 
 
-pvalue_bar
+pvalue_bar3
+
+#All graphs together----
+big_graph <- ggarrange(cindex_bar, pvalue_bar, cindex_bar2, pvalue_bar2, cindex_bar3, pvalue_bar3, labels = c("A.", "B.", "C.", "D.", "E.", "F."), ncol = 1, nrow = 6, common.legend = TRUE)
 
 
-big_graph <- ggarrange(cindex_bar, pvalue_bar, cindex_bar2, pvalue_bar2, cindex_bar3, pvalue_bar3, labels = c("A.", "B.", "C.", "D.", "E.", "F."), ncol = 2, nrow = 3, common.legend = TRUE)
 
-
-p<- ggplot(my_file, aes(x=Method, y=cindex_finished, fill=Method))+
-  geom_boxplot(data=my_file, aes(x=Method, y=cindex_finished))+
+#Set size of active genes----
+set_bar <- ggplot(my_file, aes(x=Method, y = glmnet_active_genes_optimal_corrected_risk, fill=Bulk.dataset))+
+  geom_bar(stat= "identity",position = position_dodge())+
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-        legend.position = "none", panel.background = element_blank(),
+        panel.background = element_blank(),
         axis.line = element_line(colour = "grey"))+
-  ggtitle("Gene Signatures Only")+
+  ggtitle("Genes")+
   xlab("Method")+
-  ylab("Concordance Index")
+  ylab("Set Size")+
+  scale_fill_discrete("Bulk Dataset")+
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))
 
-p
+
+set_bar
 
 
-finished_plot <- p+ geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5)+
-  stat_compare_means(method = "anova", label.x = 1, label.y = 0.56)+
-  stat_compare_means(label = "p.signif", method = "t.test",
-                     ref.group = "MiRNA + MAD", vjust = -0.8)
-  #scale_x_discrete(guide = guide_axis(check.overlap = TRUE))
-  #scale_x_discrete(guide = guide_axis(n.dodge = 3))
-  
+big_set_graph <- ggarrange(set_bar, set_bar2, set_bar3, labels = c("A.", "B.", "C."), ncol = 3, nrow = 1, common.legend = TRUE)
+big_set_graph
+
+
+#Intersect plot----
+#TODO
+
+
+#Coefficients graph----
+
+
+
+#Boxplot with dotplot----
+# p<- ggplot(my_file, aes(x=Method, y=cindex_finished, fill=Method))+
+#   geom_boxplot(data=my_file, aes(x=Method, y=cindex_finished))+
+#   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+#         legend.position = "none", panel.background = element_blank(),
+#         axis.line = element_line(colour = "grey"))+
+#   ggtitle("Gene Signatures Only")+
+#   xlab("Method")+
+#   ylab("Concordance Index")
+# 
+# p
+# 
+# 
+# finished_plot <- p+ geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5)+
+#   stat_compare_means(method = "anova", label.x = 1, label.y = 0.56)+
+#   stat_compare_means(label = "p.signif", method = "t.test",
+#                      ref.group = "MiRNA + MAD", vjust = -0.8)
+#   #scale_x_discrete(guide = guide_axis(check.overlap = TRUE))
+#   #scale_x_discrete(guide = guide_axis(n.dodge = 3))
+#   
 #Power analysis----
 summary_df <- my_file %>% dplyr::group_by(Method) %>% dplyr::summarise(m=median(C.index_at_1800_genes))
 groupmedians <- summary_df$m

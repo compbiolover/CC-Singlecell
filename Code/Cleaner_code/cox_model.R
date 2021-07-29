@@ -214,10 +214,13 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
   #Read in the data----
   my_file <- read.csv(my.file)
   colnames(my_file)[c(1,6)] <- c("gene","p.value")
+  
   if(tumor.data==FALSE & n.data==FALSE){
-    risk_df <- cox_df[,my_file$gene]
+    risk_df <- cox.df[,my_file$gene]
     risk_df <- as.matrix(risk_df)
+    print(dim(risk_df))
     gene_sign <- ifelse(my_file$coef>0, 1,-1)
+    print(length(gene_sign))
     risk_df <- risk_df%*%diag(gene_sign)
     risk_df <- as.data.frame(risk_df)
     colnames(risk_df) <- my_file$gene
@@ -278,13 +281,13 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
     
     for(x in tumor_names){
       if(x=="tumor.stage1"){
-        risk_df$tumorstage1 <- ifelse(cox_df$tumor.stage==1, 5,0)
+        risk_df$tumorstage1 <- ifelse(cox.df$tumor.stage==1, 5,0)
       }else if(x=="tumor.stage2"){
-        risk_df$tumorstage2 <- ifelse(cox_df$tumor.stage==2, 10,0)
+        risk_df$tumorstage2 <- ifelse(cox.df$tumor.stage==2, 10,0)
       }else if(x=="tumor.stage3"){
-        risk_df$tumorstage3 <- ifelse(cox_df$tumor.stage==3, 15,0)
+        risk_df$tumorstage3 <- ifelse(cox.df$tumor.stage==3, 15,0)
       }else if(x=="tumor.stage4"){
-        risk_df$tumorstage4 <- ifelse(cox_df$tumor.stage==4, 30,0)
+        risk_df$tumorstage4 <- ifelse(cox.df$tumor.stage==4, 30,0)
       }
     }
     risk_df <- as.matrix(risk_df)
@@ -351,23 +354,23 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
       
       for(x in tumor_names){
         if(x=="tumor.stage1"){
-          risk_df$tumorstage1 <- ifelse(cox_df$tumor.stage==1, 5,0)
+          risk_df$tumorstage1 <- ifelse(cox.df$tumor.stage==1, 5,0)
         }else if(x=="tumor.stage2"){
-          risk_df$tumorstage2 <- ifelse(cox_df$tumor.stage==2, 10,0)
+          risk_df$tumorstage2 <- ifelse(cox.df$tumor.stage==2, 10,0)
         }else if(x=="tumor.stage3"){
-          risk_df$tumorstage3 <- ifelse(cox_df$tumor.stage==3, 15,0)
+          risk_df$tumorstage3 <- ifelse(cox.df$tumor.stage==3, 15,0)
         }else if(x=="tumor.stage4"){
-          risk_df$tumorstage4 <- ifelse(cox_df$tumor.stage==4, 30,0)
+          risk_df$tumorstage4 <- ifelse(cox.df$tumor.stage==4, 30,0)
         }
       }
       
       for(x in n_names){
         if(x=="ajcc.n0"){
-          risk_df$ajcc.n0 <- ifelse(cox_df$ajcc.n==0, 5,0)
+          risk_df$ajcc.n0 <- ifelse(cox.df$ajcc.n==0, 5,0)
         }else if(x=="ajcc.n1"){
-          risk_df$ajcc.n1 <- ifelse(cox_df$ajcc.n==1, 10,0)
+          risk_df$ajcc.n1 <- ifelse(cox.df$ajcc.n==1, 10,0)
         }else if(x=="ajcc.n2"){
-          risk_df$ajcc.n2 <- ifelse(cox_df$ajcc.n==2, 15,0)
+          risk_df$ajcc.n2 <- ifelse(cox.df$ajcc.n==2, 15,0)
         }
       }
       
@@ -427,8 +430,8 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
 #Code for just testing tumor stage and n pathological state----
 my_predictors <- paste("~", paste("ajcc.n", sep = "+"), collapse = "+")
 my_predictors <- as.formula(my_predictors)
-my_x <- model.matrix(my_predictors, cox_df)
-my_y <- Surv(time = cox_df$days.to.last.follow.up, event = cox_df$vital.status)
+my_x <- model.matrix(my_predictors, cox.df)
+my_y <- Surv(time = cox.df$days.to.last.follow.up, event = cox.df$vital.status)
 
 cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C", maxit=100000, family="cox", parallel = TRUE)
 

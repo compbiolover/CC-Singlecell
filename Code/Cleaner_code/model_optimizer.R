@@ -97,7 +97,7 @@ three_weight_optimizer <- function(my.start        =0,
   #Doing the grid search
   for (x in a3_weights){
     for (y in weights) {
-      current_ranking <- three_metric_geneRank(ranking1 = mad.ranking, ranking2 = vim.sdes.ranking, ranking3 = mirna.ranking,  a1=x, a2=1-(x+a3), a3= y)
+      current_ranking <- three_metric_geneRank(ranking1 = first.metric, ranking2 = second.metric, ranking3 = third.metric,  a1=x, a2=1-(x+a3), a3= y)
       current_ranking <- as.data.frame(current_ranking)
       integrated_gene_lists[[as.character(df_index)]] <- current_ranking
       df_index <- df_index + 1
