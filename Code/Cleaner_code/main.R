@@ -3,16 +3,21 @@
 #Purpose: The main script for my project.
 
 #Loading needed packages----
-library(ggplot2)
-library(grid)
-library(SummarizedExperiment)
-library(TCGAbiolinks)
-library(tidyverse)
+library(ggplot2);packageVersion("ggplot2")
+library(grid);packageVersion("grid")
+library(SummarizedExperiment);packageVersion("SummarizedExperiment")
+library(TCGAbiolinks);packageVersion("TCGAbiolinks")
+library(tidyverse);packageVersion("tidyverse")
 
 #Loading single-cell data----
 cc_tumor_fpkm <- read.csv("Data/Single-cell-data/FPKM/GSE81861_CRC_tumor_all_cells_FPKM.csv")
 
 k562_cells <- read.csv("Data/Single-cell-data/Other-cancers/GSE65525_RAW/GSM1599500_K562_cells.csv")
+rownames(k562_cells) <- k562_cells$X
+k562_cells <- subset(k562_cells, select=c(X0:X0.238))
+colnames(k562_cells) <- seq(from=1,to=239,by=1)
+
+
 
 glio <- read.csv("Data/Single-cell-data/Other-cancers/GSE57872_GBM_data_matrix.txt", sep='\t')
 rownames(glio) <- glio$X
@@ -25,26 +30,6 @@ lc_tumor_tpm <- read.csv("Data/Single-cell-data/Other-cancers/GSE69405_PROCESSED
 lc_tumor_tpm <- lc_tumor_tpm[!base::duplicated(lc_tumor_tpm$gene_name),]
 rownames(lc_tumor_tpm) <- lc_tumor_tpm$gene_name
 
-#Loading in gene sets from other methods to compare to our method----
-scdd_genes <- read.csv("Data/Exported-data/Csv-files/scdd_res.csv")
-rownames(scdd_genes) <- scdd_genes$X
-scdd_genes <- scdd_genes[,c("gene", "nonzero.pvalue", "nonzero.pvalue.adj")]
-
-
-#A method to extract the active genes from the cox models----
-active_gene_extractor <- function(cox.num=1){
-  Active.Index <- which(as.logical(cox_models[[cox.num]][2]$Coefficients) != 0)
-  Active.Coefficients  <- cox_models[[cox.num]][2]$Coefficients[Active.Index]
-  active_genes <-rownames(cox_models[[cox.num]][2]$Coefficients)[Active.Index]
-  return_df <- data.frame(active_genes=active_genes, betas=Active.Coefficients)
-  return_df<- return_df[base::order(return_df$betas, decreasing = TRUE),]
-  rownames(return_df) <- 1:length(return_df$betas)
-  return(return_df)
-}
-#DESingle CC patients----
-des_genes <- des_results
-des_genes <- head(rownames(des_genes), n=1800)
-
 
 
 #Log + 1 transforming the cc_tumor sc data to see if it impacts results----
@@ -55,14 +40,32 @@ cc_cell_line_fpkm_logged <- log1p(cc_cell_line_fpkm[,2:length(colnames(cc_cell_l
 cc_cell_line_fpkm_logged$X <- cc_cell_line_fpkm$X
 
 
-#Loading additional bulk colon cancer datasets----
-sw620_sw480 <- read.csv("Data/Datasets-for-comparison/GSE112568_fpkm_table_CRC_C_Williams_Addendum.txt", sep = '\t')
 
 #Loading the types of cancer we can pick from for mirna metric----
 high_choices <- read.csv("Data/Data-from-Cleaner-code/high-dbDEMC-cancer-types.csv")
 low_choices <- read.csv("Data/Data-from-Cleaner-code/low-dbDEMC-cancer-types.csv")
 
-#Pre-processing for the different sc data files
+#Loading needed functions----
+coef_plotter <- function(my.data=cox_models_k562$`1`$`Active Coefficients` , my.labels=cox_models_k562$`1`$`Active Genes`, my.threshold=0.05, my.title="Top Cox Coefficients", my.legend="none", text.size=16){
+  coef_df <- data.frame(coefs=my.data, labels=my.labels)
+  coef_df_sub <- filter(coef_df, abs(coefs)>my.threshold)
+  
+  coef_plot <- ggplot(data = coef_df_sub, aes(x=labels, y=coefs, fill=labels))+
+    geom_bar(stat= "identity")+
+    geom_hline(yintercept = 0, color="red")+
+    theme_bw()+
+    coord_flip()+
+    ggtitle(my.title)+
+    ylab("Coefficients")+
+    xlab("Genes")+
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = text.size), legend.position = my.legend)
+  
+  coef_plot
+  
+  return(coef_plot)
+}
+
+
 #CC tumor patients----
 rownames(cc_tumor_fpkm) <- cc_tumor_fpkm$X
 current_colname_split <- strsplit(colnames(t(cc_tumor_fpkm)), "_")
@@ -107,6 +110,7 @@ cc_tumor_fpkm_logged <- as.matrix(cc_tumor_fpkm_logged)
 #Lung cancer patients----
 lc_tumor_tpm <- select(lc_tumor_tpm, contains("LC.PT.45" ) | contains("LC.MBT.15"))
 lc_tumor_tpm <- select(lc_tumor_tpm, contains("LC.PT.45_SC") | contains( "LC.MBT.15_SC"))
+
 lc_names <- c("VIM", "VIMP", "VIMP1")
 
 #K562 leukemia cell line----
@@ -134,6 +138,7 @@ save(mirna.genes, file = "Data/Data-from-Cleaner-code/lc_tumor_tpm_mirna.RData")
 
 mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "Data/Data-from-Cleaner-code/sde_mirna_optimized_lc.RData")
 
+mad_sdes_mirna_optimized <- three_weight_optimizer(first.metric = mad.genes, second.metric = sde.genes, third.metric = mirna.genes, my.filename = "Data/Data-from-Cleaner-code/cc_singlecell_mms_optimized_lc.RData")
 
 #Lung cancer TCGA bulk data----
 lung_query <- GDCquery(project       = "TCGA-LUAD",
@@ -153,7 +158,7 @@ lung_data_df <- as.data.frame(colData(lung_data_se))
 lung_data_df$vital_status <- factor(lung_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
 lung_data_df$vital_status <- as.numeric(as.character(lung_data_df$vital_status))
 
-#Bulk dataframe for lung merged dataframe----
+#Bulk data frame for lung merged dataframe----
 bulk_rna_df <- lung_data_se@assays@data@listData[["HTSeq - Counts"]]
 colnames(bulk_rna_df) <- lung_data_se@colData@rownames
 rownames(bulk_rna_df) <- lung_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
@@ -176,7 +181,7 @@ cox_time <- merged_df$days_to_last_follow_up
 cox_event <- merged_df$vital_status
 cox_tumor <- merged_df$tumor_stage
 cox_tumor_n <- merged_df$ajcc_pathologic_n
-cox_df <- subset(merged_df, select=c(TSPAN6:V56404))
+cox_df <- subset(merged_df, select=c(TSPAN6:AC007389.3))
 cox_df$days.to.last.follow.up <- cox_time
 cox_df$vital.status <- cox_event
 cox_df$tumor.stage <- cox_tumor
@@ -184,25 +189,53 @@ cox_df$ajcc.n <- cox_tumor_n
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="a", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="b", replacement="")
 cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="c", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="a", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="b", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="c", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge iv", replacement = 4)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge iii", replacement = 3)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge ii", replacement = 2)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge i", replacement = 1)
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="a", replacement="")
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="b", replacement="")
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N0", replacement=0)
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N1", replacement=1)
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N2", replacement=2)
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern = "N3", replacement = 3)
 cox_df <- filter(cox_df, !tumor.stage=="not reported")
 cox_df <- filter(cox_df, !ajcc.n=="NX")
 cox_df <- cox_df[complete.cases(cox_df[, "ajcc.n"]), ]
 
 
 #Cox model----
-cox_models <- list()
+cox_models_luad <- list()
+my_cindicies <- c()
 counter <- 1
-for (x in mirna_sde_optimized) {
+for (x in mad_sdes_mirna_optimized[1:121]) {
   current_weight <- x
-  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE) 
-  cox_models[[as.character(counter)]] <- current_cox
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = TRUE, tumor.m = FALSE, tumor.n = TRUE, save.regular.cox.genes = TRUE, regular.cox = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mms_lung_luad_top_performers_genes_tumor_n.csv") 
+  cox_models_luad[[as.character(counter)]] <- current_cox
   counter <- counter + 1
+  
+  #Storing all of the c-index values in a vector that we can use later to build the plot
+  c_finder <-current_cox$CV$index[1]
+  current_c <- current_cox$CV$cvm[c_finder]
+  current_c <- round(current_c, digits = 4)
+  my_cindicies <- c(my_cindicies, current_c)
 }
 
-save(cox_models, file = "Data/Data-from-Cleaner-code/cox_models.RData")
+top_cindex <- max(my_cindicies)
+top_index <- which(my_cindicies==top_cindex)
+
+save(cox_models_luad, file = "Data/Data-from-Cleaner-code/lung_luad_cox_models_tumor.RData")
+
+
+#Risk calculation
+patient_risk <- risk_score_calculator(my.file = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mms_lung_luad_top_performers_genes_tumor_n.csv",
+                                      my.title = "CC Singlecell MMS + Tumor Stage + N Stage LUAD",
+                                      tumor.data = TRUE, n.data = TRUE, cox.df = cox_df, show.pval = TRUE, show.pval.method = FALSE)
+
 
 #Cox for individual metrics---
 cox_mad <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mad.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
@@ -212,56 +245,6 @@ save(cox_sdes, file = "Data/Data-from-Cleaner-code/cox_sde.RData")
 cox_mirna <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
 save(cox_mirna, file = "Data/Data-from-Cleaner-code/cox_mirna.RData")
 
-#KM curves----
-hr_calcs <- list()
-counter <- 1
-for (x in cox_models[1:11]) {
-  current_cox <- x
-  current_hr <- hr_calculator(model.coefs = current_cox$Coefficients, data = cox_df, include.cat.data = FALSE, tumor.stage = FALSE, n.stage = FALSE)
-  hr_calcs[[as.character(counter)]] <- current_hr
-  counter <- counter + 1
-}
-
-#HR calcs for individual metrics---
-hr_mad <- hr_calculator(model.coefs = cox_mad$Coefficients, data = cox_df, include.cat.data = FALSE, tumor.stage = FALSE, n.stage = FALSE)
-hr_sdes <- hr_calculator(model.coefs = cox_sdes$Coefficients, data = cox_df, include.cat.data = FALSE, tumor.stage = FALSE, n.stage = FALSE)
-hr_mirna <- hr_calculator(model.coefs = cox_mirna$Coefficients, data = cox_df, include.cat.data = FALSE, tumor.stage = FALSE, n.stage = FALSE)
-
-#KM p-values----
-hr_pvalues <- list()
-counter <- 1
-for (x in hr_calcs[7:11]) {
-  current_hr <- x
-  current_pvalue <- km_pvalue_calculator(surv.time = current_hr$DF$days.to.last.follow.up, surv.status = current_hr$DF$vital.status, surv.predictors = current_hr$DF$risk, surv.df = current_hr$DF, num.sig.figs = 4, scientific.p.value = TRUE)
-  hr_pvalues[[as.character(counter)]] <- current_pvalue
-  counter <- counter + 1
-}
-
-#P-values for HR calcs for individual metrics---
-pvalue_mad <- km_pvalue_calculator(surv.time = hr_mad$DF$days.to.last.follow.up, surv.status = hr_mad$DF$vital.status, surv.predictors = hr_mad$DF$risk, surv.df = hr_mad$DF, num.sig.figs = 4, scientific.p.value = TRUE)
-pvalue_sdes <- km_pvalue_calculator(surv.time = hr_sdes$DF$days.to.last.follow.up, surv.status = hr_sdes$DF$vital.status, surv.predictors = hr_sdes$DF$risk, surv.df = hr_sdes$DF, num.sig.figs = 4, scientific.p.value = TRUE)
-pvalue_mirna <- km_pvalue_calculator(surv.time = hr_mirna$DF$days.to.last.follow.up, surv.status = hr_mirna$DF$vital.status, surv.predictors = hr_mirna$DF$risk, surv.df = hr_mirna$DF, num.sig.figs = 4, scientific.p.value = TRUE)
-
-
-#KM plots----
-hr_plots <- list()
-counter <- 1
-for (x in hr_calcs) {
-  current_calc <- x
-  current_pvalue <- hr_pvalues[counter]
-  current_plot <- km_plotter(km.fit = current_calc$KM, data.source = current_calc$DF, p.value = current_pvalue, plot.title = "SDES + MiRNA + Tumor Stage + N Stage Lung Cancer Patients Data")
-  hr_plots[[as.character(counter)]] <- current_plot
-  counter <- counter + 1
-}
-
-
-#KM Plots for HR calcs for individual metrics---
-km_mad <- km_plotter(km.fit = hr_mad$KM, data.source = hr_mad$DF, p.value = pvalue_mad, plot.title = "MAD Metric + Tumor Stage + N Stage Alone Lung Cancer Patients")
-km_sdes <- km_plotter(km.fit = hr_sdes$KM, data.source = hr_sdes$DF, p.value = pvalue_sdes, plot.title = "SDES Metric + Tumor Stage + N Stage Alone Lung Cancer Patients")
-km_mirna <- km_plotter(km.fit = hr_mirna$KM, data.source = hr_mirna$DF, p.value = pvalue_mirna, plot.title = "MiRNA Metric + Tumor Stage + N Stage Alone Lung Cancer Patients")
-
-
-#CC tumor patients dataset analysis
 #Now denoising the sc-data----
 cc_tumor_fpkm <- magic_denoiser(sc.data = cc_tumor_fpkm, magic.seed = 123)
 
@@ -273,8 +256,8 @@ mad.genes <- mad_calculator(cc_tumor_fpkm$denoised_sc_dataframe)
 save(mad.genes, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_mad.RData")
 
 #Switchde metric----
-sde.genes <- switchde_calculator(cc_tumor_fpkm$denoised_sc_dataframe, pseudo.time = cds_output$Pseudotime)
-save(sde.genes, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_sde_ccnd1.RData")
+sde.genes <- switchde_calculator(cc_tumor_fpkm$denoised_sc_dataframe, pseudo.time = cds_output$Pseudotime, zero.inflated = TRUE)
+save(sde.genes, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_sde_zero_inflated_test.RData")
 
 #Mirna metric----
 mirna_sizes1 <- seq(5, 30, by=10)
@@ -312,7 +295,7 @@ mirna.genes <- mirna_calculator(cancer.type1 = "colon cancer", cancer.type2 = "c
 save(mirna_master_list, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_first_200_mirna_at_10_targets_data.RData")
 
 #Optimizing the MiRNA + SDE metric----
-mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "Data/Data-from-Cleaner-code/sde_mirna_optimized.RData")
+mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "Data/Data-from-Cleaner-code/sde_mirna_optimized_zero_inflated.RData")
 #Optimizing the DESeq2 + MAD metric----
 deseq2.genes <- read.csv("Data/Data-from-Cleaner-code/deseq2_top1800_genes_cc_patients.csv")
 deseq2.genes <- deseq2.genes[,"gene"]
@@ -327,28 +310,52 @@ mirna_mad_optimized <- two_weight_optimizer(first.metric = mirna.genes, second.m
 #Optimized the MAD + SDES + MiRNA metric----
 mad_sdes_mirna_optimized <- three_weight_optimizer(first.metric = mad.genes, second.metric = mirna.genes, third.metric = sde.genes, my.filename = "~/Desktop/three_weight_optimized_coad.RData")
   
-  
+#TCGA data sets----  
 read_query <- GDCquery(project       = "TCGA-READ",
                        data.category = "Transcriptome Profiling",
                        data.type     = "Gene Expression Quantification",
                        workflow.type = "HTSeq - Counts")
+
+coad_query <- GDCquery(project = "TCGA-COAD",
+                       data.category = "Transcriptome Profiling",
+                       data.type = "Gene Expression Quantification",
+                       workflow.type = "HTSeq - Counts")
+
 
 combined_query <- GDCquery(project       = c("TCGA-READ", "TCGA-COAD"),
                            data.category = "Transcriptome Profiling",
                            data.type     = "Gene Expression Quantification",
                            workflow.type = "HTSeq - Counts")
 
+
+lusc_query <- GDCquery(project = "TCGA-LUSC",
+                       data.category = "Transcriptome Profiling",
+                       data.type = "Gene Expression Quantification",
+                       workflow.type = "HTSeq - Counts")
+
 #Downloading the data
 GDCdownload(query           = read_query,
             method          = "api",
             files.per.chunk = 10,
-            directory       = "Data/Bulk-data/TCGA-read-Dataset")
+            directory       = "Data/Bulk-data/TCGA-READ-Dataset")
+
+
+GDCdownload(query           = coad_query,
+            method          = "api",
+            files.per.chunk = 10,
+            directory       = "Data/Bulk-data/TCGA-COAD-Dataset")
+
 
 #Combined download
 GDCdownload(query           = combined_query,
             method          = "api",
             files.per.chunk = 10,
-            directory       = "Data/Bulk-data/TCGA-combined-Dataset")
+            directory       = "Data/Bulk-data/TCGA-COAD-and-TCGA-READ-Dataset")
+
+GDCdownload(query           = lusc_query,
+            method          = "api",
+            files.per.chunk = 10,
+            directory       = "Data/Bulk-data/TCGA-LUSC-Dataset")
 
 #READ summarizedExperiment object
 read_data_se <- GDCprepare(read_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-read-Dataset/")
@@ -359,10 +366,14 @@ read_data_df$vital_status <- as.numeric(as.character(read_data_df$vital_status))
 
 
 #Combined summarizedExperiment object
-combined_data_se <- GDCprepare(combined_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-combined-Dataset/")
+combined_data_se <- GDCprepare(combined_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-COAD-and-TCGA-READ-Dataset/")
 combined_data_df <- as.data.frame(colData(combined_data_se))
 combined_data_df$vital_status <- factor(combined_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
 combined_data_df$vital_status <- as.numeric(as.character(combined_data_df$vital_status))
+
+#Lusc summarizedExperiment object
+lusc_data_se <- GDCprepare(lusc_query, summarizedExperiment = FALSE, directory = "Data/Bulk-data/TCGA-LUSC-Dataset/")
+
 
 
 #Bulk data frame for combined merged data frame----
@@ -519,6 +530,14 @@ cox_df <- filter(cox_df, !tumor.stage=="not reported")
 cox_df <- cox_df[complete.cases(cox_df[, "ajcc.m"]), ]
 
 
+#Random 1800 genes----
+random_genes <- sample(colnames(cox_df), replace = TRUE, 1800)
+
+random_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = random_genes, tumor.stage = TRUE, tumor.n = TRUE, tumor.m = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "~/Desktop/top_performer_read_random_genes_tumor_n.csv")
+random_risk <- risk_score_calculator(my.file = "~/Desktop/top_performer_read_random_genes_tumor_n.csv",
+                                                   my.title = "Random Genes + Tumor + N Stage READ",
+                                                   tumor.data = TRUE, n.data = TRUE, cox.df = cox_df, show.pval = TRUE, show.pval.method = FALSE)
+
 
 #List from the comparison paper----
 compared_list <- list("SPOCK1"=0.287634, "VIM"=-0.70744, "C5AR"=0.376991, "WWTR1"=0.204543, "SERPINE1"=0.164739, "EFEMP1"=0.085466, "FSCN1"=0.11085, "FLNA"=-0.08217, "CXCL8"=0.18518, "NOX1"=0.04164)
@@ -556,9 +575,9 @@ for (y in gene_sizes){
 cox_models <- list()
 my_cindicies <- c()
 counter <- 1
-for (x in deseq2_sdes_optimized[1]) {
+for (x in mad_sdes_mirna_optimized[65]) {
   current_weight <- x
-  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = TRUE, tumor.n = TRUE, tumor.m = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/top_coad_performer_deseq2_sdes_just_genes_tumor_n.csv") 
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = TRUE, tumor.n = TRUE, tumor.m = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "~/Desktop/top_performer_coad _and_read_cc_singlecell_mms_genes_tumor_n.csv") 
   cox_models[[as.character(counter)]] <- current_cox
   counter <- counter + 1
   
@@ -571,16 +590,25 @@ for (x in deseq2_sdes_optimized[1]) {
 
 max(my_cindicies)
 
+
+#For calculating risk
+patient_risk <- risk_score_calculator(my.file = "~/Desktop/top_performer_coad _and_read_cc_singlecell_mms_genes_tumor_n.csv",
+                                   my.title = "CC Singlecell MMS + Tumor Stage + N Stage COAD & READ",
+                                   tumor.data = TRUE, n.data = TRUE, cox.df = cox_df, show.pval = TRUE, show.pval.method = FALSE)
+
+
+
+
 #For plotting the coefficients----
 coef_df <- data.frame(coefs=cox_models$`1`$`Active Coefficients`, labels=cox_models$`1`$`Active Genes`)
-coef_df_sub <- filter(coef_df, abs(coefs)>0.01)
+coef_df_sub <- filter(coef_df, abs(coefs)>0.05)
 
-coad_coef_plot <- ggplot(data = coef_df_sub, aes(x=labels, y=coefs, fill=labels))+
+coef_plot <- ggplot(data = coef_df_sub, aes(x=labels, y=coefs, fill=labels))+
   geom_bar(stat= "identity")+
   geom_hline(yintercept = 0, color="red")+
   theme_bw()+
   coord_flip()+
-  ggtitle("Top CC Singlecell MMS COAD Cox Coefficients")+
+  ggtitle("Top CC Singlecell MMS COAD + READ Cox Coefficients")+
   ylab("Coefficients")+
   xlab("Genes")+
   #ylim(c(-0.1,1))+
@@ -588,17 +616,59 @@ coad_coef_plot <- ggplot(data = coef_df_sub, aes(x=labels, y=coefs, fill=labels)
 
 coef_plot
 
+#Looking to see if there are sex differences----
+cox_df <- filter(cox_df, gender=="male")
+male_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna_mad_optimized$`8`, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mm_read_genes_male.csv")
+cox_df <- filter(cox_df, gender=="female")
+female_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna_mad_optimized$`8`, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mm_read_genes_female.csv") 
+
+#By ethnic cohort----
+cox_df <- filter(cox_df, race=="white")
+white_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna_mad_optimized$`8`, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mm_coad_genes_white.csv")
+cox_df <- filter(cox_df, race=="black or african american")
+black_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna_mad_optimized$`8`, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mm_coad_genes_black.csv")
+cox_df <- filter(cox_df, race=="asian")
+asian_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna_mad_optimized$`8`, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mm_coad_genes_asian.csv")
+cox_df <- filter(cox_df, race=="american indian or alaska native")
+native_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna_mad_optimized$`8`, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mm_coad_genes_native.csv")
+cox_df <- filter(cox_df, race=="not reported")
+not_reported_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna_mad_optimized$`8`, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mm_coad_genes_not_reported.csv")
+
+
+
+
 #For plotting early and late stage tumor information separately on KM curves----
 cox_df_early <- filter(cox_df, tumor.stage==1 | tumor.stage==2)
 cox_df_late <- filter(cox_df, tumor.stage==3 | tumor.stage==4)
 
-coad_risk <- risk_score_calculator(my.file = "Data/Data-from-Cleaner-code/top_coad_performer_deseq2_sdes_just_genes_tumor_n.csv",
-                      my.title = "DESeq2 + SDES + Tumor Stage + N Stage COAD",
-                      tumor.data = TRUE, n.data = TRUE, cox.df = cox_df)
+male_risk <- risk_score_calculator(my.file = "Data/Data-from-Cleaner-code/top_coad_performer_cc_singlecell_mm_all_three_metrics_tumor_stage_n.csv",
+                      my.title = "CC Singlecell MM + Tumor stage + N Stage COAD",
+                      tumor.data = TRUE, n.data = TRUE, cox.df = cox_df, show.pval = TRUE, show.pval.method = FALSE)
 
 
-coad_risk
-cox_models$`1`$CV
+female_risk <- risk_score_calculator(my.file = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mm_read_genes_female.csv",
+                                   my.title = "CC Singlecell MM READ Female Early",
+                                   tumor.data = FALSE, n.data = FALSE, cox.df = cox_df_early, show.pval = TRUE, show.pval.method = FALSE)
+
+
+white_risk <- risk_score_calculator(my.file = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mm_coad_genes_white.csv",
+                                    my.title = "CC Singlecell MM READ",
+                                    tumor.data = FALSE, n.data = FALSE, cox.df = cox_df, show.pval = TRUE, show.pval.method = FALSE)
+
+
+black_risk <- risk_score_calculator(my.file = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mm_read_genes_black.csv",
+                                    my.title = "CC Singlecell MM COAD Black Late",
+                                    tumor.data = FALSE, n.data = FALSE, cox.df = cox_df_late, show.pval = TRUE, show.pval.method = FALSE)
+
+
+
+not_reported_risk <- risk_score_calculator(my.file = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/cc_singlecell_mm_coad_genes_not_reported.csv",
+                                    my.title = "CC Singlecell MM READ Not Reported",
+                                    tumor.data = FALSE, n.data = FALSE, cox.df = cox_df, show.pval = TRUE, show.pval.method = FALSE)
+
+
+
+
 
 all_dfs <- list()
 counter <- 1
@@ -1003,12 +1073,12 @@ k562_cells <- magic_denoiser(sc.data = k562_cells,magic.seed = 123)
 cds_output <- cell_dataset_builder(vim.genes = "VIM", cell.data = k562_cells$denoised_sc_dataframe, cell.meta = k562_cells$cds_gene_names)
 
 #MAD metric----
-mad.genes <- mad_calculator(cc_tumor_fpkm$denoised_sc_dataframe)
-save(mad.genes, file = "k562_mad.RData")
+mad.genes <- mad_calculator(k562_cells$denoised_sc_dataframe)
+save(mad.genes, file = "Data/Data-from-Cleaner-code/k562_mad.RData")
 
 #Switchde metric----
 sde.genes <- switchde_calculator(k562_cells$denoised_sc_dataframe, pseudo.time = cds_output$Pseudotime)
-save(sde.genes, file = "k562_sde.RData")
+save(sde.genes, file = "Data/Data-from-Cleaner-code/k562_sde.RData")
 
 #Mirna metric----
 counter <- 1
@@ -1032,7 +1102,10 @@ mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.met
 mirna_mad_optimized <- two_weight_optimizer(first.metric = mad.genes, second.metric = mirna.genes, my.filename = "Data/Data-from-Cleaner-code/mad_mirna_optimized_k562.RData")
 
 
-#Leukimia TCGA bulk data----
+#Optimizing the MMS metric----
+mad_sdes_mirna_optimized <- three_weight_optimizer(first.metric = mad.genes, second.metric = mirna.genes, third.metric = sde.genes, my.filename = "~/Desktop/three_weight_optimized_k562.RData")
+
+#Leukemia TCGA bulk data----
 leuk_query <- GDCquery(project       = "TCGA-DLBC",
                        data.category = "Transcriptome Profiling",
                        data.type     = "Gene Expression Quantification",
@@ -1073,19 +1146,45 @@ calculated_days[calculated_days==0]=1
 cox_time <- calculated_days
 cox_event <- merged_df$vital_status
 cox_tumor <- merged_df$tumor_stage
-cox_df <- subset(merged_df, select=c(TSPAN6:V56404))
+cox_df <- subset(merged_df, select=c(TSPAN6:AC007389.5))
 cox_df$days.to.last.follow.up <- cox_time
 cox_df$vital.status <- cox_event
+cox_df$tumor.stage <- cox_tumor
+cox_df$ajcc.n <- cox_tumor_n
+cox_df$race <- cox_race
+cox_df$ethnicity <- cox_eth
+cox_df$gender <- cox_gender
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="a", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="b", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="c", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge iv", replacement = 4)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge iii", replacement = 3)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge ii", replacement = 2)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "stge i", replacement = 1)
+
 
 #Cox model----
 cox_models_k562 <- list()
+my_cindicies <- c()
 counter <- 1
-for (x in mirna_sde_optimized) {
+for (x in mad_sdes_mirna_optimized[1:121]) {
   current_weight <- x
-  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE) 
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = TRUE, tumor.m = FALSE, tumor.n = FALSE, regular.cox = FALSE, save.regular.cox.genes = FALSE, my.filename = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/glio_genes_and_tumor_top_performers.csv") 
   cox_models_k562[[as.character(counter)]] <- current_cox
   counter <- counter + 1
+  
+  #Storing all of the c-index values in a vector that we can use later to build the plot
+  c_finder <-current_cox$CV$index[1]
+  current_c <- current_cox$CV$cvm[c_finder]
+  current_c <- round(current_c, digits = 4)
+  my_cindicies <- c(my_cindicies, current_c)
+  
+  
 }
+
+coef_plotter(my.data = cox_models_k562$`1`$`Active Coefficients`, my.labels = cox_models_k562$`1`$`Active Genes`, my.threshold = 0.01, my.title = "CC Singlecell MMS K562 Top Cox Coefficients", my.legend = "none", text.size = 16)
+risk_score_calculator(my.file = "Data/Data-from-Cleaner-code/Regular_cox_model_outputs/leukimia_top_performers.csv", tumor.data = FALSE, n.data = FALSE, my.title = "CC Singlecell MMS DLBC", cox.df = cox_df, show.pval = TRUE)
+
 
 #Cox for individual metrics---
 cox_mad <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mad.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
@@ -1537,7 +1636,7 @@ for (x in mirna_sde_optimized) {
 
 #Cox for individual metrics---
 cox_mad <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mad.genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
-cox_sdes <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = sde.genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
+cox_sdes <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = sde.genes, tumor.stage = FALSE, tumor.m = FALSE, tumor.n = FALSE)
 cox_mirna <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = mirna.genes, tumor.stage = TRUE, tumor.m = TRUE, tumor.n = FALSE)
 
 

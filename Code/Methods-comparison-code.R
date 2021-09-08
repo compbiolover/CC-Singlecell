@@ -231,6 +231,74 @@ write.csv(scdd_res, file = "Data/Exported-data/Csv-files/scdd_res_glio.csv")
 
 #DESeq2----
 #Reading in the count files
+lung_cells_ds2 <- read.csv(file = "Data/Single-cell-data/Counts/GSE81861_CRC_tumor_all_cells_COUNT.csv")
+nm_cells_ds2 <- read.csv(file = "Data/Single-cell-data/Counts/GSE81861_CRC_NM_all_cells_COUNT.csv")
+normal_num <- rep("normal", 266)
+tumor_num <- rep("tumor", 375)
+all_nums <- c(tumor_num, normal_num)
+# nm_names <- rep(paste("NM",1:ncol(nm_cells_ds2)))
+# tumor_names <- rep(paste("TM",1:ncol(tumor_cells_ds2)))
+# all_names <- c(tumor_names, nm_names)
+
+#Merging them together into one large dataframe
+deseq2_df <- merge(tumor_cells_ds2, nm_cells_ds2)
+rownames(deseq2_df) <- deseq2_df$X
+deseq2_df <- subset(deseq2_df, select=c(RHC3546__Tcell__.C6E879:RHC6187__Macrophage__.FFFF55))
+deseq2_rows <- rownames(deseq2_df)
+deseq2_rows <- gene_vector_cleaner(unclean.data = deseq2_rows)
+deseq2_cols <- colnames(deseq2_df)
+deseq2_df <- deseq2_df[complete.cases(deseq2_df), ]
+deseq2_df <- apply(deseq2_df, c(1,2), as.integer)
+#rownames(deseq2_df) <- seq(1, nrow(deseq2_df), by=1)
+#colnames(deseq2_df) <- seq(1, ncol(deseq2_df), by=1)
+deseq2_mat <- as.matrix(deseq2_df)
+
+#Making a summarizedExperiment object from the combined dataframe
+deseq2_se <- SummarizedExperiment(assays=list(counts=deseq2_mat),
+                                  colData=DataFrame(label=deseq2_cols),
+                                  rowData=DataFrame(length=deseq2_rows),)
+
+
+
+keep <-  rowSums(assay(deseq2_se)>5)>10
+table(keep)
+
+zinb_data <- deseq2_se[keep,]
+zinb_data$cell_state <- all_nums
+
+
+zinb_data <- zinb_data[names(zinb_data)[1:5000],]
+
+#For multicore
+BiocParallel::register(BiocParallel::MulticoreParam())
+
+zinb_data <- zinbwave(zinb_data, K=0, BPPARAM = BiocParallel::bpparam(), epsilon=1e12, normalizedValues=FALSE, observationalWeights = TRUE, verbose=TRUE)
+
+dds <- DESeqDataSet(zinb_data, design=~cell_state)
+
+dds <- estimateSizeFactors(dds, type="poscounts")
+
+scr <- scran::calculateSumFactors(dds)
+sizeFactors(dds) <- scr
+
+dds <- DESeq(dds, sfType="poscounts", useT=TRUE, minmu=1e-6, minRep=Inf) 
+
+
+dds_res <- DESeq2::results(dds)
+
+resOrdered <- dds_res[order(dds_res$padj),]
+save(resOrdered, file = "Data/Data-from-Cleaner-code/deseq2_top5000_genes_cc_patients.RData")
+
+resOrdered_subset <- resOrdered[1:1800,]
+save(resOrdered_subset, file = "Data/Data-from-Cleaner-code/deseq2_top1800_genes_cc_patients.RData")
+
+cleaned_gene_names <- gene_vector_cleaner(unclean.data = rownames(resOrdered_subset))
+resOrdered_subset_finished <- data.frame(gene=cleaned_gene_names, baseMean=resOrdered_subset$baseMean, log2FoldChange=resOrdered_subset$log2FoldChange, lfcSE=resOrdered_subset$lfcSE, stat=resOrdered_subset$stat, pvalue=resOrdered_subset$pvalue, padj=resOrdered_subset$padj)
+write.csv(resOrdered_subset_finished, file = "Data/Data-from-Cleaner-code/deseq2_top1800_genes_cc_patients.csv")
+
+
+#For TCGA-LUAD
+#Reading in the count files
 tumor_cells_ds2 <- read.csv(file = "Data/Single-cell-data/Counts/GSE81861_CRC_tumor_all_cells_COUNT.csv")
 nm_cells_ds2 <- read.csv(file = "Data/Single-cell-data/Counts/GSE81861_CRC_NM_all_cells_COUNT.csv")
 normal_num <- rep("normal", 266)

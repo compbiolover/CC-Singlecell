@@ -3,6 +3,9 @@
 #Loading needed packages----
 library(ggplot2)
 library(ggpubr)
+library(stringr)
+library(tidyverse)
+
 
 #Setting the working directory----
 setwd("~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/")
@@ -18,12 +21,17 @@ pvalue_to_plot_1 <- round(aov_sum_1[[1]][["Pr(>F)"]][1], digits = 5)
 tukey_aov_1 <- TukeyHSD(res_aov_1)
 
 
+#CC Singlecell MM, MS, and MMS
+my_file <- filter(my_file, Method=="MiRNA + SDES" | Method== "MiRNA + MAD" | Method=="CC Singlecell MMS" | Method=="CC Singlecell MMS" | Method=="Random Genes")
+my_file <- my_file[c(1:8,10:11),]
+
 #genes only
 my_file <- filter(my_file, Method=="MiRNA + SDES" | Method== "MiRNA + MAD" | Method== "scDD (genes only)" | Method== "DESeq2 (genes only)" | Method== "DESeq2 (genes only)" | Method=="edgeR (genes only)" | Method=="DEsingle (genes only)" | Method=="MAD" | Method=="MiRNA" | Method=="SDES")
 #genes + tumor stage
 my_file <- filter(my_file, Method=="MiRNA + SDES + Tumor stage" | Method== "MiRNA + MAD + Tumor stage" | Method== "scDD (genes + Tumor stage)" | Method== "DESeq2 (genes only + Tumor stage)" | Method=="edgeR (genes only + Tumor stage)" | Method=="DEsingle (genes + Tumor stage)" | Method=="MAD + Tumor stage" | Method=="MiRNA + Tumor stage" | Method=="SDES + Tumor stage")
 #genes + tumor and N stage
 my_file <- filter(my_file, Method=="MiRNA + SDES + Tumor stage + N stage" | Method== "MiRNA + MAD + Tumor stage + N stage" | Method== "scDD (genes + Tumor stage + N stage)" | Method== "DESeq2 (genes only + Tumor stage + N stage)" | Method=="edgeR (genes only + Tumor stage + N stage)" | Method=="DEsingle (genes + Tumor stage + N stage)" | Method=="MAD + Tumor stage + N stage" | Method=="MiRNA + Tumor stage + N stage" | Method=="SDES + Tumor stage + N stage")
+
 #Making the names cleaner
 my_file <- my_file %>% group_by(Method)
 my_file[c(1,3,6), "Method"] <- "CC Singlecell MS"
@@ -38,6 +46,7 @@ my_file[25:27, "Method"] <- "MiRNA"
 
 
 #Making nicer graphs----
+my_file$Method <- factor(my_file$Method, levels = c("CC Singlecell MS", "CC Singlecell MM", "CC Singlecell MMS", "Random Genes"))
 #my_file <- filter(my_file, Bulk.dataset== "TCGA-COAD" | Bulk.dataset=="TCGA-READ")
 #my_comparisons <- list(c("DEsingle, MiRNA + MAD"), c("DEsingle, MiRNA + SDES"), c("scDD, MiRNA + MAD"), c("scDD, MiRNA + SDES"))
 #my_file$Method <- factor(my_file$Method, levels = c("MAD","SDES","MiRNA","MiRNA + SDES","MiRNA + MAD","DEsingle","scDD","DESeq2","edgeR"))
@@ -47,19 +56,27 @@ my_file$Bulk.dataset <- factor(my_file$Bulk.dataset, levels = c("TCGA-COAD", "TC
 #C-index graph----
 cindex_bar3 <- ggplot(my_file, aes(x=Method, y = C.index_at_optimal_genes_corrected_risk, fill=Bulk.dataset))+
   geom_bar(stat= "identity",position = position_dodge())+
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 40, family = "sans"),
         panel.background = element_blank(),
-        axis.line = element_line(colour = "grey"))+
-  ggtitle("Gene Signature & All Clinical Data C-indices")+
+        axis.line = element_line(colour = "grey"),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 35, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "top")+
+  ggtitle("Gene Signature C-indices")+
   xlab("Method")+
   ylab("Concordance Index")+
-  scale_fill_discrete("Bulk Dataset")+
+  scale_fill_discrete("Bulk Dataset:")+
   scale_y_continuous(expand = expansion(mult = c(0, .1)))+
-  geom_hline(yintercept = 0.70)
+  geom_hline(yintercept = 0.65)
 
 
 
 cindex_bar3 <- cindex_bar3 + coord_cartesian(ylim = c(0.5, 0.7))
+cindex_bar3 <- cindex_bar3 + scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 cindex_bar3
 
 
@@ -89,15 +106,22 @@ set_bar <- ggplot(my_file, aes(x=Method, y = glmnet_active_genes_optimal_correct
   geom_bar(stat= "identity",position = position_dodge())+
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
         panel.background = element_blank(),
-        axis.line = element_line(colour = "grey"))+
-  ggtitle("Genes")+
+        axis.line = element_line(colour = "grey"),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 35, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "top")+
+  ggtitle("Set Size of Active Genes")+
   xlab("Method")+
   ylab("Set Size")+
   scale_fill_discrete("Bulk Dataset")+
   scale_y_continuous(expand = expansion(mult = c(0, .1)))
 
 
-set_bar
+set_bar + theme(plot.title = element_text(size = 40, family = "sans", face = "bold"))
 
 
 big_set_graph <- ggarrange(set_bar, set_bar2, set_bar3, labels = c("A.", "B.", "C."), ncol = 3, nrow = 1, common.legend = TRUE)

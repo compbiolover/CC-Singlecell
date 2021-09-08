@@ -165,7 +165,7 @@ cox_model_fitter <- function(my.seed       =1,
 
 #risk_score_calculator-----
 risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_cox_model_outputs/coad_and_read_regular_cox_genes_1800.csv", 
-                                  tumor.data=FALSE, n.data=FALSE, my.title="Finished KM Plot", cox.df=cox_df){
+                                  tumor.data=FALSE, n.data=FALSE, my.title="Finished KM Plot", cox.df=cox_df, show.pval=TRUE, show.pval.method=FALSE){
   #Required packages----
   require(survival)
   
@@ -195,15 +195,20 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
     #KM Curves plotting code----
     sur_Plot<-ggsurvplot(km.fit,
                          data=data.source,
-                         pval=TRUE,
-                         pval.method = FALSE,
+                         pval=show.pval,
+                         pval.method = show.pval.method,
                          pval.size=pval.digits,
                          conf.int = confidence.int,
                          legend.labs=legend.labs,
                          legend.title=legend.title,
                          xlab=x.lab,
                          title=plot.title,
-                         palette=color.pal)
+                         palette=color.pal,
+                         font.main= c(40, "bold"),
+                         font.x= c(40, "bold"),
+                         font.y=c(40, "bold"),
+                         font.tickslab=c(40, "plain"),
+                         font.legend=c(40, "plain"))
     
     #Returning our finished KM plot----
     return(sur_Plot)
@@ -239,7 +244,7 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
       my_converted_scores[[as.character(my_genes[counter])]] <- current_risk
       counter <- counter + 1
     }
-    #Making a dataframe of the converted scores
+    #Making a data frame of the converted scores
     converted_df <- data.frame(my_df=1:dim(cox.df)[1])
     counter <- 1
     for (x in my_converted_scores) {
@@ -310,7 +315,7 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
       my_converted_scores[[as.character(my_genes[counter])]] <- current_risk
       counter <- counter + 1
     }
-    #Making a dataframe of the converted scores
+    #Making a data frame of the converted scores
     converted_df <- data.frame(my_df=1:dim(cox.df)[1])
     counter <- 1
     for (x in my_converted_scores) {
@@ -371,6 +376,8 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
           risk_df$ajcc.n1 <- ifelse(cox.df$ajcc.n==1, 10,0)
         }else if(x=="ajcc.n2"){
           risk_df$ajcc.n2 <- ifelse(cox.df$ajcc.n==2, 15,0)
+        }else if(x=="ajcc.n3"){
+          risk_df$ajcc.n3 <- ifelse(cox.df$ajcc.n==3, 20,0)
         }
       }
       
@@ -397,7 +404,7 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
         my_converted_scores[[as.character(my_genes[counter])]] <- current_risk
         counter <- counter + 1
       }
-      #Making a dataframe of the converted scores
+      #Making a data frame of the converted scores
       converted_df <- data.frame(my_df=1:dim(cox.df)[1])
       counter <- 1
       for (x in my_converted_scores) {

@@ -7,14 +7,14 @@
 
 #The switchde (SDE) metric ----
 switchde_calculator <- function(denoised.sc=sc, 
-                                pseudo.time=pt){
+                                pseudo.time=pt, zero.inflated=FALSE){
   
   #Loading/installing needed package----
   require(switchde)
   require(tidyverse)
   
   #Actual metric----
-  sdes <- switchde(denoised.sc, as.numeric(pseudo.time$Pseudotime), verbose = TRUE)
+  sdes <- switchde(denoised.sc, as.numeric(pseudo.time$Pseudotime), verbose = TRUE, zero_inflated = zero.inflated)
   sde.filtered <- filter(sdes, qval < 0.05)
   index <- order(abs(sde.filtered$k), decreasing = T)
   vim.sdes.rank <- sde.filtered[index,]
