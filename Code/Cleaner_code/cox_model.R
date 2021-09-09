@@ -14,7 +14,7 @@ cox_model_fitter <- function(my.seed       =1,
                              regular.cox   =TRUE,
                              save.regular.cox.genes =TRUE,
                              remove.stage   = c("tumor.stage1","tumor.stage2","tumor.stage3", "tumor.stage4"),
-                             remove.n.stage = c("ajcc.n0", "ajcc.n1", "ajcc.n2"),
+                             remove.n.stage = c("ajcc.n0", "ajcc.n1", "ajcc.n2", "ajcc.n3"),
                              my.filename   ="my_saved_genes.csv"){
   
   #Doing input sanity checks----
@@ -117,11 +117,13 @@ cox_model_fitter <- function(my.seed       =1,
   active_genes <-rownames(Coefficients)[Active.Index]
   
   if(tumor.stage==TRUE & tumor.n==FALSE & tumor.m==FALSE){
+    print("This is the genes + tumor stage predictor...")
     active_genes <- active_genes[!active_genes %in% remove.stage]
     active_genes <- c(active_genes, "tumor.stage")
   }
   
   if(tumor.stage==TRUE & tumor.n==TRUE & tumor.m==FALSE){
+    print("This is the genes + tumor stage + n stage predictor...")
     active_genes <- active_genes[!active_genes %in% remove.n.stage]
     active_genes <- c(active_genes, "tumor.stage", "ajcc.n")
   }
