@@ -15,6 +15,8 @@ mirna_calculator <- function(ts.org             ="Human",
                              mirna.remove       ="hsa-miR-129-1-3p",
                              mirna.filename     ="TargetScan_output.RData",
                              max.mirnas         =1559,
+                             save.mirna.genes   =TRUE,
+                             mirna.gene.filename="~/Desktop/my_mirnas.csv",
                              write.heatmap.data =TRUE,
                              heatmap.data.name  ="~/Desktop/my_heatmap_data.csv"){
   
@@ -54,7 +56,7 @@ mirna_calculator <- function(ts.org             ="Human",
   }
   
   #Now submitting these miRNAs to TargetScan to get genes to make a gene list for the third metric----
-  #testing to see if all of the miRNAs exist in targetscan before getting all submitted at once
+  #testing to see if all of the miRNAs exist in TargetScan before getting all submitted at once
   common_mirnas <- common_mirnas[!common_mirnas %in% mirna.remove]
   if(length(common_mirnas)>= length(common_mirnas[1:max.mirnas])){
     common_mirnas <- common_mirnas[1:max.mirnas]
@@ -82,8 +84,8 @@ mirna_calculator <- function(ts.org             ="Human",
   }
   
   #save(miRNA_targets, file = mirna.filename)
-  #Simplifying the output of the targetscan commands to 
-  #just the Gene name and the mirna columns
+  #Simplifying the output of the TargetScan commands to 
+  #just the Gene name and the miRNA columns
   counter <- 1
   total_list <- list()
   for (i in miRNA_targets){
@@ -114,7 +116,7 @@ mirna_calculator <- function(ts.org             ="Human",
   miRNA_score <- matrix(data = 0, nrow = length(all_genes_for_score_unique), ncol = length(all_miRs_for_score), dimnames = list(all_genes_for_score_unique, all_miRs_for_score))
   miRNA_score <- as.data.frame(miRNA_score)
   
-  #Checking to see for each miRNA (colname) if it interacts with a particular row.
+  #Checking to see for each miRNA (col name) if it interacts with a particular row.
   #If it does it get a plus one to that cell. If it does not it moves to next cell
   for (i in rownames(miRNA_score)){
     for (x in miRNA_targets){
@@ -131,10 +133,13 @@ mirna_calculator <- function(ts.org             ="Human",
     write.csv(miRNA_score, file = heatmap.data.name)
   }
   
-  #Now calculating the rowsums of each gene for total number of miRNA interactions----
+  #Now calculating the row sums of each gene for total number of miRNA interactions----
   mirna_gene_list <- rowSums(miRNA_score)
   mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
   mirna.ranking <- sort(mirna.ranking, decreasing = TRUE)
+  if(save.mirna.genes==TRUE){
+    write.csv(mirna.ranking, file = mirna.gene.filename)
+  }
   #Return object----
   return(mirna.ranking)
 }
