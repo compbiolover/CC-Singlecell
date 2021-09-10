@@ -14,10 +14,11 @@ mirna_calculator <- function(ts.org                      ="Human",
                              print.ts.targets            =TRUE,
                              mirna.remove                ="hsa-miR-129-1-3p",
                              save.mirna.raw.targets      =TRUE,
-                             mirna.raw.targets.filename  ="TargetScan_output.RData",
+                             mirna.raw.targets.filename  ="~/Desktop/TargetScan_output.RData",
                              max.mirnas                  =1559,
                              save.mirna.genes            =TRUE,
                              mirna.gene.filename         ="~/Desktop/my_mirnas.csv",
+                             mirna.gene.rfile            ="~/Desktop/my_mirnas.RData",
                              write.heatmap.data          =TRUE,
                              heatmap.data.name           ="~/Desktop/my_heatmap_data.csv"){
   
@@ -145,6 +146,7 @@ mirna_calculator <- function(ts.org                      ="Human",
   mirna.ranking <- sort(mirna.ranking, decreasing = TRUE)
   if(save.mirna.genes==TRUE){
     write.csv(mirna.ranking, file = mirna.gene.filename)
+    save(mirna.ranking, file = mirna.gene.rfile)
   }
   #Return object----
   return(mirna.ranking)
