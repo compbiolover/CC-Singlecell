@@ -6,7 +6,7 @@
 #mirna_calculator----
 mirna_calculator <- function(ts.org             ="Human", 
                              ts.version         ="7.2",
-                             max.miR.targets    =NULL,
+                             max.miR.targets    =10,
                              cancer.up          =TRUE,
                              cancer.type1       =TRUE,
                              cancer.type2       =TRUE,
