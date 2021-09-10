@@ -4,21 +4,22 @@
 #outputs
 
 #mirna_calculator----
-mirna_calculator <- function(ts.org             ="Human", 
-                             ts.version         ="7.2",
-                             max.miR.targets    =10,
-                             cancer.up          =TRUE,
-                             cancer.type1       =TRUE,
-                             cancer.type2       =TRUE,
-                             cancer.type3       =TRUE,
-                             print.ts.targets   =TRUE,
-                             mirna.remove       ="hsa-miR-129-1-3p",
-                             mirna.filename     ="TargetScan_output.RData",
-                             max.mirnas         =1559,
-                             save.mirna.genes   =TRUE,
-                             mirna.gene.filename="~/Desktop/my_mirnas.csv",
-                             write.heatmap.data =TRUE,
-                             heatmap.data.name  ="~/Desktop/my_heatmap_data.csv"){
+mirna_calculator <- function(ts.org                      ="Human", 
+                             ts.version                  ="7.2",
+                             max.miR.targets             =10,
+                             cancer.up                   =TRUE,
+                             cancer.type1                =TRUE,
+                             cancer.type2                =TRUE,
+                             cancer.type3                =TRUE,
+                             print.ts.targets            =TRUE,
+                             mirna.remove                ="hsa-miR-129-1-3p",
+                             save.mirna.raw.targets      =TRUE,
+                             mirna.raw.targets.filename  ="TargetScan_output.RData",
+                             max.mirnas                  =1559,
+                             save.mirna.genes            =TRUE,
+                             mirna.gene.filename         ="~/Desktop/my_mirnas.csv",
+                             write.heatmap.data          =TRUE,
+                             heatmap.data.name           ="~/Desktop/my_heatmap_data.csv"){
   
   #Loading required package----
   require(tidyverse)
@@ -83,7 +84,12 @@ mirna_calculator <- function(ts.org             ="Human",
     my_num <- my_num + 1
   }
   
-  #save(miRNA_targets, file = mirna.filename)
+  
+  if(save.mirna.raw.targets==TRUE){
+    save(miRNA_targets, file = mirna.raw.targets.filename)
+    
+  }
+  
   #Simplifying the output of the TargetScan commands to 
   #just the Gene name and the miRNA columns
   counter <- 1
