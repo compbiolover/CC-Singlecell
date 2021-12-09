@@ -212,6 +212,7 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
                          font.tickslab=c(40, "plain"),
                          font.legend=c(40, "plain"))
     
+    
     #Returning our finished KM plot----
     return(sur_Plot)
   }
@@ -430,7 +431,6 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
       finished_plot <-km_plotter(km.fit = km_fit, data.source = converted_df, p.value = TRUE, plot.title = my.title)
 
   }
-  
   return(finished_plot)
 }
 

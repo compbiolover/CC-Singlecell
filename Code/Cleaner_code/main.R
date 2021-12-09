@@ -41,7 +41,7 @@ cc_cell_line_fpkm_logged$X <- cc_cell_line_fpkm$X
 
 
 
-#Loading the types of cancer we can pick from for mirna metric----
+#Loading the types of cancer we can pick from for miRNA metric----
 high_choices <- read.csv("Data/Data-from-Cleaner-code/high-dbDEMC-cancer-types.csv")
 low_choices <- read.csv("Data/Data-from-Cleaner-code/low-dbDEMC-cancer-types.csv")
 
@@ -260,6 +260,22 @@ sde.genes <- switchde_calculator(cc_tumor_fpkm$denoised_sc_dataframe, pseudo.tim
 save(sde.genes, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_sde_zero_inflated_test.RData")
 
 #Mirna metric----
+#Just at a fixed size
+mirna.genes.100.colorect.100.targets <- mirna_calculator(cancer.type1 = "colorectal cancer",
+                                  ts.org = "Human",
+                                  ts.version = "7.2",
+                                  max.miR.targets = 10,
+                                  cancer.up = TRUE,
+                                  mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"),
+                                  max.mirnas = 1559,
+                                  write.heatmap.data = FALSE, 
+                                  print.ts.targets = TRUE,
+                                  save.mirna.raw.targets = FALSE,
+                                  save.mirna.genes = TRUE,
+                                  mirna.gene.filename = "~/Desktop/mirna_genes_100_target_per_mirna_colorectal_only_10_targets.csv",
+                                  mirna.gene.rfile = "~/Desktop/mirna_genes_100_target_per_mirna_colorectal_only_10_targets.RData")
+
+#Looking at different sizes of mirna
 mirna_sizes1 <- seq(5, 30, by=10)
 mirna_sizes2 <- seq(50, 200, by=50)
 mirna_sizes3 <- seq(200, 1555, by=200)
@@ -268,9 +284,9 @@ mirna_sizes <- c(mirna_sizes1, mirna_sizes2, mirna_sizes3, mirna_sizes4)
 mirna_sizes <- unique(mirna_sizes)
 mirna_master_list <- list()
 counter <- 1
-for(y in mirna_sizes1){
+for(y in mirna_sizes){
   print(y)
-  current_mirna <- mirna_calculator(cancer.type1 = "colon cancer", cancer.type2 = "colorectal cancer", ts.org = "Human", ts.version = "7.2", max.miR.targets = 10, cancer.up = TRUE, mirna.filename = NULL, mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"), max.mirnas = y, write.heatmap.data = TRUE, heatmap.data.name = "~/Desktop/heatmap_data_for_committee_meeting1_figure.csv")
+  current_mirna <- mirna_calculator(cancer.type1 = "colon cancer", cancer.type2 = "colorectal cancer", ts.org = "Human", ts.version = "7.2", max.miR.targets = 10, cancer.up = TRUE, mirna.gene.filename = "Data/miRNA-data/MiRNA-size-data/COAD/10-targets", mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"), max.mirnas = y, write.heatmap.data = TRUE, heatmap.data.name = "~/Desktop/heatmap_data_for_committee_meeting1_figure.csv")
   mirna_master_list[[as.character(counter)]] <- current_mirna
   counter <- counter + 1
 }
@@ -292,7 +308,7 @@ for(y in mirna_sizes){
 
 
 mirna.genes <- mirna_calculator(cancer.type1 = "colon cancer", cancer.type2 = "colorectal cancer", ts.org = "Human", ts.version = "7.2", max.miR.targets = y, cancer.up = TRUE, mirna.filename = "Data/Data-from-Cleaner-code/TargetScan_cc_tumor_patients_all_targets.RData", mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"))
-save(mirna_master_list, file = "Data/Data-from-Cleaner-code/cc_tumor_fpkm_first_200_mirna_at_10_targets_data.RData")
+save(mirna_master_list, file = "Data/miRNA-data/MiRNA-size-data/COAD/sizes_1500_at_10_targets.RData")
 
 #Optimizing the MiRNA + SDE metric----
 mirna_sde_optimized <- two_weight_optimizer(first.metric = sde.genes, second.metric = mirna.genes, my.filename = "Data/Data-from-Cleaner-code/sde_mirna_optimized_zero_inflated.RData")
@@ -308,7 +324,10 @@ deseq2_sdes_optimized <- two_weight_optimizer(first.metric = sde.genes, second.m
 mirna_mad_optimized <- two_weight_optimizer(first.metric = mirna.genes, second.metric = mad.genes, my.filename = "~/Desktop/mirna_mad_optimized.RData")
 
 #Optimized the MAD + SDES + MiRNA metric----
-mad_sdes_mirna_optimized <- three_weight_optimizer(first.metric = mad.genes, second.metric = mirna.genes, third.metric = sde.genes, my.filename = "~/Desktop/three_weight_optimized_coad.RData")
+mad_sdes_mirna_optimized_colorect <- three_weight_optimizer(first.metric = mad.genes,
+                                                            second.metric = mirna.genes,
+                                                            third.metric = sde.genes,
+                                                            my.filename = "Data/miRNA-data/MiRNA-size-data/three_weight_optimizer_cc_tumor_fpkm.RData")
   
 #TCGA data sets----  
 read_query <- GDCquery(project       = "TCGA-READ",
@@ -316,9 +335,9 @@ read_query <- GDCquery(project       = "TCGA-READ",
                        data.type     = "Gene Expression Quantification",
                        workflow.type = "HTSeq - Counts")
 
-coad_query <- GDCquery(project = "TCGA-COAD",
+coad_query <- GDCquery(project       = "TCGA-COAD",
                        data.category = "Transcriptome Profiling",
-                       data.type = "Gene Expression Quantification",
+                       data.type     = "Gene Expression Quantification",
                        workflow.type = "HTSeq - Counts")
 
 
@@ -343,7 +362,7 @@ GDCdownload(query           = read_query,
 GDCdownload(query           = coad_query,
             method          = "api",
             files.per.chunk = 10,
-            directory       = "Data/Bulk-data/TCGA-COAD-Dataset")
+            directory       = "Data/TCGA-COAD/")
 
 
 #Combined download
@@ -363,6 +382,12 @@ read_data_df <- as.data.frame(colData(read_data_se))
 read_data_df$vital_status <- factor(read_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
 read_data_df$vital_status <- as.numeric(as.character(read_data_df$vital_status))
 
+#COAD summarizedExperiment object
+coad_data_se <- GDCprepare(coad_query, summarizedExperiment = TRUE, directory = "Data/TCGA-COAD/")
+coad_data_df <- GDCprepare(coad_query, summarizedExperiment = FALSE, directory = "Data/TCGA-COAD/")
+coad_data_df <- as.data.frame(colData(coad_data_se))
+coad_data_df$vital_status <- factor(coad_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
+coad_data_df$vital_status <- as.numeric(as.character(coad_data_df$vital_status))
 
 
 #Combined summarizedExperiment object
@@ -375,6 +400,26 @@ combined_data_df$vital_status <- as.numeric(as.character(combined_data_df$vital_
 lusc_data_se <- GDCprepare(lusc_query, summarizedExperiment = FALSE, directory = "Data/Bulk-data/TCGA-LUSC-Dataset/")
 
 
+#Bulk data frame for COAD data frame----
+bulk_rna_df <- coad_data_se@assays@data@listData[["HTSeq - Counts"]]
+colnames(bulk_rna_df) <- coad_data_se@colData@rownames
+rownames(bulk_rna_df) <- coad_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
+bulk_rna_df <- t(bulk_rna_df)
+bulk_rna_df <- as.data.frame(bulk_rna_df)
+bulk_rownames <- rownames(bulk_rna_df)
+bulk_rna_df$barcode <- bulk_rownames
+
+bulk_rna_df_unique <- subset(bulk_rna_df, select = unique(colnames(bulk_rna_df)))
+coad_data_df_unique <- subset(coad_data_df, select = unique(colnames(coad_data_df)))
+merged_df <- merge(bulk_rna_df_unique, coad_data_df_unique, by = 'barcode')
+rownames(merged_df) <- merged_df$barcode
+merged_df <- merged_df[,2:length(colnames(merged_df))]
+
+merged_df$days_to_death <- ifelse(is.na(merged_df$days_to_death),0, merged_df$days_to_death)
+merged_df$days_to_last_follow_up <- ifelse(is.na(merged_df$days_to_last_follow_up),0, merged_df$days_to_last_follow_up)
+coad_df <- merged_df
+
+merged_df <- coad_df
 
 #Bulk data frame for combined merged data frame----
 combined_bulk_rna_df <- combined_data_se@assays@data@listData[["HTSeq - Counts"]]
@@ -490,7 +535,7 @@ cox_df <- cox_df[complete.cases(cox_df[, "ajcc.n"]), ]
 
 #Merged data frame for the normal/main colon cancer dataset
 #Load the COAD data frame for use with Cox model----
-load("Data/Exported-data/R-objects/merged_df_replaced.RData")
+load("Data/Exported-data/R-objects/coad_df.RData")
 
 calculated_days <- merged_df$days.to.death - merged_df$days.to.last.follow.up
 calculated_days[calculated_days==0]=1
@@ -528,7 +573,7 @@ cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N1", replacement=1)
 cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N2", replacement=2)
 cox_df <- filter(cox_df, !tumor.stage=="not reported")
 cox_df <- cox_df[complete.cases(cox_df[, "ajcc.m"]), ]
-
+#save(cox_df, file = "Data/TCGA-COAD/coad_df.RData")
 
 #Random 1800 genes----
 random_genes <- sample(colnames(cox_df), replace = TRUE, 1800)
@@ -575,9 +620,9 @@ for (y in gene_sizes){
 cox_models <- list()
 my_cindicies <- c()
 counter <- 1
-for (x in mad_sdes_mirna_optimized[65]) {
+for (x in mad_sdes_mirna_optimized_colorect[116]) {
   current_weight <- x
-  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = TRUE, tumor.n = TRUE, tumor.m = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "~/Desktop/top_performer_coad _and_read_cc_singlecell_mms_genes_tumor_n.csv") 
+  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800, cox.predictors = current_weight, tumor.stage = FALSE, tumor.n = FALSE, tumor.m = FALSE, regular.cox = TRUE, save.regular.cox.genes = TRUE, my.filename = "~/Desktop/top_performer_coad_cc_singlecell_mms_genes_200_mirna_targets_colorect_only.csv") 
   cox_models[[as.character(counter)]] <- current_cox
   counter <- counter + 1
   
@@ -588,27 +633,44 @@ for (x in mad_sdes_mirna_optimized[65]) {
   my_cindicies <- c(my_cindicies, current_c)
 }
 
-max(my_cindicies)
-
+top_cindex <-max(my_cindicies)
+top_index <- which(my_cindicies==top_cindex)
+top_index
 
 #For calculating risk
-patient_risk <- risk_score_calculator(my.file = "~/Desktop/top_performer_coad _and_read_cc_singlecell_mms_genes_tumor_n.csv",
-                                   my.title = "CC Singlecell MMS + Tumor Stage + N Stage COAD & READ",
-                                   tumor.data = TRUE, n.data = TRUE, cox.df = cox_df, show.pval = TRUE, show.pval.method = FALSE)
+patient_risk <- risk_score_calculator(my.file = "~/Desktop/top_performer_coad_cc_singlecell_mms_genes_200_mirna_targets_colorect_only.csv",
+                                   my.title = "CC Singlecell MMS COAD Colorectal 200 Only",
+                                   tumor.data = FALSE, n.data = FALSE, cox.df = cox_df, show.pval = TRUE, show.pval.method = FALSE)
 
 
 
 
 #For plotting the coefficients----
-coef_df <- data.frame(coefs=cox_models$`1`$`Active Coefficients`, labels=cox_models$`1`$`Active Genes`)
-coef_df_sub <- filter(coef_df, abs(coefs)>0.05)
+#coef_df <- data.frame(coefs=cox_models$`1`$`Active Coefficients`, labels=cox_models$`1`$`Active Genes`)
+coef_df_sub <- filter(coef_df, abs(coef)>2)
+coef_df_sub <- filter(coef_df_sub, p.value<0.01)
+#coef_df_sub <- filter(coef_df, p.value<0.0001)
+
+coef_df_sub$p.value.trans <- -log10(coef_df_sub$p.value)
+coef_plot2 <- ggplot(data = coef_df_sub, aes(x=Gene, y=coef, color=Gene, fill=Gene))+
+  geom_col()+
+  theme_bw()+
+  ggtitle("CC Singlecell MMS COAD Colorectal Cox Coefficients")+
+  ylab("Coefficients")+
+  xlab("Gene")+
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 16))+
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))
+
+
+coef_plot2
 
 coef_plot <- ggplot(data = coef_df_sub, aes(x=labels, y=coefs, fill=labels))+
   geom_bar(stat= "identity")+
   geom_hline(yintercept = 0, color="red")+
   theme_bw()+
   coord_flip()+
-  ggtitle("Top CC Singlecell MMS COAD + READ Cox Coefficients")+
+  ggtitle("Top CC Singlecell MMS READ Cox Coefficients")+
   ylab("Coefficients")+
   xlab("Genes")+
   #ylim(c(-0.1,1))+
@@ -1123,7 +1185,7 @@ Leuk_data_df <- as.data.frame(colData(Leuk_data_se))
 Leuk_data_df$vital_status <- factor(Leuk_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
 Leuk_data_df$vital_status <- as.numeric(as.character(Leuk_data_df$vital_status))
 
-#Bulk dataframe for Leuk merged dataframe----
+#Bulk data frame for Leuk merged data frame----
 bulk_rna_df <- Leuk_data_se@assays@data@listData[["HTSeq - Counts"]]
 colnames(bulk_rna_df) <- Leuk_data_se@colData@rownames
 rownames(bulk_rna_df) <- Leuk_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
@@ -1277,7 +1339,7 @@ glio_query <- GDCquery(project        = "TCGA-GBM",
 GDCdownload(query           = glio_query,
             method          = "api",
             files.per.chunk = 10,
-            directory       = "Data/Bulk-data/TCGA-Glio-Dataset")
+            directory       = "Data/TCGA-GBM/TCGA-Glio-Dataset")
 
 #Making the summarizedExperiment object and then removing all entries that lacked days_to_last_follow_up information
 Glio_data_se <- GDCprepare(glio_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-Glio-Dataset/")

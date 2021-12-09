@@ -75,13 +75,15 @@ mirna_calculator <- function(ts.org                      ="Human",
   my_num <- 1
   miRNA_targets <- vector(mode = "list", length = length(common_mirnas))
   for (m in common_mirnas[1:length(common_mirnas)]) {
-    print(m)
+    percent_done <- (my_num/length(common_mirnas))*100
+    #print(percent_done)
+    #print(m)
     current_target <- targetScan(mirna=common_mirnas[my_num], species=ts.org, release=ts.version, maxOut= max.miR.targets)
     miRNA_name <- m
     miRNA_name_final <- rep(miRNA_name, times=length(current_target$Ortholog))
     current_target <- cbind(current_target,miRNA_name_final)
     miRNA_targets[[m]] <- current_target
-    print(my_num)
+    #print(my_num)
     my_num <- my_num + 1
   }
   

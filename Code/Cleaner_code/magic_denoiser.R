@@ -8,7 +8,7 @@
 magic_denoiser <- function(sc.data      =sc, 
                            magic.seed   =123,
                            magic.knn    =10,
-                           magic.solver ='exact',
+                           magic.solver ='approximate',
                            magic.cores  =1,
                            magic.verbose=1,
                            filt.1       =0.3, 
