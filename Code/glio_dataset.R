@@ -68,6 +68,42 @@ cox_df$days.to.last.follow.up <- ifelse(cox_df$days.to.last.follow.up==0,1,cox_d
 
 
 #Mirna metric----
+#For changing miRNA and miRNA targets
+mirnas <- seq(1, 340, by = 50)
+#mirnas <- seq(1,340, by = 2)
+for(x in mirnas[1:length(mirnas)]){
+  mirna.genes <- mirna_calculator(cancer.type1 = "brain cancer",
+                                  max.miR.targets = x,
+                                  cancer.up = TRUE,
+                                  mirna.remove = "hsa-miR-129-1-3p",
+                                  max.mirnas = x,
+                                  save.mirna.genes = TRUE,
+                                  mirna.gene.filename = paste0("Data/TCGA-GBM/MiRNA/Global_Search/mirna_genes_global_search_mirna_", x,"_", x, "_targets.csv"),
+                                  mirna.gene.rfile = paste0("Data/TCGA-GBM/MiRNA/Global_Search/mirna_genes_global_search_mirna_", x,"_", x, "_targets.RData"))
+  
+}
+
+
+#For miRNA fill-in
+for(y in mirnas){
+  for(x in mirnas[1:length(mirnas)]){
+    mirna.genes <- mirna_calculator(cancer.type1 = "brain cancer",
+                                    max.miR.targets = x,
+                                    cancer.up = TRUE,
+                                    mirna.remove = "hsa-miR-129-1-3p" ,
+                                    max.mirnas = x,
+                                    save.mirna.genes = TRUE,
+                                    mirna.gene.filename = paste0("Data/TCGA-GBM/Mirna/Global_Search/mirna_genes_global_search_mirna_fill_in_", y,"_", x, "_targets.csv"),
+                                    mirna.gene.rfile = paste0("Data/TCGA-GBM/Mirna/Global_Search/mirna_genes_global_search_mirna_fill_in_", y,"_", x, "_targets.RData"))
+    
+  }
+}
+
+
+
+
+
+#For a single miRNA
 mirna.genes <- mirna_calculator(ts.org = "Human",
                                 ts.version = "7.2",
                                 max.mirnas = 400,

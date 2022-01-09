@@ -3,8 +3,8 @@
 #Purpose: All of the analysis for TCGA-COAD analysis
 
 #Load needed packages----
-library(akima)
-library(arules)
+# library(akima)
+# library(arules)
 library(data.table)
 library(ggplot2)
 library(survival)
@@ -53,58 +53,160 @@ save(sde.genes, file = "Data/TCGA-COAD/sde.RData")
 
 #MiRNA metric----
 #For loop for testing several different mirna number or mirna target size
-mirna_targets <- seq(374,1550, by=2)
-#mirnas <- seq(374,1550, by=2)
-mirnas <- seq(1, 1550, by = 50)
+#mirnas <- seq(1,1557, by=2)
+#For cancer upregulated miRNAS
+mirnas <- seq(1, 1560, by = 50)
+#For cancer downregulaed miRNas
+#mirnas <- seq(1, 82, by = 2)
 
-for(x in mirnas[31:length(mirnas)]){
+for(x in mirnas[1:length(mirnas)]){
   mirna.genes <- mirna_calculator(cancer.type1 = "colorectal cancer",
                                   cancer.type2 = "colon cancer",
-                                  ts.org = "Human",
-                                  ts.version = "7.2",
                                   max.miR.targets = x,
                                   cancer.up = TRUE,
                                   mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p", "hsa-miR-454-3p", "hsa-miR-365a-5p"),
                                   max.mirnas = x,
-                                  write.heatmap.data = FALSE, 
+                                  ts.org = "Human",
+                                  ts.version = "7.2",
                                   print.ts.targets = TRUE,
-                                  save.mirna.raw.targets = FALSE,
                                   save.mirna.genes = TRUE,
-                                  mirna.gene.filename = paste0("Data/TCGA-COAD/mirna_genes_global_search_", x,"_", x, "_targets.csv"),
-                                  mirna.gene.rfile = paste0("Data/TCGA-COAD/mirna_genes_global_search_", x,"_", x, "_targets.RData"))
+                                  mirna.gene.filename = paste0("Data/TCGA-COAD/Mirna/Global_Search/mirna_genes_global_search_mirna_", x,"_", x, "_targets.csv"),
+                                  mirna.gene.rfile = paste0("Data/TCGA-COAD/Mirna/Global_Search/mirna_genes_global_search_mirna_", x,"_", x, "_targets.RData"))
   
+}
+
+
+#For miRNA fill-in
+for(y in mirnas){
+  for(x in mirnas[1:length(mirnas)]){
+    mirna.genes <- mirna_calculator(cancer.type1 = "colorectal cancer",
+                                    cancer.type2 = "colon cancer",
+                                    max.miR.targets = x,
+                                    cancer.up = FALSE,
+                                    mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p", "hsa-miR-454-3p", "hsa-miR-365a-5p"),
+                                    max.mirnas = x,
+                                    save.mirna.genes = TRUE,
+                                    mirna.gene.filename = paste0("Data/TCGA-COAD/Mirna/Global_Search/mirna_genes_global_search_mirna_fill_in_", y,"_", x, "_targets_downreg_mirnas.csv"),
+                                    mirna.gene.rfile = paste0("Data/TCGA-COAD/Mirna/Global_Search/mirna_genes_global_search_mirna_fill_in_", y,"_", x, "_targets_downreg_mirnas.RData"))
+    
+  }
 }
 
 
 
 
+#Looping through several global search terms now that we know it works well
+mirna_targets <- seq(310, 1010, by=100)
+for(x in mirna_targets[1]){
+  mirna.genes <- mirna_calculator(cancer.type1 = "colorectal cancer",
+                                  cancer.type2 = "colon cancer",
+                                  max.miR.targets = 310,
+                                  cancer.up = TRUE,
+                                  mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p", "hsa-miR-454-3p", "hsa-miR-365a-5p"),
+                                  max.mirnas = 800,
+                                  save.mirna.genes = TRUE,
+                                  save.mirna.raw.targets = FALSE,
+                                  write.heatmap.data = FALSE,
+                                  mirna.gene.filename = paste0("~/Desktop/800-",x,"-targets.csv"),
+                                  mirna.gene.rfile = paste0("~/Desktop/800-",x,"-targets.RData"))
+  
+  
+  
+  
+}
 
-
+#For individual miRNAs
 mirna.genes <- mirna_calculator(cancer.type1 = "colorectal cancer",
                                 cancer.type2 = "colon cancer",
-                                ts.org = "Human",
-                                ts.version = "7.2",
-                                max.miR.targets = 200,
+                                max.miR.targets = 710,
                                 cancer.up = TRUE,
                                 mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p", "hsa-miR-454-3p", "hsa-miR-365a-5p"),
-                                max.mirnas = 1558,
-                                write.heatmap.data = FALSE, 
-                                print.ts.targets = TRUE,
-                                save.mirna.raw.targets = FALSE,
+                                max.mirnas = 800,
                                 save.mirna.genes = TRUE,
-                                mirna.gene.filename = "Data/TCGA-COAD/mirna_genes_1558_200_targets.csv",
-                                mirna.gene.rfile = "Data/TCGA-COAD/mirna_genes_1558_200_targets.RData")
+                                mirna.gene.filename = "~/Desktop/800-710-targets.csv",
+                                mirna.gene.rfile = "~/Desktop/800-710-targets.RData")
 
 
 #Optimizing the weights of the three metric linear model----
 mad_sdes_mirna_optimized <- three_weight_optimizer(first.metric = mad.genes,
                                                    second.metric = mirna.genes,
                                                    third.metric = sde.genes,
-                                                   my.filename = "Data/TCGA-COAD/three_weight_optimized_40_mirna.RData")
+                                                   my.filename = "~/Desktop/test-optimization-800-10-targets.RData")
 
 
 #Loading the merged data frame----
-#load("Data/Exported-data/R-objects/coad_df.RData")
+read_query <- GDCquery(project       = "TCGA-COAD",
+                       data.category = "Transcriptome Profiling",
+                       data.type     = "Gene Expression Quantification",
+                       workflow.type = "HTSeq - FPKM")
+
+#Downloading the files
+GDCdownload(query           = read_query,
+            method          = "api",
+            files.per.chunk = 10,
+            directory       = "Data/Bulk-data/TCGA-COAD-Test-Dataset")
+
+
+#Making the SummarizedExperiment object
+lung_data_se <- GDCprepare(read_query, summarizedExperiment = TRUE, directory = "Data/Bulk-data/TCGA-COAD-Test-Dataset/")
+lung_data_df <- as.data.frame(colData(lung_data_se))
+lung_data_df$vital_status <- factor(lung_data_df$vital_status, levels = c("Alive", "Dead"), labels = c(0,1))
+lung_data_df$vital_status <- as.numeric(as.character(lung_data_df$vital_status))
+
+
+bulk_rna_df <- lung_data_se@assays@data@listData[["HTSeq - FPKM"]]
+colnames(bulk_rna_df) <- lung_data_se@colData@rownames
+rownames(bulk_rna_df) <- lung_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
+bulk_rna_df <- t(bulk_rna_df)
+bulk_rna_df <- as.data.frame(bulk_rna_df)
+bulk_rownames <- rownames(bulk_rna_df)
+bulk_rna_df$barcode <- bulk_rownames
+
+bulk_rna_df_unique <- subset(bulk_rna_df, select = unique(colnames(bulk_rna_df)))
+lung_data_df_unique <- subset(lung_data_df, select = unique(colnames(lung_data_df)))
+merged_df <- merge(bulk_rna_df_unique, lung_data_df_unique, by = 'barcode')
+rownames(merged_df) <- merged_df$barcode
+merged_df <- merged_df[,2:length(colnames(merged_df))]
+
+calculated_days <- merged_df$days_to_death - merged_df$days_to_last_follow_up
+calculated_days[calculated_days==0]=1
+merged_df <- merged_df[complete.cases(merged_df[, "days_to_last_follow_up"]), ]
+merged_df$days_to_last_follow_up <- ifelse(merged_df$days_to_last_follow_up==0,1,merged_df$days_to_last_follow_up)
+cox_time <- merged_df$days_to_last_follow_up
+cox_event <- merged_df$vital_status
+cox_tumor <- merged_df$ajcc_pathologic_stage
+cox_tumor_n <- merged_df$ajcc_pathologic_n
+cox_tumor_m <- merged_df$ajcc_pathologic_m
+cox_gender <- merged_df$gender
+cox_eth <- merged_df$ethnicity
+cox_race <- merged_df$race
+cox_df <- subset(merged_df, select=c(TSPAN6:AC007389.3))
+cox_df$days.to.last.follow.up <- cox_time
+cox_df$vital.status <- cox_event
+cox_df$tumor.stage <- cox_tumor
+cox_df$ajcc.m <- cox_tumor_m
+cox_df$ajcc.n <- cox_tumor_n
+cox_df$race <- cox_race
+cox_df$ethnicity <- cox_eth
+cox_df$gender <- cox_gender
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="A", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="B", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="C", replacement="")
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage iv", replacement = 4)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage iii", replacement = 3)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage ii", replacement = 2)
+cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage i", replacement = 1)
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="a", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="b", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N0", replacement=0)
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N1", replacement=1)
+cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N2", replacement=2)
+cox_df <- filter(cox_df, !tumor.stage=="not reported")
+cox_df <- cox_df[complete.cases(cox_df[, "ajcc.m"]), ]
+#save(cox_df, file = "Data/TCGA-COAD/coad_df_fpkm.RData")
+
+# load("Data/Exported-data/R-objects/coad_df.RData")
 # calculated_days <- merged_df$days.to.death - merged_df$days.to.last.follow.up
 # calculated_days[calculated_days==0]=1
 # merged_df$days.to.last.follow.up <- ifelse(is.na(calculated_days), merged_df$days.to.last.follow.up, calculated_days)
@@ -155,14 +257,16 @@ counter <- 1
 
 for (x in mad_sdes_mirna_optimized[34]) {
   current_weight <- x
-  current_cox <- cox_model_fitter(my.seed = 1, cox.df = cox_df, gene.num = 1800,
+  current_cox <- cox_model_fitter(my.seed = 1,
+                                  cox.df = cox_df,
+                                  gene.num = 1800,
                                   cox.predictors = current_weight,
                                   tumor.stage = FALSE,
                                   tumor.n = FALSE,
                                   tumor.m = FALSE,
                                   regular.cox = TRUE,
                                   save.regular.cox.genes = TRUE,
-                                  my.filename = "~/Desktop/test.csv") 
+                                  my.filename = "~/Desktop/test-max.csv") 
   
   cox_models[[as.character(counter)]] <- current_cox
   counter <- counter + 1
@@ -181,8 +285,8 @@ top_index
 cox_models$`1`$CV
 
 #KM risk calculation----
-patient_risk <- risk_score_calculator(my.file = "Data/TCGA-COAD/three_weight_optimized_output_1558_mirna_200_top.csv",
-                                      my.title = "CC Singlecell MMS COAD 1558 MiRNA 100 Targets Only",
+patient_risk <- risk_score_calculator(my.file = "~/Desktop/test-max.csv",
+                                      my.title = "CC Singlecell MMS COAD 800 MiRNA 10 Targets Only",
                                       tumor.data = FALSE, n.data = FALSE, cox.df = cox_df, show.pval = TRUE, show.pval.method = FALSE)
 patient_risk
 
@@ -210,46 +314,6 @@ coef_plot <- ggplot(data = coef_df_sub, aes(x=Gene, y=coefs, color=Gene, fill=Ge
 
 coef_plot
 
-#Finding the combination with the max value for mirna for this dataset
-coad_mirna_df <- read.csv(file = "Documentation/mirna_data.csv")
-coad_mirna_df <- filter(coad_mirna_df, Dataset=="TCGA-COAD")
-coad_mirna_df <- filter(coad_mirna_df, MiRNA == 20 | MiRNA == 40 | MiRNA == 80 | MiRNA == 200 | MiRNA == 400 | MiRNA == 800 | MiRNA == 1000 | MiRNA == 1200 | MiRNA == 1500 | MiRNA == 1558)
-coad_mirna_df <- filter(coad_mirna_df, Concordance_index==max(coad_mirna_df$Concordance_index))
-
-#Making heatmap of optimal mirna value
-# ggplot(coad_mirna_df, aes(MiRNA, MiRNA_targets)) +
-#   geom_tile(aes(fill = Concordance_index), colour = "white") +
-#   scale_fill_gradient(low = "white", high = "red")+
-#   theme_minimal()+
-#   ylab("MiRNA Targets")+
-#   labs(fill="Concordance Index")+
-#   ggtitle("TCGA-COAD")+
-#   coord_fixed()
-
-
-
-resolution <- 0.1
-a <- interp(x=coad_mirna_df$MiRNA, y=coad_mirna_df$MiRNA_targets, z=coad_mirna_df$Concordance_index, 
-            xo=seq(min(coad_mirna_df$MiRNA),max(coad_mirna_df$MiRNA_targets),by=resolution),
-            yo=seq(min(coad_mirna_df$MiRNA_targets),max(coad_mirna_df$MiRNA_targets),by=resolution), duplicate="mean")
-
-x.coordinate <- a$x
-y.coordinate <- a$y
-my.table <- as.data.frame(a$z) 
-
-names(my.table) <- y.coordinate
-my.table[is.na(my.table)] <- 0
-my.table$x <- x.coordinate
-longenergy <- melt(as.data.table(my.table),id="x")
-
-
-ggheat <- ggplot(longenergy,aes(x=variable,y=x, fill=value)) +
-  geom_tile() + 
-  theme(axis.text.x=element_blank(),axis.text.y=element_blank()) + 
-  xlab("# of MiRNA Targets") + ylab("# of MiRNAs") 
-
-
-ggheat
 
 
 #Regular cox with the top coefficients from the penalized cox model
@@ -454,4 +518,35 @@ ggplot(data = stacked_data, aes(x=Dataset, y=Concordance_index_all, fill=Concord
         axis.title = element_text(face = "bold"),
         legend.position = "bottom")
 
+#MiRNA size heat map----
+mirna_heatmap_df <- read.csv("Data/TCGA-COAD/mirna-gene-size-vs-gene-target-data.csv")
 
+#Reading all the files in to get the C-index
+c_index_getter <- function(filename){
+  finished_filename <- paste0("~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/Data/TCGA-COAD/Mirna/Global_Search/Finished-outputs/",filename)
+  my_file <- read.csv(finished_filename)
+  current_c <- my_file$c_index[1]
+  return(current_c)
+}
+
+files <- list.files("Data/TCGA-COAD/Mirna/Global_Search/Finished-outputs/")
+all_cindicies <-sapply(files, c_index_getter)
+all_cindicies <- unname(all_cindicies)
+
+#Appending our c-indicies to the larger file
+mirna_heatmap_df$C_index <- all_cindicies
+
+#Making the heat map
+ggplot(data = mirna_heatmap_df, aes(x=Mirna, y=Mirna_targets, fill=C_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  coord_fixed()+
+  labs(x ="# of MiRNAs",
+       y = "# of MiRNA Targets",
+       title = "COAD Global Search",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold"),
+        axis.title = element_text(face = "bold"),
+        legend.position = "bottom")
+  

@@ -29,6 +29,39 @@ sde.genes <- switchde_calculator(lc_tumor_tpm$denoised_sc_dataframe, pseudo.time
 save(sde.genes, file = "Data/TCGA-LUSC/sde.RData")
 
 #MiRNA metric
+mirnas <- seq(1, 810, by = 50)
+#For constant miRNA number while varying the target number
+for(y in mirnas){
+  for(x in mirnas[1:length(mirnas)]){
+    mirna.genes <- mirna_calculator(cancer.type1 = "lung cancer",
+                                    max.miR.targets = x,
+                                    cancer.up = TRUE,
+                                    mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"),
+                                    max.mirnas = x,
+                                    save.mirna.genes = TRUE,
+                                    mirna.gene.filename = paste0("Data/TCGA-LUSC/MiRNA/Global_Search/mirna_genes_global_search_mirna_fill_in_", y,"_", x, "_targets.csv"),
+                                    mirna.gene.rfile = paste0("Data/TCGA-LUSC/Mirna/Global_Search/mirna_genes_global_search_mirna_fill_in_", y,"_", x, "_targets.RData"))
+    
+  }
+}
+
+
+#For changing miRNA and miRNA targets
+for(x in mirnas[1:length(mirnas)]){
+  mirna.genes <- mirna_calculator(cancer.type1 = "lung cancer",
+                                  max.miR.targets = x,
+                                  cancer.up = TRUE,
+                                  mirna.remove = c("hsa-miR-129-2-3p", "hsa-miR-129-1-3p"),
+                                  max.mirnas = x,
+                                  save.mirna.genes = TRUE,
+                                  mirna.gene.filename = paste0("Data/TCGA-LUSC/MiRNA/Global_Search/mirna_genes_global_search_mirna_", x,"_", x, "_targets.csv"),
+                                  mirna.gene.rfile = paste0("Data/TCGA-LUSC/MiRNA/Global_Search/mirna_genes_global_search_mirna_", x,"_", x, "_targets.RData"))
+  
+}
+
+
+
+#Single miRNA
 mirna.genes <- mirna_calculator(cancer.type1 = "lung cancer",
                                 ts.org = "Human",
                                 ts.version = "7.2",
