@@ -13,14 +13,15 @@ mirna_calculator <- function(ts.org                      ="Human",
                              mirna.remove                ="hsa-miR-129-1-3p",
                              max.mirnas                  =1559,
                              save.mirna.genes            =TRUE,
-                             mirna.gene.rfile            ="~/Desktop/my_mirnas.rds"){
+                             mirna.gene.rfile            ="~/Desktop/my_mirnas.rds",
+                             mirna.ranking               ="~/Desktop/mirna.ranking.rds"){
   
   #Loading required package----
   require(hoardeR)
   require(tidyverse)
   
   #Our return list 
-  miRNA_returns <- vector(mode = "list", length = 2)
+  miRNA_returns <- vector(mode = "list", length = 4)
   
   #miRNAs from miRmap----
   miRmap_mirnas <- read.csv(file = "Data/miRNA-data/mirmap_mirnas.csv", sep = ',')
@@ -74,40 +75,43 @@ mirna_calculator <- function(ts.org                      ="Human",
                                 release=ts.version,
                                 maxOut= max.miR.targets)
   
+  #Saving the original unaltered targetScan output
+  miRNA_returns[[1]] <- miRNA_targets
+    
   #Subsetting the returning output from targetScan  
-  miRNA_targets <- lapply(miRNA_targets, "[", c(1,3,4))
+  # miRNA_targets <- lapply(miRNA_targets, "[", c(1,3,4))
   
   #Our numeric conversion functions for lapply()
   numeric_converter1 <- function(df){
   within(df, consSites <- as.numeric(consSites))
   }
-  
+
   numeric_converter2 <- function(df){
     within(df, poorlySites <- as.numeric(poorlySites))
   }
-  
- 
+
+
   #Turning our specific columns in all of our list's data frames to
   #numeric data types
   miRNA_targets <- lapply(miRNA_targets, numeric_converter1)
   miRNA_targets <- lapply(miRNA_targets, numeric_converter2)
-  
-  
-  #Using a loop to go through each data frame in our list of data frames and
-  #removing any values that are equal to NA and replacing them with 0 to 
-  #make sure our scoring calculation don't break. 
+
+
+  # #Using a loop to go through each data frame in our list of data frames and
+  # #removing any values that are equal to NA and replacing them with 0 to 
+  # #make sure our scoring calculation don't break. 
   miRNA_targets_mod <- list()
   counter <- 1
-  
+
   for(x in miRNA_targets){
     current_df <- x
     current_df[is.na(current_df)] <- 0
     miRNA_targets_mod[[counter]] <- current_df
     counter <- counter + 1
   }
-  
-  
-  
+
+
+
   #We create a column in all of our list's data frames that is the fraction
   #of well conserved binding sites over total binding sites and remove any
   #entries that lead to NaN. We then create another column in all of the list's
@@ -118,32 +122,42 @@ mirna_calculator <- function(ts.org                      ="Human",
   miRNA_targets_mod <- lapply(miRNA_targets_mod, function(x) {x$mirna_frac <- x$consSites/(x$consSites + x$poorlySites);return(x)})
   miRNA_targets_mod <- lapply(miRNA_targets_mod, na.omit)
   miRNA_targets_mod <- lapply(miRNA_targets_mod, function(x) {x$total_binding_sites <-(x$consSites + x$poorlySites);return(x)})
-  miRNA_targets_mod <- lapply(miRNA_targets_mod, function(x) {x$score <- rowSums(x[2:5]);return(x)})
+  miRNA_targets_mod <- lapply(miRNA_targets_mod, function(x) {x$score <- rowSums(x[3:6]);return(x)})
   miRNA_targets_mod <- lapply(miRNA_targets_mod, function(x) {x$score <- x$score +1;return(x)})
-  
+
   #Getting the names of the miRNAs from the original set of lists for our
   #modified lists
   names(miRNA_targets_mod) <- names(miRNA_targets)
-  
+
 
   #Adding the miRNA-gene target matrices to our return list
-  miRNA_returns[[1]] <- miRNA_targets_mod
-  
+  miRNA_returns[[2]] <- miRNA_targets_mod
+
   #Creating our score matrix by binding all of the data frames in our
   #list together and then sorting them from greatest to least score
   miRNA_score <- dplyr::bind_rows(miRNA_targets_mod)
-  miRNA_score <- miRNA_score[order(-miRNA_score$score), ] 
+  miRNA_score <- miRNA_score[order(-miRNA_score$score), ]
 
   #Function for standardizing our score from 0 to 1
   range_standridizing <- function(x){(x-min(x))/(max(x)-min(x))}
   miRNA_score$score <- range_standridizing(miRNA_score$score)
   
+  #Now removing duplicate gene rows
+  miRNA_score <- miRNA_score[!duplicated(miRNA_score[c('Ortholog')]), ]
+
   #Adding our score matrix to our return list and returning all our objects
-  miRNA_returns[[2]] <- miRNA_score
+  miRNA_returns[[3]] <- miRNA_score
+  
+  #Taking our finished data frame and constructing a named numeric from it 
+  mirna.ranking <- miRNA_score$score
+  names(mirna.ranking) <- miRNA_score$Ortholog
+  
+  #Adding our named numeric to the return object
+  miRNA_returns[[4]] <- mirna.ranking
   
   #Saving the ranked miRNAs to a .rds file for use later
   if(save.mirna.genes==TRUE){
-    saveRDS(miRNA_score, file = mirna.gene.rfile)
+    saveRDS(mirna.ranking, file = mirna.gene.rfile)
   }
   
   return(miRNA_returns)
