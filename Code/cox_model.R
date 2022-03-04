@@ -6,15 +6,17 @@
 #cox_model_fitter----
 cox_model_fitter <- function(my.seed       =1,
                              cox.df        =NULL,
-                             gene.num      =900,
+                             gene.num      =1800,
                              cox.predictors=NULL,
                              tumor.stage   =FALSE,
                              tumor.n       =FALSE,
                              tumor.m       =FALSE,
                              regular.cox   =TRUE,
                              save.regular.cox.genes =TRUE,
-                             remove.stage   = c("tumor.stage1","tumor.stage2","tumor.stage3", "tumor.stage4"),
-                             remove.n.stage = c("ajcc.n0", "ajcc.n1", "ajcc.n2", "ajcc.n3"),
+                             remove.stage   = c("tumor.stage1","tumor.stage2",
+                                                "tumor.stage3", "tumor.stage4"),
+                             remove.n.stage = c("ajcc.n0", "ajcc.n1", "ajcc.n2",
+                                                "ajcc.n3"),
                              my.filename   ="my_saved_genes.csv"){
   
   #Doing input sanity checks----
@@ -43,6 +45,7 @@ cox_model_fitter <- function(my.seed       =1,
   #the packages will be installed
   #from CRAN and then loaded.
   require(BiocGenerics)
+  require(caret)
   require(doParallel)
   require(glmnet)
   require(lmtest)
@@ -50,9 +53,9 @@ cox_model_fitter <- function(my.seed       =1,
   require(survival)
   require(survminer)
   
-  #Setting the seed for reproducible----
-  #output
+  #Setting the seed for reproducible output----
   set.seed(my.seed)
+  
   
   #Setting the number of processors on the----
   #machine to speed up the fitting
@@ -61,7 +64,7 @@ cox_model_fitter <- function(my.seed       =1,
   
   #Making the list that will store the----
   #data we will return
-  cox_data <- list()
+  cox_data <- vector(mode = "list", length = 12)
   
   #The predictors for the cox model----
   if(is.numeric(cox.predictors)==TRUE){
@@ -84,7 +87,8 @@ cox_model_fitter <- function(my.seed       =1,
   colname_changes <- unlist(colname_changes)
   colnames(cox.df) <- colname_changes
   my_predictors <- intersect(my_predictors, colnames(cox.df))
-  my_predictors <- paste("~", paste(my_predictors[1:length(my_predictors)], collapse = "+"))
+  my_predictors <- paste("~", paste(my_predictors[1:length(my_predictors)], 
+                                    collapse = "+"))
   
   
   if(tumor.stage==TRUE & tumor.n==FALSE & tumor.m==FALSE){
@@ -102,19 +106,33 @@ cox_model_fitter <- function(my.seed       =1,
   }
   
   my_x <- model.matrix(my_predictors, cox.df)
+  
+  
   #The response object for the cox model----
   my_y <- Surv(time = cox.df$days.to.last.follow.up, event = cox.df$vital.status)
+  
   #The 10-fold cross-validation fit----
-  cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C", maxit=100000, family="cox", parallel = TRUE)
+  cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C",
+                      maxit=100000, family="cox", parallel = TRUE, keep = TRUE)
   
   
   #Looking to see which genes are the most important
   fit <- glmnet(my_x, my_y, family =  "cox", maxit = 100000)
   Coefficients <- coef(fit, s = cv_fit$lambda.min)
   
+  
+  
   Active.Index <- which(as.logical(Coefficients) != 0)
   Active.Coefficients  <- Coefficients[Active.Index]
   active_genes <-rownames(Coefficients)[Active.Index]
+ 
+  
+  #Saving the coefficients of the model
+  # active_coefs_df <- cbind(active_genes, Active.Coefficients)
+  # write.csv(active_coefs_df, file = my.filename)
+  
+  #Assessing the performance of the 10-fold cv on the entire data set----
+  # model_perf<- assess.glmnet(cv_fit, newx = my_x, newy = my_y)
   
   if(tumor.stage==TRUE & tumor.n==FALSE & tumor.m==FALSE){
     print("This is the genes + tumor stage predictor...")
@@ -128,46 +146,43 @@ cox_model_fitter <- function(my.seed       =1,
     active_genes <- c(active_genes, "tumor.stage", "ajcc.n")
   }
   
+ 
   #Getting survival
-  my_surv <- survival::survfit(cv_fit, s = "lambda.min", x = my_x, y = my_y)
+  #my_surv <- survival::survfit(cv_fit, s = "lambda.min", x = my_x, y = my_y)
   
-  #Regular Cox
-  if(regular.cox==TRUE){
-    active_predictors <-paste(active_genes, collapse = "+")
-    regular_cox_df <- cox.df[,active_genes]
-    regular_cox_df$days.to.last.follow.up <- cox.df$days.to.last.follow.up
-    regular_cox_df$vital.status <- cox.df$vital.status
-    my_formula <- paste("~", paste(active_genes[1:length(active_genes)], collapse = "+"))
-    regular_cox <- coxph(Surv(time = regular_cox_df$days.to.last.follow.up, event = regular_cox_df$vital.status)~., data = regular_cox_df)
-    cox_data[["Regular Cox"]] <- regular_cox
-    cox_data[["Summary of Regular Cox"]] <- summary(regular_cox)
-    if(save.regular.cox.genes==TRUE){
-      summ_regular_cox <- summary(regular_cox)
-      write.csv(summ_regular_cox$coefficients, file = my.filename)
-    }
-    
-  }
+
   
   #Adding the relevant data bits to list to return
   cox_data[["CV"]] <- cv_fit
+  #cox_data[["Cox fit"]] <- fit
+  #cox_data[["Cox Performance"]] <- model_perf
   cox_data[["Coefficients"]] <- Coefficients
   cox_data[["Active Coefficients"]] <- Active.Coefficients
   cox_data[["Active Index"]] <- Active.Index
   cox_data[["Active Genes"]] <- active_genes
   cox_data[["Predictors"]] <- my_predictors
-  cox_data[["Predicted Survival"]] <- my_surv
+  #cox_data[["Predicted Survival"]] <- my_surv
+  #cox_data[["Finished Coefficients"]] <- active_coefs_df
   
   
   #Returning our finished output----
   return(cox_data)
-
-}
+  
+  }
+  
+ 
 
 
 
 #risk_score_calculator-----
 risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_cox_model_outputs/coad_and_read_regular_cox_genes_1800.csv", 
-                                  tumor.data=FALSE, n.data=FALSE, my.title="Finished KM Plot", cox.df=cox_df, show.pval=TRUE, show.pval.method=FALSE){
+                                  tumor.data=FALSE, n.data=FALSE,
+                                  my.title="Finished KM Plot",
+                                  cox.df=cox_df,
+                                  show.pval=TRUE,
+                                  show.pval.method=FALSE,
+                                  my.line.size = 3.0,
+                                  my.censor.size = 4){
   #Required packages----
   require(survival)
   
@@ -189,10 +204,20 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
                          legend.title  ="Risk",
                          x.lab         ="Time (days)",
                          plot.title    ="MiRNA",
-                         color.pal     =c("red", "blue")){
+                         color.pal     =c("red", "blue"),
+                         size          = my.line.size,
+                         censor.size   = my.censor.size){
     
     #Loading the needed package. If not installed it is automatically done.----
     require(survminer)
+    
+    custom_theme <- function() {
+      theme_survminer() %+replace%
+        theme(
+          plot.title=element_text(hjust=0.5),
+          axis.line = element_line(size = 1.5)
+        )
+    }
     
     #KM Curves plotting code----
     sur_Plot<-ggsurvplot(km.fit,
@@ -210,18 +235,29 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
                          font.x= c(40, "bold"),
                          font.y=c(40, "bold"),
                          font.tickslab=c(40, "plain"),
-                         font.legend=c(40, "plain"))
+                         font.legend=c(40, "plain"),
+                         size = size,
+                         censor.size=3,
+                         censor.shape="|",
+                         ggtheme = custom_theme())
     
+    #Saving the plot to .svg format
+    ggsave("~/Desktop/test-survival.svg",
+           plot = print(sur_Plot$plot, newpage = FALSE),
+           device="svg", dpi=300,
+           width = 34, height = 34, units = "cm")
     
     #Returning our finished KM plot----
     return(sur_Plot)
   }
   
   
-  
+  #List to store the return objects in
+  survival_return <- vector(mode = "list", length = 2)
   #Read in the data----
   my_file <- read.csv(my.file)
-  colnames(my_file)[c(1,6)] <- c("gene","p.value")
+  my_file <- my_file[,2:3]
+  colnames(my_file)[c(1,2)] <- c("gene","coef")
   
   if(tumor.data==FALSE & n.data==FALSE){
     risk_df <- cox.df[,my_file$gene]
@@ -243,7 +279,9 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
     total_risk_length <- length(colnames(risk_df))
     risk_length <- total_risk_length-2
     for(x in my_genes){
-      current_risk <- risk_converter(my.name = my_genes[counter], my.data = risk_df[1:risk_length], my.med.exp = gene_info[1:risk_length])
+      current_risk <- risk_converter(my.name = my_genes[counter],
+                                     my.data = risk_df[1:risk_length],
+                                     my.med.exp = gene_info[1:risk_length])
       my_converted_scores[[as.character(my_genes[counter])]] <- current_risk
       counter <- counter + 1
     }
@@ -268,8 +306,12 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
     converted_df <- as.data.frame(converted_df)
     converted_df$risk <- ifelse(converted_df$risk>median_risk, "high", "low")
     km_fit <- survfit(Surv(time, vital.status) ~ risk, data = converted_df)
-    finished_plot <- km_plotter(km.fit = km_fit, data.source = converted_df, p.value = TRUE, plot.title = my.title)
+    finished_plot <- km_plotter(km.fit = km_fit, data.source = converted_df,
+                                p.value = TRUE,
+                                plot.title = my.title)
     finished_plot
+    
+    survival_return[["KM Plot"]] <- finished_plot
   }
   
   #Only for if there is tumor data included----
@@ -341,8 +383,8 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
     km_fit <- survfit(Surv(time, vital.status) ~ risk, data = converted_df)
     finished_plot <-km_plotter(km.fit = km_fit, data.source = converted_df, p.value = TRUE, plot.title = my.title)
     finished_plot
+    survival_return[["KM Plot"]] <- finished_plot
     
-  
   }else if(tumor.data==TRUE & n.data==TRUE){
       tumor_info <- filter(my_file, gene=="tumor.stage1" | gene=="tumor.stage2" | gene=="tumor.stage3" | gene=="tumor.stage4")
       n_info <- filter(my_file, gene=="ajcc.n1" | gene=="ajcc.n2" | gene=="ajcc.n3")
@@ -429,19 +471,22 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
       converted_df$risk <- ifelse(converted_df$risk>median_risk, "high", "low")
       km_fit <- survfit(Surv(time, vital.status) ~ risk, data = converted_df)
       finished_plot <-km_plotter(km.fit = km_fit, data.source = converted_df, p.value = TRUE, plot.title = my.title)
-
+      survival_return[["KM Plot"]] <- finished_plot
   }
-  return(finished_plot)
+  
+  survival_return[["Survival DF"]] <- converted_df
+  return(survival_return)
 }
 
 
 
 #Code for just testing tumor stage and n pathological state----
-my_predictors <- paste("~", paste("ajcc.n", sep = "+"), collapse = "+")
-my_predictors <- as.formula(my_predictors)
-my_x <- model.matrix(my_predictors, cox.df)
-my_y <- Surv(time = cox.df$days.to.last.follow.up, event = cox.df$vital.status)
-
-cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C", maxit=100000, family="cox", parallel = TRUE)
+# my_predictors <- paste("~", paste("ajcc.n", sep = "+"), collapse = "+")
+# my_predictors <- as.formula(my_predictors)
+# my_x <- model.matrix(my_predictors, cox.df)
+# my_y <- Surv(time = cox.df$days.to.last.follow.up, event = cox.df$vital.status)
+# 
+# cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C",
+#                     maxit=100000, family="cox", parallel = TRUE)
 
 
