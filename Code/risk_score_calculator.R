@@ -35,8 +35,10 @@ risk_score_calculator <- function(my.file=active_coefs.csv,
   
   #Read in the data----
   my_file <- read.csv(my.file)
+  
   #Subsetting to just he columns we need
   my_file <- my_file[,2:3]
+  
   #Renaming them nicer names
   colnames(my_file)[c(1,2)] <- c("gene","coef")
   
@@ -48,13 +50,17 @@ risk_score_calculator <- function(my.file=active_coefs.csv,
     risk_df <- cox.df[,my_file$gene]
     risk_df <- as.matrix(risk_df)
     print(dim(risk_df))
+    
     #Making a vector of gene signs based on coefficient values
     gene_sign <- ifelse(my_file$coef>0, 1,-1)
     print(length(gene_sign))
-    #Doing matrix multiplication of risk_df matrix by the gene_sign vector
+
+    #Doing matrix multiplication of risk_df matrix by the diagonal of the 
+    #gene_sign vector to propogate the sign of the coefficient for each gene
+    #through our risk matrix for later calculation steps
     risk_df <- risk_df%*%diag(gene_sign)
     risk_df <- as.data.frame(risk_df)
-    #View(risk_df)
+    
     #Giving the column names nicer names
     colnames(risk_df) <- my_file$gene
     
