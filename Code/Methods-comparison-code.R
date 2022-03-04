@@ -1,5 +1,5 @@
 #Author: Andrew Willems <awillems@vols.utk.edu>
-#Purpose: Code to test several scRNA-seq methods to my method
+#Purpose: Code to test several scRNA-seq methods against my method
 
 #Loading needed packages----
 library(BiocParallel)
@@ -161,8 +161,6 @@ sce <- SingleCellExperiment(assays=list(normcounts=cbind(all_tumor_cells_fpkm,
 #Filtering the sce object
 sce_filtered <- preprocess(sce, zero.thresh=0.9)
 
-#Trying to run the code in serial to determine what is going on with scDD function----
-#BiocParallel::register(BiocParallel::SerialParam())
 #For multiple cores----
 BiocParallel::register(BiocParallel::MulticoreParam())
 
@@ -175,6 +173,18 @@ scdd_res <- filter(scdd_res, nonzero.pvalue.adj<0.05)
 
 save(scdd_res,file = "Data/Exported-data/R-objects/scdd_res.RData")
 write.csv(scdd_res, file = "Data/Exported-data/Csv-files/scdd_res.csv")
+
+
+#For finding the optimal number of genes----
+scdd_gene_nums <- seq(1, 570, 50)
+
+for(num in scdd_gene_nums){
+  scdd_sub <- scdd_res[1:num,]
+  scdd_sub_finished<- data.frame(gene=scdd_sub$gene, pvalue=scdd_sub$nonzero.pvalue, pvalue.adj=scdd_sub$nonzero.pvalue.adj)
+  write.csv(scdd_sub_finished, file = paste0("Data/Data-from-Cleaner-code/scdd_top_",num,"_genes_cc_patients.csv"))
+  
+}
+
 
 
 #For Glio dataset----
@@ -229,9 +239,10 @@ save(scdd_res,file = "Data/Exported-data/R-objects/scdd_res_glio.RData")
 write.csv(scdd_res, file = "Data/Exported-data/Csv-files/scdd_res_glio.csv")
 
 
+
 #DESeq2----
 #Reading in the count files
-lung_cells_ds2 <- read.csv(file = "Data/Single-cell-data/Counts/GSE81861_CRC_tumor_all_cells_COUNT.csv")
+tumor_cells_ds2 <- read.csv(file = "Data/Single-cell-data/Counts/GSE81861_CRC_tumor_all_cells_COUNT.csv")
 nm_cells_ds2 <- read.csv(file = "Data/Single-cell-data/Counts/GSE81861_CRC_NM_all_cells_COUNT.csv")
 normal_num <- rep("normal", 266)
 tumor_num <- rep("tumor", 375)
@@ -292,9 +303,21 @@ save(resOrdered, file = "Data/Data-from-Cleaner-code/deseq2_top5000_genes_cc_pat
 resOrdered_subset <- resOrdered[1:1800,]
 save(resOrdered_subset, file = "Data/Data-from-Cleaner-code/deseq2_top1800_genes_cc_patients.RData")
 
+
 cleaned_gene_names <- gene_vector_cleaner(unclean.data = rownames(resOrdered_subset))
 resOrdered_subset_finished <- data.frame(gene=cleaned_gene_names, baseMean=resOrdered_subset$baseMean, log2FoldChange=resOrdered_subset$log2FoldChange, lfcSE=resOrdered_subset$lfcSE, stat=resOrdered_subset$stat, pvalue=resOrdered_subset$pvalue, padj=resOrdered_subset$padj)
 write.csv(resOrdered_subset_finished, file = "Data/Data-from-Cleaner-code/deseq2_top1800_genes_cc_patients.csv")
+
+#Making a bunch of DESeq2 gene subsets for finding optimal point
+deseq2_gene_nums <- seq(1, 3000, 50)
+
+for(num in deseq2_gene_nums){
+  deseq2_sub <- resOrdered[1:num,]
+  cleaned_gene_names <- gene_vector_cleaner(unclean.data = rownames(deseq2_sub))
+  deseq2_sub_finished<- data.frame(gene=cleaned_gene_names, baseMean=deseq2_sub$baseMean, log2FoldChange=deseq2_sub$log2FoldChange, lfcSE=deseq2_sub$lfcSE, stat=deseq2_sub$stat, pvalue=deseq2_sub$pvalue, padj=deseq2_sub$padj)
+  write.csv(deseq2_sub_finished, file = paste0("Data/Data-from-Cleaner-code/deseq2_top_",num,"_genes_cc_patients.csv"))
+  
+}
 
 
 #For TCGA-LUAD
@@ -413,6 +436,18 @@ register(param)
 des_results <- DEsingle(counts = sce, group = condition, parallel = TRUE, BPPARAM = param)
 save(des_results, file = "Data/Data-from-Cleaner-code/des_results_cc_patients.RData")
 
+#Subsetting the DEsingle results for finding optimal gene size
+desingle_gene_nums <- seq(1, 3000, 50)
+
+for(num in desingle_gene_nums){
+  desingle_sub <- des_results[1:num,]
+  desingle_sub_finished<- data.frame(gene=rownames(desingle_sub), pvalue=desingle_sub$pvalue, pvalue_adj=desingle_sub$pvalue.adj.FDR)
+  write.csv(desingle_sub_finished, file = paste0("Data/Data-from-Cleaner-code/desingle_top_",num,"_genes_cc_patients.csv"))
+  
+}
+
+
+
 #load("Data/Exported-data/R-objects/des_results.RData", verbose = TRUE)
 
 
@@ -432,140 +467,21 @@ fit <- glmFit(dge, design)
 lrt <- glmWeightedF(fit, coef = 1:2)
 topTags(lrt)
 
+finished_edger <- head(lrt$table, n=5000)
 finished_edger <- head(lrt$table, n=1800)
 finished_edger <- finished_edger[order(finished_edger$padjFilter), ]
-write.csv(finished_edger, file = "Data/Data-from-Cleaner-code/finished_edgeR_genes.csv")
-clean_edger_names <- gene_vector_cleaner(edger_df_done$X)
+write.csv(finished_edger, file = "Data/Other-methods/edger/edgeR_5000_genes.csv")
+clean_edger_names <- gene_vector_cleaner(rownames(finished_edger))
+finished_edger$gene <- clean_edger_names
 
 
+#Making a bunch of edgeR gene subsets for finding optimal point
+edger_gene_nums <- seq(1, 3000, 50)
 
-
-
-#EMDomics----
-#Reading in the files
-all_tumor_cells_fpkm <- read.csv("Data/Single-cell-data/FPKM/GSE81861_CRC_tumor_all_cells_FPKM.csv")
-all_nm_cells_fpkm <- read.csv("Data/Single-cell-data/FPKM/GSE81861_CRC_NM_all_cells_FPKM.csv")
-
-rownames(all_tumor_cells_fpkm) <- all_tumor_cells_fpkm$X
-all_tumor_cells_fpkm <- gene_name_cleaner(data.to.clean = all_tumor_cells_fpkm)
-all_tumor_cells_fpkm <- t(all_tumor_cells_fpkm)
-all_tumor_cells_fpkm <- subset(all_tumor_cells_fpkm, select=c(RHC3546__Tcell__.C6E879:RHC6041__Macrophage__.FFFF55))
-save(all_tumor_cells_fpkm, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_for_emdomics.RData")
-write.csv(all_tumor_cells_fpkm, file = "Data/Exported-data/Csv-files/all_tumor_cells_fpkm_for_emdomics.csv")
-
-all_nm_cells_fpkm <- read.csv("Data/Single-cell-data/GSE81861_CRC_NM_all_cells_FPKM.csv")
-rownames(all_nm_cells_fpkm) <- all_nm_cells_fpkm$X
-all_nm_cells_fpkm <- gene_name_cleaner(data.to.clean = all_nm_cells_fpkm)
-all_nm_cells_fpkm <- t(all_nm_cells_fpkm)
-all_nm_cells_fpkm <- subset(all_nm_cells_fpkm, select=c(RHC3934__Bcell__.7DEA7B:RHC6187__Macrophage__.FFFF55))
-save(all_nm_cells_fpkm, file = "Data/Exported-data/R-objects/all_nm_cells_fpkm_for_emdomics.RData")
-write.csv(all_nm_cells_fpkm, file = "Data/Exported-data/Csv-files/all_nm_cells_fpkm_for_emdomics.csv")
-
-unique_tumor_names <- unique(rownames(all_tumor_cells_fpkm))
-all_tumor_cells_fpkm <- all_tumor_cells_fpkm[unique_tumor_names,]
-save(all_tumor_cells_fpkm, file = "Data/Exported-data/R-objects/all_tumor_cells_fpkm_for_emdomics_formatted.RData")
-write.csv(all_tumor_cells_fpkm, file = "Data/Exported-data/Csv-files/all_tumor_cells_fpkm_for_emdomics_formatted.csv")
-
-
-
-unique_nm_names <- unique(rownames(all_nm_cells_fpkm))
-all_nm_cells_fpkm <- all_nm_cells_fpkm[unique_nm_names,]
-save(all_nm_cells_fpkm, file = "Data/Exported-data/R-objects/all_nm_cells_fpkm_for_emdomics_formatted.RData")
-write.csv(all_nm_cells_fpkm, file = "Data/Exported-data/Csv-files/all_nm_cells_fpkm_for_emdomics_formatted.csv")
-
-
-condition <- c(rep("A", ncol(all_tumor_cells_fpkm)), rep("B", ncol(all_nm_cells_fpkm)))
-
-all_crc_data_together <- merge(all_tumor_cells_fpkm, all_nm_cells_fpkm, by=0)
-rownames(all_crc_data_together) <- all_crc_data_together$Row.names
-all_crc_data_together <- subset(all_crc_data_together, select=c(RHC3546__Tcell__.C6E879:RHC6187__Macrophage__.FFFF55))
-
-names(condition) <- colnames(all_crc_data_together)
-
-
-all_crc_data_together <- as.matrix(all_crc_data_together)
-
-counts <- all_crc_data_together
-
-#Seurat filtering
-seurat<-CreateSeuratObject(raw.data = counts, min.cells = 3, min.genes = 350, project = "My_project")
-
-
-
-#For multi-core support
-BiocParallel::register(BiocParallel::MulticoreParam())
-
-#Doing the actual calculation
-emdomics_results <- calculate_emd(all_crc_data_together, condition, nperm=100, parallel=TRUE)
-
-#scde----
-
-#SINCERA----
-
-
-
-#Plotting of the different metrics----
-#Image loading function----
-my_img_loader <- function(use.ebimage=TRUE,
-                          img.to.load=NULL,
-                          show.img   =TRUE, 
-                          my.method  ="raster",
-                          png.info   =TRUE){
-  require(EBImage)
-  require(png)
-  require(grid)
-  require(gridExtra)
+for(num in edger_gene_nums){
+  edger_sub <- finished_edger[1:num,]
+  edger_sub_finished<- data.frame(gene=edger_sub$gene, pvalue=edger_sub$PValue, pvalue.adj=edger_sub$padjFilter)
+  write.csv(edger_sub_finished, file = paste0("Data/Data-from-Cleaner-code/edger_top_",num,"_genes_cc_patients.csv"))
   
-  
-  if(use.ebimage==TRUE){
-    loaded_img <- EBImage::readImage(img.to.load)
-    
-    if(show.img==TRUE){
-      display(loaded_img, method = my.method)
-    }
-    
-  }else{
-    loaded_img <- png::readPNG(source = img.to.load, info = png.info)
-    
-  }
-  
-  
-  return(loaded_img)
 }
 
-#Using it to load images----
-setwd("~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/")
-cc_names <- list.files("Completed_KM_Curves/CC_Singlecell/")
-deseq2_names <- list.files("Completed_KM_Curves/DESeq2/")
-desingle_names <- list.files("Completed_KM_Curves/Desingle/")
-edger_names <- list.files("Completed_KM_Curves/edgeR/")
-scdd_names <- list.files("Completed_KM_Curves/scDD/")
-cc_genes <- cc_names[cc_names %in% c("mad_sdes_cindex_combo_that_seperates_rc_patients.png", "mirna_sdes_cc_patients_cindex_that_seperates.png", "mirna_sdes_top_cindex_combo_rc_patients.png", "mirna_sdes_top_cindex_combo_cc_and_rc_patients.png", "mad_sdes_top_cindex_combo_cc_patients.png", "mad_sdes_top_cindex_combo_cc_and_rc_patients.png")]
-deseq2_genes <- deseq2_names[deseq2_names %in% c("cc_patients.png","rc_patients.png", "cc_and_rc_patients.png")]
-desingle_genes <- desingle_names
-edger_genes <- edger_names[edger_names %in% c("cc_patients.png", "rc_patients.png", "cc_and_rc_patients.png")]
-scdd_genes <- scdd_names[scdd_names %in% c("genes_only_cc_patients.png", "genes_only_rc_patients.png", "genes_only_cc_and_rc_patients.png")]
-
-all_genes <- c(cc_genes, deseq2_genes, edger_genes, desingle_genes, scdd_genes)
-
-cindex_boxplot <- readPNG("Completed_KM_Curves/genes_only_even_more_progress.png")
-cindex_boxplot <- rasterGrob(cindex_boxplot)
-
-#Looping through and loading them----
-setwd("Completed_KM_Curves/scDD/")
-#my_imgs <- list()
-#my_deseq2_imgs <- list()
-#my_edger_imgs <- list()
-#my_desingle_imgs <- list()
-my_scdd_imgs <- list()
-counter <- 1
-for (f in scdd_genes) {
-  current_img <- my_img_loader(img.to.load = f, show.img = FALSE, use.ebimage = FALSE, png.info = TRUE)
-  my_scdd_imgs[[as.character(counter)]] <- current_img
-  counter <- counter + 1
-}
-
-
-#Putting all the images together----
-km_plots <- grid.arrange(rasterGrob(my_imgs$`4`),rasterGrob(my_imgs$`6`),rasterGrob(my_imgs$`3`), rasterGrob(my_imgs$`1`), rasterGrob(my_imgs$`5`), rasterGrob(my_imgs$`2`), rasterGrob(my_deseq2_imgs$`2`), rasterGrob(my_deseq2_imgs$`3`), rasterGrob(my_deseq2_imgs$`1`), rasterGrob(my_edger_imgs$`2`), rasterGrob(my_edger_imgs$`3`), rasterGrob(my_edger_imgs$`1`),rasterGrob(my_desingle_imgs$`2`),rasterGrob(my_desingle_imgs$`3`), rasterGrob(my_desingle_imgs$`1`),rasterGrob(my_scdd_imgs$`2`), rasterGrob(my_scdd_imgs$`3`), rasterGrob(my_scdd_imgs$`1`), ncol=3, nrow=6)
-plot_grid(cindex_boxplot, km_plots, rel_heights = c(1/3,2/3),nrow = 2, ncol = 1, labels = c("A.", "B."), hjust = -8.0)

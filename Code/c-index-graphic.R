@@ -6,16 +6,16 @@ library(ggpubr)
 library(stringr)
 library(tidyverse)
 
-
-#Setting the working directory----
-setwd("~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/")
-
 #Reading in the file----
 my_file <- read.csv("Completed_KM_Curves/Final-c-index-and-km-curve-document.csv")
 my_file <- subset(my_file, select=c(1:4, 19:23))
 my_file <- filter(my_file, scRNA.seq.dataset != "GSE81861_Cell_line_hct116")
+my_file <- filter(my_file, scRNA.seq.dataset != "GSE81861_CRC_tumor")
+my_file <- filter(my_file, scRNA.seq.dataset != "GSM1599500_K562_cells")
+my_file <- filter(my_file, scRNA.seq.dataset != "lc_tumor")
+my_file <- filter(my_file, Bulk.dataset == "TCGA-COAD")
 my_file$pvalue_trans <- -log10(my_file$pvalue_finished_corrected_risk)
-res_aov_1 <- aov(C.index_at_optimal_genes_corrected_risk~Method, data = my_file)
+res_aov_1 <- aov(C.index_at_1800_genes~Method, data = my_file)
 aov_sum_1 <- summary(res_aov_1)
 pvalue_to_plot_1 <- round(aov_sum_1[[1]][["Pr(>F)"]][1], digits = 5)
 tukey_aov_1 <- TukeyHSD(res_aov_1)
@@ -26,7 +26,7 @@ my_file <- filter(my_file, Method=="MiRNA + SDES" | Method== "MiRNA + MAD" | Met
 my_file <- my_file[c(1:8,10:11),]
 
 #genes only
-my_file <- filter(my_file, Method=="MiRNA + SDES" | Method== "MiRNA + MAD" | Method== "scDD (genes only)" | Method== "DESeq2 (genes only)" | Method== "DESeq2 (genes only)" | Method=="edgeR (genes only)" | Method=="DEsingle (genes only)" | Method=="MAD" | Method=="MiRNA" | Method=="SDES")
+my_file <- filter(my_file, Method=="MiRNA + SDES" | Method== "MiRNA + MAD" | Method== "scDD (genes only)" | Method== "DESeq2 (genes only)" | Method== "DESeq2 (genes only)" | Method=="edgeR (genes only)" | Method=="DEsingle (genes only)" | Method=="MAD" | Method=="MiRNA" | Method=="SDES" | Method=="CC Singlecell MMS")
 #genes + tumor stage
 my_file <- filter(my_file, Method=="MiRNA + SDES + Tumor stage" | Method== "MiRNA + MAD + Tumor stage" | Method== "scDD (genes + Tumor stage)" | Method== "DESeq2 (genes only + Tumor stage)" | Method=="edgeR (genes only + Tumor stage)" | Method=="DEsingle (genes + Tumor stage)" | Method=="MAD + Tumor stage" | Method=="MiRNA + Tumor stage" | Method=="SDES + Tumor stage")
 #genes + tumor and N stage
@@ -54,7 +54,7 @@ my_file$Method <- factor(my_file$Method, levels = c("MAD", "SDES", "MiRNA", "CC 
 my_file$Bulk.dataset <- factor(my_file$Bulk.dataset, levels = c("TCGA-COAD", "TCGA-READ", "TCGA-COAD + TCGA-READ"))
 
 #C-index graph----
-cindex_bar3 <- ggplot(my_file, aes(x=Method, y = C.index_at_optimal_genes_corrected_risk, fill=Bulk.dataset))+
+cindex_bar4 <- ggplot(my_file, aes(x=scRNA.seq.dataset, y = C.index_at_1800_genes, fill=scRNA.seq.dataset))+
   geom_bar(stat= "identity",position = position_dodge())+
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 40, family = "sans"),
         panel.background = element_blank(),
@@ -65,19 +65,18 @@ cindex_bar3 <- ggplot(my_file, aes(x=Method, y = C.index_at_optimal_genes_correc
         axis.text.y = element_text(size = 40, family = "sans"),
         legend.text = element_text(size = 35, family = "sans"),
         legend.title = element_text(size = 40, family = "sans"),
-        legend.position = "top")+
-  ggtitle("Gene Signature C-indices")+
+        legend.position = "bottom")+
+  ggtitle("TCGA-COAD")+
   xlab("Method")+
   ylab("Concordance Index")+
-  scale_fill_discrete("Bulk Dataset:")+
   scale_y_continuous(expand = expansion(mult = c(0, .1)))+
-  geom_hline(yintercept = 0.65)
+  scale_fill_viridis(discrete = TRUE, direction = -1, name = "Method")
+  #geom_hline(yintercept = 0.65)
 
 
-
-cindex_bar3 <- cindex_bar3 + coord_cartesian(ylim = c(0.5, 0.7))
-cindex_bar3 <- cindex_bar3 + scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-cindex_bar3
+cindex_bar4 <- cindex_bar4 + coord_cartesian(ylim = c(0.5, 0.7))
+#cindex_bar3 <- cindex_bar3 + scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+cindex_bar4
 
 
 #P-value graph----
@@ -128,81 +127,9 @@ big_set_graph <- ggarrange(set_bar, set_bar2, set_bar3, labels = c("A.", "B.", "
 big_set_graph
 
 
-#Intersect plot----
-#TODO
-
-
-#Coefficients graph----
-
-
-
-#Boxplot with dotplot----
-# p<- ggplot(my_file, aes(x=Method, y=cindex_finished, fill=Method))+
-#   geom_boxplot(data=my_file, aes(x=Method, y=cindex_finished))+
-#   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-#         legend.position = "none", panel.background = element_blank(),
-#         axis.line = element_line(colour = "grey"))+
-#   ggtitle("Gene Signatures Only")+
-#   xlab("Method")+
-#   ylab("Concordance Index")
-# 
-# p
-# 
-# 
-# finished_plot <- p+ geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5)+
-#   stat_compare_means(method = "anova", label.x = 1, label.y = 0.56)+
-#   stat_compare_means(label = "p.signif", method = "t.test",
-#                      ref.group = "MiRNA + MAD", vjust = -0.8)
-#   #scale_x_discrete(guide = guide_axis(check.overlap = TRUE))
-#   #scale_x_discrete(guide = guide_axis(n.dodge = 3))
-#   
-#Power analysis----
-summary_df <- my_file %>% dplyr::group_by(Method) %>% dplyr::summarise(m=median(C.index_at_1800_genes))
-groupmedians <- summary_df$m
-
-power_analysis <- power.anova.test(groups = length(groupmedians), 
-                      between.var = var(groupmedians), within.var = 0.03, 
-                      power=0.95,sig.level=0.05,n=NULL)
-power_analysis
-
-
-
-
-
-
-#Now doing simulating datasets to try and see if we get better performance for stats----
-library(SPsimSeq)
-set.seed(1)
-
-cox_df_cc_counts <-subset(cox_df, select=(TSPAN6:AC007389.3))
-cox_df_cc_counts <- t(cox_df_cc_counts)
-cox_df_cc_counts <- as.data.frame(cox_df_cc_counts)
-
-sim.data.bulk <- SPsimSeq(n.sim = 1, s.data = cox_df_cc_counts,
-                          group = 1, n.genes = 55317,
-                          tot.samples = 501, 
-                          pDE = 0.1, lfc.thrld = 0.5, 
-                          result.format = "list", verbose = TRUE)
-
-
-
-library(seqgendiff)
-set.seed(1)
-
-
-
-
-library(splatter)
-params <- splatEstimate(cc_tumor_fpkm)
-sim <- splatSimulate(params, nGenes = 55186)
-
-
 
 
 #Plotting pvalues----
-
-
-pvalue_plot <- ggplot(data = my_file, aes(x=Method, y=))
 
 #cv_master_subset$Method <- factor(cv_master_subset$Method, levels = c("MAD", "SDES", "MiRNA", "MAD + SDES", "MiRNA + SDES", "MAD + SDES + MiRNA"))
 my_file$MAD.Metric <- formatC(my_file$MAD.Metric, format="f", digits=2)

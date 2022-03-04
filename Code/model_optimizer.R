@@ -39,13 +39,36 @@ three_metric_geneRank <- function(ranking1 = NULL,
 }
 
 #Helper function for geneRank functions
-getRank <- function(ranking = NULL, 
+getRank <- function(ranking = NULL,
                     gn      = NULL){
   if (gn %in% names(ranking)) {
     return(ranking[gn])
   }
   else return(0.0)
 }
+
+
+
+#Attempt at optimization-----
+getIntersection <- function(gene.list1 = NULL,
+                            gene.list2 = NULL,
+                            gene.list3 = NULL){
+  
+  return_list <- vector(mode = "list", length = 3)
+  
+  common_genes <- intersect(c(names(gene.list1), names(gene.list2)), names(gene.list3))
+  mad.genes.sub <- mad.genes[common_genes]
+  sde.genes.sub <- sde.genes[common_genes]
+  mirna.genes.sub <- mirna.ranking[common_genes]
+  
+  return_list[[1]] <- mad.genes.sub
+  return_list[[2]] <- sde.genes.sub
+  return_list[[3]] <- mirna.genes.sub
+  return(return_list)
+}
+
+
+
 
 #Optimization for just 2 metrics----
 two_weight_optimizer <- function(my.start        =0,
@@ -60,13 +83,13 @@ two_weight_optimizer <- function(my.start        =0,
   #Setting up weights, loop-indexer, and the list that will store the results
   weights <- seq(from = my.start, to=my.finish, by=step.size)
   df_index <- my.index
-  integrated_gene_lists <- list()
+  integrated_gene_lists <- vector(mode = "list", length = 11)
   
   #Doing the grid search
   for (x in weights) {
     current_ranking <- two_metric_geneRank(ranking1 = first.metric, ranking2 = second.metric,  a1=x, a2=1-x)
     current_ranking <- as.data.frame(current_ranking)
-    integrated_gene_lists[[as.character(df_index)]] <- current_ranking
+    integrated_gene_lists[[df_index]] <- current_ranking
     df_index <- df_index + 1
   }
   
@@ -85,26 +108,27 @@ three_weight_optimizer <- function(my.start        =0,
                                    first.metric    =mad.ranking,
                                    second.metric   =vim.sdes.ranking,
                                    third.metric    =mirna.ranking,
-                                   my.filename     ="Data/Exported-data/R-objects/three_metric_optimization.RData"){
+                                   my.filename     ="Data/Exported-data/R-objects/three_metric_optimization.rds"){
   
   #Setting up weights, the starting value for the a3 metric, loop-indexer, and the list that will store the results
   weights <- seq(from = my.start, to=my.finish, by=step.size)
   a3_weights <- seq(from = my.start, to=my.finish, by=step.size)
   a3 <- a3.start
   df_index <- my.index
-  integrated_gene_lists <- list()
+  integrated_gene_lists <- vector(mode = "list", length = 121)
   
   #Doing the grid search
   for (x in a3_weights){
     for (y in weights) {
       current_ranking <- three_metric_geneRank(ranking1 = first.metric, ranking2 = second.metric, ranking3 = third.metric,  a1=x, a2=1-(x+a3), a3= y)
       current_ranking <- as.data.frame(current_ranking)
-      integrated_gene_lists[[as.character(df_index)]] <- current_ranking
+      integrated_gene_lists[[df_index]] <- current_ranking
       df_index <- df_index + 1
     }
   }
   
-  #Saving the output of the grid search to a .RData
-  save(integrated_gene_lists, file = my.filename)
+  #Saving the output of the grid search to a .rds file
+  saveRDS(integrated_gene_lists, file = my.filename)
   return(integrated_gene_lists)
 }
+

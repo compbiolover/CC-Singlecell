@@ -210,7 +210,9 @@ cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N2", replacement=2)
 cox_df$sample.type <- cox_type
 cox_df <- filter(cox_df, !tumor.stage=="not reported")
 cox_df <- cox_df[complete.cases(cox_df[, "ajcc.m"]), ]
-
+cox_df$days.to.last.follow.up <- ifelse(cox_df$days.to.last.follow.up < 1, 1,
+                 cox_df$days.to.last.follow.up)
+saveRDS(cox_df, "Data/TCGA-COAD/coad_df_finished_v2.rds")
 #save(cox_df, file = "Data/TCGA-COAD/coad_df_fpkm.RData")
 
 # load("Data/Exported-data/R-objects/coad_df.RData")

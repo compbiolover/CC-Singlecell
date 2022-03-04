@@ -13,8 +13,7 @@ mirna_calculator <- function(ts.org                      ="Human",
                              mirna.remove                ="hsa-miR-129-1-3p",
                              max.mirnas                  =1559,
                              save.mirna.genes            =TRUE,
-                             mirna.gene.rfile            ="~/Desktop/my_mirnas.rds",
-                             mirna.ranking               ="~/Desktop/mirna.ranking.rds"){
+                             mirna.ranking.name          ="~/Desktop/mirna.ranking.rds"){
   
   #Loading required package----
   require(hoardeR)
@@ -63,7 +62,9 @@ mirna_calculator <- function(ts.org                      ="Human",
   if(length(common_mirnas)>= length(common_mirnas[1:max(max.mirnas)])){
     common_mirnas <- common_mirnas[1:max.mirnas]
   }else{
-    print("There are fewer target miRNAs available than your input.\n Using the largest number of common miRNAs for this submission to TargetScan")
+    print("There are fewer target miRNAs available than your input.\n 
+          Using the largest number of common miRNAs for this submission
+          to TargetScan")
     common_mirnas <- common_mirnas[1:length(common_mirnas)]
     print(paste0("The number of common mirnas is:", print(length(common_mirnas))))
   }
@@ -97,9 +98,9 @@ mirna_calculator <- function(ts.org                      ="Human",
   miRNA_targets <- lapply(miRNA_targets, numeric_converter2)
 
 
-  # #Using a loop to go through each data frame in our list of data frames and
-  # #removing any values that are equal to NA and replacing them with 0 to 
-  # #make sure our scoring calculation don't break. 
+  #Using a loop to go through each data frame in our list of data frames and
+  #removing any values that are equal to NA and replacing them with 0 to 
+  #make sure our scoring calculation don't break. 
   miRNA_targets_mod <- list()
   counter <- 1
 
@@ -157,7 +158,7 @@ mirna_calculator <- function(ts.org                      ="Human",
   
   #Saving the ranked miRNAs to a .rds file for use later
   if(save.mirna.genes==TRUE){
-    saveRDS(mirna.ranking, file = mirna.gene.rfile)
+    saveRDS(mirna.ranking, file = mirna.ranking.name)
   }
   
   return(miRNA_returns)

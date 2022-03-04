@@ -1,8 +1,8 @@
-
 #Loading files----
-load("mad.RData", verbose = TRUE)
-load("sde.RData", verbose = TRUE)
-load("~/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Inputs/RData/800-710-targets.RData", verbose = TRUE)
+# load("mad.RData", verbose = TRUE)
+# load("sde.RData", verbose = TRUE)
+#mirna.ranking <- readRDS(file = "/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Inputs/RData/mirna_test2.rds")
+#load("~/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Inputs/RData/800-310-targets.RData", verbose = TRUE)
 
 
 #Needed functions----
@@ -441,12 +441,6 @@ risk_score_calculator <- function(my.file="Data/Data-from-Cleaner-code/Regular_c
 
 
 
-#Name: model_optimizer.R----
-#Author: Andrew Willems <awillems@vols.utk.edu>
-#Purpose: Optimize the lists of genes from our
-#integrated lists by tuning the weights of our
-#linear model via grid search.
-
 #Function used to rank my linear model with just two metrics----
 two_metric_geneRank <- function(ranking1 = NULL,
                                 ranking2  = NULL,
@@ -555,83 +549,291 @@ three_weight_optimizer <- function(my.start        =0,
 
 
 
-combo_used <- "800_710"
+
 #Doing the actual optimization----
-mad_sdes_mirna_optimized <- three_weight_optimizer(first.metric = mad.genes,
-                                                   second.metric = mirna.ranking,
-                                                   third.metric = sde.genes,
-                                                   my.filename = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Weighted-Optimizations/Optimization-",combo_used,"-targets.RData"))
+# combo_used <- c("100_10", "100_110", "100_210", "100_310", "100_410", "100_510", "100_610", "100_710", "100_810", "100_910", "100_1010")
 
-
+# for(c in combo_used){
+#   mirna.ranking <- readRDS(file = paste0("~/Projects/CC_Singlecell/TCGA-GBM/Data/MiRNA/Global-heatmap/Inputs/RData/",c,"_targets_mirna_ranking.rds"))
+#   mad_sdes_mirna_optimized <- three_weight_optimizer(first.metric = mad.genes,
+#                                                      second.metric = mirna.ranking,
+#                                                      third.metric = sde.genes,
+#                                                      my.filename = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-GBM/Data/MiRNA/Global-heatmap/Weighted-Optimizations/Optimization_",c,"_targets.RData"))
 
 #Actual code----
-cox_models <- list()
-my_cindicies <- c()
-counter <- 1
-load(file = "coad_df.RData", verbose = TRUE)
+cox_df <- readRDS("read_df_finished_v2.rds")
+files <- list.files("/home/awillems/Projects/CC_Singlecell/TCGA-READ/Data/MiRNA/Global-heatmap/Weighted-Optimizations")
 
-
-for (y in mad_sdes_mirna_optimized[1:121]) {
-  current_weight <- y
-  current_cox <- cox_model_fitter(my.seed = 1,
-                                  cox.df = cox_df,
-                                  gene.num = 1800,
-                                  cox.predictors = current_weight,
-                                  tumor.stage = FALSE,
-                                  tumor.n = FALSE,
-                                  tumor.m = FALSE,
-                                  regular.cox = FALSE,
-                                  save.regular.cox.genes = FALSE,
-                                  my.filename = paste0("three_weight_optimized_global_search_",x,"_mirna_",x,"_top.csv"))
+for(f in files){
+  cox_models <- list()
+  my_cindicies <- c()
+  top_cindices <- c()
+  counter <- 1
+  load(file = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-READ/Data/MiRNA/Global-heatmap/Weighted-Optimizations/",f), verbose = TRUE)
   
-  cox_models[[as.character(counter)]] <- current_cox
-  perc_done <- (counter/121)*100
-  print(paste0(round(perc_done, digits = 2), "% done with Concordance Index outputs"))
-  counter <- counter + 1
+  mad_sdes_mirna_optimized <- integrated_gene_lists
   
-  #Storing all of the c-index values in a vector that we can use later to build the plot
-  c_finder <-current_cox$CV$index[1]
-  current_c <- current_cox$CV$cvm[c_finder]
-  current_c <- round(current_c, digits = 4)
-  my_cindicies <- c(my_cindicies, current_c)
+  for (y in mad_sdes_mirna_optimized[1:121]) {
+    current_weight <- y
+    current_cox <- cox_model_fitter(my.seed = 1,
+                                    cox.df = cox_df,
+                                    gene.num = 1100,
+                                    cox.predictors = current_weight,
+                                    tumor.stage = FALSE,
+                                    tumor.n = FALSE,
+                                    tumor.m = FALSE,
+                                    regular.cox = FALSE,
+                                    save.regular.cox.genes = FALSE,
+                                    my.filename = paste0("three_weight_optimized_global_search_",x,"_mirna_",x,"_top.csv"))
+    
+    cox_models[[as.character(counter)]] <- current_cox
+    perc_done <- (counter/121)*100
+    print(paste0(round(perc_done, digits = 2), "% done with Concordance Index outputs"))
+    counter <- counter + 1
+    
+    #Storing all of the c-index values in a vector that we can use later to build the plot
+    c_finder <-current_cox$CV$index[1]
+    current_c <- current_cox$CV$cvm[c_finder]
+    current_c <- round(current_c, digits = 4)
+    my_cindicies <- c(my_cindicies, current_c)
+  }
+  
+  
+  top_cindex <-max(my_cindicies)
+  top_index <- which(my_cindicies==top_cindex)
+  print(top_index)
+  print(my_cindicies)
+  top_index_used <- top_index[1]
+  print(my_cindicies[top_index_used])
+  #print(top_index_used)
+  
+  top_cindices <- c(top_cindices, my_cindicies[top_index_used])
+  
+  # c_index_df <- data.frame(c_index=my_cindicies[top_index_used])
+  # write.csv(c_index_df, file = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Outputs/Top-cindices/top_cindices_mirna_used_combo_",c,"_index_",top_index_used,"_changed_df.csv"))
+  
+  #Now doing it for just the top c-index combo
+  # cox_models <- list()
+  # my_cindicies <- c()
+  # counter <- 1
+  
+  # for (y in mad_sdes_mirna_optimized[top_index_used]) {
+  #   current_weight <- y
+  #   current_cox <- cox_model_fitter(my.seed = 1,
+  #                                   cox.df = cox_df,
+  #                                   gene.num = 1800,
+  #                                   cox.predictors = current_weight,
+  #                                   tumor.stage = FALSE,
+  #                                   tumor.n = FALSE,
+  #                                   tumor.m = FALSE,
+  #                                   regular.cox = FALSE,
+  #                                   save.regular.cox.genes = FALSE,
+  #                                   my.filename = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Outputs/Top-coefficients/top_coefs_global_search_mirnas_",c,"_targets_mirna_top_index_",top_index_used,"_changed_df.csv"))
+  #   
+  #   cox_models[[as.character(counter)]] <- current_cox
+  #   counter <- counter + 1
+  #   
+  #   #Storing all of the c-index values in a vector that we can use later to build the plot
+  #   c_finder <-current_cox$CV$index[1]
+  #   current_c <- current_cox$CV$cvm[c_finder]
+  #   current_c <- round(current_c, digits = 4)
+  #   my_cindicies <- c(my_cindicies, current_c)
+  #   cox_models$`1`$CV
+  #   #print(my_cindicies)
+  #   c_index_df <- data.frame(c_index=my_cindicies)
+  #   c_index_df
+  #   write.csv(c_index_df, file = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Outputs/Top-cindices/top_cindices_mirna_used_combo_",c,"_index_",top_index_used,"_changed_df.csv"))
+  # }
+  # 
+  
+  
+  
+  
 }
 
+write.csv(top_cindices, file = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-READ/Data/MiRNA/Global-heatmap/Outputs/Top-cindices/top_cindices_new_mirna.csv"))
 
-top_cindex <-max(my_cindicies)
-top_index <- which(my_cindicies==top_cindex)
-print(top_index)
-print(my_cindicies)
-top_index_used <- top_index[1]
-print(my_cindicies[top_index_used])
-#print(top_index_used)
+  # cox_models <- list()
+  # my_cindicies <- c()
+  # counter <- 1
+  # load(file = files[f], verbose = TRUE)
+  # 
+  # 
+  # for (y in mad_sdes_mirna_optimized[1:121]) {
+  #   current_weight <- y
+  #   current_cox <- cox_model_fitter(my.seed = 1,
+  #                                   cox.df = cox_df,
+  #                                   gene.num = 1800,
+  #                                   cox.predictors = current_weight,
+  #                                   tumor.stage = FALSE,
+  #                                   tumor.n = FALSE,
+  #                                   tumor.m = FALSE,
+  #                                   regular.cox = FALSE,
+  #                                   save.regular.cox.genes = FALSE,
+  #                                   my.filename = paste0("three_weight_optimized_global_search_",x,"_mirna_",x,"_top.csv"))
+  # 
+  #   cox_models[[as.character(counter)]] <- current_cox
+  #   perc_done <- (counter/121)*100
+  #   print(paste0(round(perc_done, digits = 2), "% done with Concordance Index outputs"))
+  #   counter <- counter + 1
+  # 
+  #   #Storing all of the c-index values in a vector that we can use later to build the plot
+  #   c_finder <-current_cox$CV$index[1]
+  #   current_c <- current_cox$CV$cvm[c_finder]
+  #   current_c <- round(current_c, digits = 4)
+  #   my_cindicies <- c(my_cindicies, current_c)
+  # }
+  # 
+  # 
+  # top_cindex <-max(my_cindicies)
+  # top_index <- which(my_cindicies==top_cindex)
+  # print(top_index)
+  # print(my_cindicies)
+  # top_index_used <- top_index[1]
+  # print(my_cindicies[top_index_used])
+  # #print(top_index_used)
+  # 
+  # #Now doing it for just the top c-index combo
+  # cox_models <- list()
+  # my_cindicies <- c()
+  # counter <- 1
+  # 
+  # for (y in mad_sdes_mirna_optimized[top_index_used]) {
+  #   current_weight <- y
+  #   current_cox <- cox_model_fitter(my.seed = 1,
+  #                                   cox.df = cox_df,
+  #                                   gene.num = 1800,
+  #                                   cox.predictors = current_weight,
+  #                                   tumor.stage = FALSE,
+  #                                   tumor.n = FALSE,
+  #                                   tumor.m = FALSE,
+  #                                   regular.cox = FALSE,
+  #                                   save.regular.cox.genes = FALSE,
+  #                                   my.filename = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Outputs/Top-coefficients/top_coefs_global_search_mirnas_",c,"_targets_dbdemc_mirna_top_index_",top_index_used,".csv"))
+  # 
+  #   cox_models[[as.character(counter)]] <- current_cox
+  #   counter <- counter + 1
+  # 
+  #   #Storing all of the c-index values in a vector that we can use later to build the plot
+  #   c_finder <-current_cox$CV$index[1]
+  #   current_c <- current_cox$CV$cvm[c_finder]
+  #   current_c <- round(current_c, digits = 4)
+  #   my_cindicies <- c(my_cindicies, current_c)
+  #   cox_models$`1`$CV
+  #   c_index_df <- data.frame(c_index=my_cindicies)
+  #   write.csv(c_index_df, file = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Outputs/Top-cindices/top_cindices_dbdemc_mirna_used_combo_",c,"_index_",top_index_used,".csv"))
+  # }
+  # 
+  # 
 
-#Now doing it for just the top c-index combo
-cox_models <- list()
-my_cindicies <- c()
-counter <- 1
 
-for (y in mad_sdes_mirna_optimized[top_index_used]) {
-  current_weight <- y
-  current_cox <- cox_model_fitter(my.seed = 1,
-                                  cox.df = cox_df,
-                                  gene.num = 1800,
-                                  cox.predictors = current_weight,
-                                  tumor.stage = FALSE,
-                                  tumor.n = FALSE,
-                                  tumor.m = FALSE,
-                                  regular.cox = TRUE,
-                                  save.regular.cox.genes = TRUE,
-                                  my.filename = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Outputs/Top-coeffecients/top_coefs_global_search_mirnas_",combo_used,"_targets_top_index_",top_index_used,".csv"))
-  
-  cox_models[[as.character(counter)]] <- current_cox
-  counter <- counter + 1
-  
-  #Storing all of the c-index values in a vector that we can use later to build the plot
-  c_finder <-current_cox$CV$index[1]
-  current_c <- current_cox$CV$cvm[c_finder]
-  current_c <- round(current_c, digits = 4)
-  my_cindicies <- c(my_cindicies, current_c)
-  cox_models$`1`$CV
-  c_index_df <- data.frame(c_index=my_cindicies)
-  write.csv(c_index_df, file = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Outputs/Top-cindices/top_cindices_mirna_combo_",combo_used,"_index_",top_index_used,".csv"))
-}
+
+
+
+
+#Just individual steps with no for loop----
+# mad_sdes_mirna_optimized <- three_weight_optimizer(first.metric = mad.genes,
+#                                                    second.metric = mirna.ranking,
+#                                                    third.metric = sde.genes,
+#                                                    my.filename = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Weighted-Optimizations/Optimization-",combo_used,"-targets.RData"))
+# 
+# 
+# 
+#Actual code
+# cox_models <- list()
+# my_cindicies <- c()
+# counter <- 1
+# load(file = "coad_df.RData", verbose = TRUE)
+# 
+# 
+# for (y in mad_sdes_mirna_optimized[1:121]) {
+#   current_weight <- y
+#   current_cox <- cox_model_fitter(my.seed = 1,
+#                                   cox.df = cox_df,
+#                                   gene.num = 1800,
+#                                   cox.predictors = current_weight,
+#                                   tumor.stage = FALSE,
+#                                   tumor.n = FALSE,
+#                                   tumor.m = FALSE,
+#                                   regular.cox = FALSE,
+#                                   save.regular.cox.genes = FALSE,
+#                                   my.filename = paste0("three_weight_optimized_global_search_",x,"_mirna_",x,"_top.csv"))
+#   
+#   cox_models[[as.character(counter)]] <- current_cox
+#   perc_done <- (counter/121)*100
+#   print(paste0(round(perc_done, digits = 2), "% done with Concordance Index outputs"))
+#   counter <- counter + 1
+#   
+#   #Storing all of the c-index values in a vector that we can use later to build the plot
+#   c_finder <-current_cox$CV$index[1]
+#   current_c <- current_cox$CV$cvm[c_finder]
+#   current_c <- round(current_c, digits = 4)
+#   my_cindicies <- c(my_cindicies, current_c)
+# }
+# 
+# 
+# top_cindex <-max(my_cindicies)
+# top_index <- which(my_cindicies==top_cindex)
+# print(top_index)
+# print(my_cindicies)
+# top_index_used <- top_index[1]
+# print(my_cindicies[top_index_used])
+# #print(top_index_used)
+# 
+# #Now doing it for just the top c-index combo
+# cox_models <- list()
+# my_cindicies <- c()
+# counter <- 1
+# 
+# for (y in mad_sdes_mirna_optimized[top_index_used]) {
+#   current_weight <- y
+#   current_cox <- cox_model_fitter(my.seed = 1,
+#                                   cox.df = cox_df,
+#                                   gene.num = 1800,
+#                                   cox.predictors = current_weight,
+#                                   tumor.stage = FALSE,
+#                                   tumor.n = FALSE,
+#                                   tumor.m = FALSE,
+#                                   regular.cox = TRUE,
+#                                   save.regular.cox.genes = TRUE,
+#                                   my.filename = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Outputs/Top-coeffecients/top_coefs_global_search_mirnas_",combo_used,"_targets_top_index_",top_index_used,".csv"))
+#   
+#   cox_models[[as.character(counter)]] <- current_cox
+#   counter <- counter + 1
+#   
+#   #Storing all of the c-index values in a vector that we can use later to build the plot
+#   c_finder <-current_cox$CV$index[1]
+#   current_c <- current_cox$CV$cvm[c_finder]
+#   current_c <- round(current_c, digits = 4)
+#   my_cindicies <- c(my_cindicies, current_c)
+#   cox_models$`1`$CV
+#   c_index_df <- data.frame(c_index=my_cindicies)
+#   write.csv(c_index_df, file = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/MiRNA/Global-heatmap/Outputs/Top-cindices/top_cindices_mirna_combo_",combo_used,"_index_",top_index_used,".csv"))
+# }
+
+#Individual metrics
+
+#MAD/SDE
+# load("read_df.RData", verbose = TRUE)
+# 
+# mad_res <- cox_model_fitter(my.seed = 1,
+#                             cox.df = cox_df,
+#                             gene.num = 1800,
+#                             cox.predictors = integrated_gene_lists[[27]],
+#                             tumor.stage = FALSE,
+#                             tumor.n = FALSE,
+#                             tumor.m = FALSE,
+#                             regular.cox = TRUE,
+#                             save.regular.cox.genes = TRUE,
+#                             my.filename = "~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/Data/TCGA-COAD/top_peforming_coefs_0.704.csv")
+# 
+# 
+# 
+# c_finder <-mad_res$CV$index[1]
+# current_c <- mad_res$CV$cvm[c_finder]
+# current_c <- round(current_c, digits = 4)
+# c_index_df <- data.frame(c_index=current_c)
+# write.csv(c_index_df, file = "Data/TCGA-READ/MiRNA/Global_Search/Outputs/top_cindices_mirna.csv")
+# 
+
+

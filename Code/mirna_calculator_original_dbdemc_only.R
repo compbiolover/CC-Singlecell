@@ -1,6 +1,7 @@
 #Name: mirna_calculator.R----
 #Author: Andrew Willems <awillems@vols.utk.edu>
-#Purpose: Efficiently build miRNA metric outputs
+#Purpose: Efficiently build miRNA metric
+#outputs
 
 #mirna_calculator----
 mirna_calculator <- function(ts.org                      ="Human", 
@@ -9,102 +10,71 @@ mirna_calculator <- function(ts.org                      ="Human",
                              cancer.up                   =TRUE,
                              cancer.type1                ="colon cancer",
                              cancer.type2                ="rectal cancer",
-                             print.ts.targets            =TRUE,
                              mirna.remove                ="hsa-miR-129-1-3p",
-                             save.mirna.raw.targets      =TRUE,
-                             mirna.raw.targets.filename  ="~/Desktop/TargetScan_output.RData",
                              max.mirnas                  =1559,
                              save.mirna.genes            =TRUE,
                              mirna.gene.filename         ="~/Desktop/my_mirnas.csv",
-                             mirna.gene.rfile            ="~/Desktop/my_mirnas.RData",
-                             write.heatmap.data          =TRUE,
-                             heatmap.data.name           ="~/Desktop/my_heatmap_data.csv"){
+                             mirna.gene.rfile            ="~/Desktop/my_mirnas.RData"){
   
   #Loading required package----
   require(hoardeR)
   require(tidyverse)
   
   
-  #miRNAs from miRmap----
-  miRmap_mirnas <- read.csv(file = "Data/miRNA-data/mirmap_mirnas.csv",
-                            sep = ',')
   
   if(cancer.up==TRUE){
-    dbDEMC_high <- read.csv(file = "Data/miRNA-data/dbDEMC-2.0-high.txt",
-                            sep = '\t')
+    dbDEMC_high <- read.csv(file = "Data/miRNA-data/List-of-dbDEMC-2-0-miRNAs/dbDEMC-2.0-high.txt", sep = '\t')
     
     #Filtering to just the miRNAs associated with a particular type of cancer. 
-    dbDEMC_high <- filter(dbDEMC_high, 
-                          Cancer.Type==cancer.type1 | Cancer.Type==cancer.type2)
+    dbDEMC_high <- filter(dbDEMC_high, Cancer.Type==cancer.type1 | Cancer.Type==cancer.type2)
     dbDEMC_high_miRNAs <- subset(dbDEMC_high, select = miRBase.Update.ID)
     if ("unknown" %in% dbDEMC_high_miRNAs$miRBase.Update.ID==TRUE){
-      dbDEMC_high_miRNAs <- filter(dbDEMC_high_miRNAs,
-                                   miRBase.Update.ID != "unknown")
+      dbDEMC_high_miRNAs <- filter(dbDEMC_high_miRNAs, miRBase.Update.ID != "unknown")
       dbDEMC_high_miRNAs <- as.vector(dbDEMC_high_miRNAs)
     }else{
       dbDEMC_high_miRNAs <- as.vector(dbDEMC_high_miRNAs)
     }
     
-    #Common mirnas
-    common_mirnas <- intersect(miRmap_mirnas$mature_name,
-                               dbDEMC_high_miRNAs$miRBase.Update.ID)
   }else{
-    dbDEMC_low <- read.csv(file = "Data/miRNA-data/dbDEMC-2.0-low.txt",
-                           sep = '\t')
+    dbDEMC_low <- read.csv(file = "Data/miRNA-data/List-of-dbDEMC-2-0-miRNAs/dbDEMC-2.0-low.txt", sep = '\t')
     colnames(dbDEMC_low)[1] <- "miRNA.ID"
     
     #Filtering to just the miRNAs associated with a particular type of cancer. 
-    dbDEMC_low <- filter(dbDEMC_low, 
-                         Cancer_Type==cancer.type1 | Cancer_Type==cancer.type2)
+    dbDEMC_low <- filter(dbDEMC_low, Cancer_Type==cancer.type1 | Cancer_Type==cancer.type2)
     dbDEMC_low_miRNAs <- subset(dbDEMC_low, select = miRBase_update)
     dbDEMC_low_miRNAs <- as.vector(dbDEMC_low_miRNAs)
     
-    #Common miRNAs between databases
-    common_mirnas <- intersect(miRmap_mirnas$mature_name,
-                               dbDEMC_low_miRNAs$miRBase_update)
   }
   
-  #Now submitting these miRNAs to TargetScan to get genes to make a gene list
-  #for the third metric testing to see if all of the miRNAs exist in TargetScan
-  #before getting all submitted at once
-  common_mirnas <- common_mirnas[!common_mirnas %in% mirna.remove]
-  if(length(common_mirnas)>= length(common_mirnas[1:max.mirnas])){
-    common_mirnas <- common_mirnas[1:max.mirnas]
+  #Now submitting these miRNAs to TargetScan to get genes to make a gene list for the third metric----
+  #testing to see if all of the miRNAs exist in TargetScan before getting all submitted at once
+  dbDEMC_high_miRNAS <- dbDEMC_high_miRNAs[!dbDEMC_high_mirnas %in% mirna.remove]
+  if(length(dbDEMC_high_miRNAS)>= length(dbDEMC_high_miRNAS[1:max.mirnas])){
+    dbDEMC_high_miRNAS <- dbDEMC_high_miRNAS[1:max.mirnas]
   }else{
     print("There are fewer target mirnas available than your input.
           Using the largest number of common mirnas for this submission
           to TargetScan")
-    common_mirnas <- common_mirnas[1:length(common_mirnas)]
-    print("The number of common mirnas is")
-    print(length(common_mirnas))
+    dbDEMC_high_miRNAS <- dbDEMC_high_miRNAS[1:length(dbDEMC_high_miRNAS)]
+    print("The number of dbDEMC mirnas is")
+    print(length(dbDEMC_high_miRNAS))
   }
   
-  if(print.ts.targets==TRUE){
-    print(length(common_mirnas))
-  }
   my_num <- 1
   miRNA_targets <- vector(mode = "list", length = length(common_mirnas))
   for (m in common_mirnas[1:length(common_mirnas)]) {
     percent_done <- (my_num/length(common_mirnas))*100
-    #print(percent_done)
-    #print(m)
-    current_target <- targetScan(mirna=common_mirnas[my_num],
-                                 species=ts.org,
+    current_target <- targetScan(mirna=common_mirnas[my_num], species=ts.org,
                                  release=ts.version,
                                  maxOut= max.miR.targets)
     miRNA_name <- m
     miRNA_name_final <- rep(miRNA_name, times=length(current_target$Ortholog))
     current_target <- cbind(current_target,miRNA_name_final)
     miRNA_targets[[m]] <- current_target
-    #print(my_num)
     my_num <- my_num + 1
   }
   
   
-  if(save.mirna.raw.targets==TRUE){
-    save(miRNA_targets, file = mirna.raw.targets.filename)
-    
-  }
   
   #Simplifying the output of the TargetScan commands to 
   #just the Gene name and the miRNA columns
@@ -141,7 +111,7 @@ mirna_calculator <- function(ts.org                      ="Human",
                                         all_miRs_for_score))
   miRNA_score <- as.data.frame(miRNA_score)
   
-  #Checking to see for each miRNA (column name) if it interacts with a particular row.
+  #Checking to see for each miRNA (col name) if it interacts with a particular row.
   #If it does it get a plus one to that cell. If it does not it moves to next cell
   for (i in rownames(miRNA_score)){
     for (x in miRNA_targets){
@@ -154,12 +124,8 @@ mirna_calculator <- function(ts.org                      ="Human",
     }
   }
   
-  if(write.heatmap.data==TRUE){
-    write.csv(miRNA_score, file = heatmap.data.name)
-  }
   
-  #Now calculating the row sums of each gene for total number of
-  #the miRNA interactions----
+  #Now calculating the row sums of each gene for total number of miRNA interactions----
   mirna_gene_list <- rowSums(miRNA_score)
   mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
   mirna.ranking <- sort(mirna.ranking, decreasing = TRUE)
