@@ -1,4 +1,6 @@
-#Survival plotter only
+#Name: km_plotter.R
+#Author: Andrew Willems <awillems@vols.utk.edu>
+#Purpose: To plot survival data from our model fits efficiently
 km_plotter <- function(km.fit                  =km_fit,
                        data.source             =surv_gene_df,
                        p.value                 =TRUE,
@@ -29,12 +31,13 @@ km_plotter <- function(km.fit                  =km_fit,
                        my.km.plot.type         = "svg",
                        my.plot.height          = 34,
                        my.plot.width           = 34,
-                       my.plot.dpi             = 300){
+                       my.plot.dpi             = 300,
+                       my.plot.unit            = "cm"){
   
-  #Loading the needed package. If not installed it is automatically done----
+  #Loading the needed package
   require(survminer)
   
-  #Custom function to modify specific aspects of 'survminers' default theme
+  #Custom function to modify specific aspects of 'survminer's' default theme
   custom_theme <- function() {
     theme_survminer() %+replace%
       theme(
@@ -43,7 +46,7 @@ km_plotter <- function(km.fit                  =km_fit,
       )
   }
   
-  #KM Curves plotting code----
+  #Kaplan-Meier (KM) curve plotting
   sur_Plot<-ggsurvplot(fit = km.fit,
                        data=data.source,
                        palette=color.pal,
@@ -59,8 +62,10 @@ km_plotter <- function(km.fit                  =km_fit,
                        font.main= c(my.plot.main.size, my.plot.main.face),
                        font.x= c(my.plot.x.size, my.plot.x.face),
                        font.y=c(my.plot.y.size, my.plot.y.face),
-                       font.tickslab=c(my.plot.ticks.size, my.plot.ticks.size.face),
-                       font.legend=c(my.plot.legend.size, my.plot.legend.face),
+                       font.tickslab=c(my.plot.ticks.size,
+                                       my.plot.ticks.size.face),
+                       font.legend=c(my.plot.legend.size,
+                                     my.plot.legend.face),
                        size = surv.curv.size,
                        censor= my.censor,
                        censor.size=my.censor.size,
@@ -68,10 +73,12 @@ km_plotter <- function(km.fit                  =km_fit,
                        ggtheme = custom_theme())
   
   #Saving the plot to .svg or other specified format
+  #with particular parameters
   ggsave(filename = my.km.plot,
-         plot = print(sur_Plot$plot, newpage = FALSE),
-         device= my.km.plot.type, dpi=my.plot.dpi,
-         width = my.plot.width, height = my.plot.height, units = "cm")
+         plot     = print(sur_Plot$plot, newpage = FALSE),
+         device   = my.km.plot.type, dpi=my.plot.dpi,
+         width    = my.plot.width, height = my.plot.height,
+         units    = my.plot.unit)
   
   #Returning our finished KM plot----
   return(sur_Plot)
