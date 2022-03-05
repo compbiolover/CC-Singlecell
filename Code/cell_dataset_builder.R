@@ -9,6 +9,7 @@ cell_dataset_builder <- function(vim.genes=vim,
                                  graph.root=1.5,
                                  show.traj=TRUE,
                                  point.size=2.5,
+                                 my.root   = "Y_19",
                                  my.monocle.graph = "~/Desktop/pseudotime_graph.svg",
                                  my.monocle.graph.genes = "~/Desktop/genes_graph.svg",
                                  my.moncole.plot.type = "svg",
@@ -34,7 +35,7 @@ cell_dataset_builder <- function(vim.genes=vim,
   partition_plot <-plot_cells(cds, color_cells_by="partition")
   vim_plot <- plot_cells(cds, genes=vim_genes, cell_size=point.size)
   cds <- learn_graph(cds)
-  cds <- order_cells(cds, root_pr_nodes = "Y_9")
+  cds <- order_cells(cds, root_pr_nodes = my.root)
   pt_graph <-plot_cells(cds         = cds,
              color_cells_by         = "pseudotime",
              label_cell_groups      = FALSE,
