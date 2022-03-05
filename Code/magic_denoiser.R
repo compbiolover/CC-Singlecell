@@ -10,10 +10,7 @@ magic_denoiser <- function(sc.data      =sc,
                            magic.knn    =10,
                            magic.solver ='approximate',
                            magic.cores  =1,
-                           magic.verbose=1,
-                           filt.1       =0.3, 
-                           filt.2       =0, 
-                           filt.3       =0.2){
+                           magic.verbose=1){
   #Loading required packages----
   require(ggplot2)
   require(Rmagic)
@@ -29,8 +26,6 @@ magic_denoiser <- function(sc.data      =sc,
                        n.jobs=magic.cores,
                        verbose=magic.verbose)
   denoised_sc <- t(denoised_sc[["result"]])
-  denoised_sc <- denoised_sc[rowMeans(denoised_sc) > filt.1 &
-                               rowMeans(denoised_sc > filt.2) > filt.3,]
   denoised_sc <-  as.data.frame(denoised_sc)
   
   #Getting the gene names of the single-cell data and saving it----
