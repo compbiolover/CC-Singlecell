@@ -178,7 +178,8 @@ cox_model_fitter <- function(my.seed       =1,
 risk_score_calculator <- function(my.file=active_coefs.csv, 
                                   tumor.data=FALSE,
                                   n.data=FALSE,
-                                  cox.df=cox_df){
+                                  cox.df=cox_df,
+                                  plot.title = "TCGA-COAD"){
   #Required packages----
   require(survival)
   
@@ -305,7 +306,11 @@ risk_score_calculator <- function(my.file=active_coefs.csv,
     km_fit <- survfit(Surv(time, vital.status) ~ risk, data = converted_df)
     finished_plot <- km_plotter(km.fit = km_fit, data.source = converted_df,
                                 p.value = TRUE,
-                                plot.title = my.title)
+                                pval.size = 8,
+                                confidence.int = FALSE,
+                                surv.curv.size = 4.5,
+                                my.km.plot.type = "svg",
+                                my.km.plot = plot.title)
     finished_plot
     
     survival_return[["KM Plot"]] <- finished_plot

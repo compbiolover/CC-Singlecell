@@ -38,13 +38,28 @@ cc_tumor_fpkm <- t(cc_tumor_fpkm)
 cc_tumor_fpkm <- subset(cc_tumor_fpkm,
                         select=c(RHC3546__Tcell__.C6E879:RHC6041__Macrophage__.FFFF55))
 cc_tumor_fpkm <- apply(cc_tumor_fpkm, c(1,2), as.numeric)
-cc_tumor_fpkm <- as.matrix(cc_tumor_fpkm)
+#cc_tumor_fpkm <- as.matrix(cc_tumor_fpkm)
+
+#First pre-processing the scRNA-seq data before sending it to MAGIC
+#Keeping genes expressed in at least 10 cells
+keep_rows <- rowSums(cc_tumor_fpkm > 0) > 10
+cc_tumor_fpkm <- cc_tumor_fpkm[keep_rows,]
+
+# look at the distribution of library sizes
+ggplot() +
+  geom_histogram(aes(x=colSums(cc_tumor_fpkm)), bins=50) +
+  geom_vline(xintercept = 1000, color='red')
+
+#Normalizing the library size
+cc_tumor_fpkm_normalized <- library.size.normalize(cc_tumor_fpkm)
+cc_tumor_fpkm_normalized <- sqrt(cc_tumor_fpkm_normalized)
 
 
 #Denoising the single-cell data and saving the output----
-cc_tumor_fpkm <- magic_denoiser(sc.data = cc_tumor_fpkm, magic.seed = 123)
+cc_tumor_fpkm <- magic_denoiser(sc.data = cc_tumor_fpkm_normalized,
+                                magic.seed = 123,magic.solver = 'approximate')
 saveRDS(cc_tumor_fpkm,
-        file = "Data/Reproducible-results/denoised-colon-and-rectal-single-cell-data.rds")
+        file = "Data/Reproducible-results/denoised-colon-and-rectal-single-cell-data_v2.rds")
 
 
 #Generating the VIM based pseudotime progression with Monocle3----
@@ -59,13 +74,13 @@ cds_output <- cell_dataset_builder(vim.genes = c("VIM", "VIMP"),
 #MAD metric for colon and rectal cancer----
 mad.genes <- mad_calculator(cc_tumor_fpkm$denoised_sc_dataframe)
 saveRDS(mad.genes,
-        file = "Data/Reproducible-results/Data/mad_colon_and_rectal_cancer.rds")
+        file = "Data/Reproducible-results/Data/mad_colon_and_rectal_cancer_v2.rds")
 
 #Switchde metric for colon and rectal cancer----
 sde.genes <- switchde_calculator(cc_tumor_fpkm$denoised_sc_dataframe,
                                  pseudo.time = cds_output$Pseudotime)
 saveRDS(sde.genes,
-        file = "Data/Reproducible-results/Data/sde_colon_and_rectal_cancer.rds")
+        file = "Data/Reproducible-results/Data/sde_colon_and_rectal_cancer_v2.rds")
 
 #MiRNA metric----
 #Due to it taking a while I am just including the file that we get from this
@@ -107,7 +122,7 @@ mad_sdes_mirna_optimized <- integrated_gene_lists
 
 
 #Elastic-net penalized cox model----
-load("Data/Reproducible-results/Data/coad_df.RData", verbose = TRUE)
+cox_df <- readRDS("Data/TCGA-COAD/coad_df_finished_v2.rds")
 cox_models <- vector(mode = "list", length = 12)
 my_cindicies <- vector(mode = "numeric", length = 1)
 my_active_coefs <- vector(mode = "character", length = 1)
@@ -150,8 +165,7 @@ load("Data/Reproducible-results/Data/Optimization_800_510_targets_for_rectal_can
 
 mad_sdes_mirna_optimized <- integrated_gene_lists
 
-
-load("Data/Reproducible-results/Data/read_df.RData", verbose = TRUE)
+cox_df <- readRDS("Data/TCGA-READ/read_df_finished_v2.rds")
 
 cox_models <- vector(mode = "list", length = 12)
 my_cindicies <- vector(mode = "numeric", length = 1)
@@ -196,12 +210,10 @@ patient_risk
 
 #KM risk calculation for READ----
 patient_risk <- risk_score_calculator(my.file = "~/Desktop/read_active_genes.csv",
-                                      my.title = "TCGA-READ",
                                       tumor.data = FALSE,
                                       n.data = FALSE, 
-                                      cox.df = cox_df,
-                                      show.pval = TRUE,
-                                      show.pval.method = FALSE)
+                                      cox.df = cox_df, 
+                                      plot.title = "TCGA-READ Test")
 patient_risk
 
 

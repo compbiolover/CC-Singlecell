@@ -23,9 +23,14 @@ magic_denoiser <- function(sc.data      =sc,
   
   #The actual denoising of the single-cell data----
   sc.data <- t(sc.data)
-  denoised_sc <- magic(sc.data, seed = magic.seed, solver=magic.solver, knn=magic.knn, n.jobs=magic.cores, verbose=magic.verbose)
+  denoised_sc <- magic(sc.data, seed = magic.seed,
+                       solver=magic.solver,
+                       knn=magic.knn,
+                       n.jobs=magic.cores,
+                       verbose=magic.verbose)
   denoised_sc <- t(denoised_sc[["result"]])
-  denoised_sc <- denoised_sc[rowMeans(denoised_sc) > filt.1 & rowMeans(denoised_sc > filt.2) > filt.3,]
+  denoised_sc <- denoised_sc[rowMeans(denoised_sc) > filt.1 &
+                               rowMeans(denoised_sc > filt.2) > filt.3,]
   denoised_sc <-  as.data.frame(denoised_sc)
   
   #Getting the gene names of the single-cell data and saving it----
