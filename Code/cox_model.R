@@ -11,13 +11,11 @@ cox_model_fitter <- function(my.seed       =1,
                              tumor.stage   =FALSE,
                              tumor.n       =FALSE,
                              tumor.m       =FALSE,
-                             regular.cox   =TRUE,
-                             save.regular.cox.genes =TRUE,
                              remove.stage   = c("tumor.stage1","tumor.stage2",
                                                 "tumor.stage3", "tumor.stage4"),
                              remove.n.stage = c("ajcc.n0", "ajcc.n1", "ajcc.n2",
                                                 "ajcc.n3"),
-                             my.filename   ="my_saved_genes.csv"){
+                             my.filename   ="~/Desktop/my_models_active_coefs.csv"){
   
   #Doing input sanity checks----
   if(missing(my.seed)){
@@ -128,8 +126,8 @@ cox_model_fitter <- function(my.seed       =1,
  
   
   #Saving the coefficients of the model
-  # active_coefs_df <- cbind(active_genes, Active.Coefficients)
-  # write.csv(active_coefs_df, file = my.filename)
+  active_coefs_df <- cbind(active_genes, Active.Coefficients)
+  write.csv(active_coefs_df, file = my.filename)
   
   #Assessing the performance of the 10-fold cross-validation
   #on the entire data set----
@@ -147,23 +145,17 @@ cox_model_fitter <- function(my.seed       =1,
     active_genes <- c(active_genes, "tumor.stage", "ajcc.n")
   }
   
- 
-  #Getting survival
-  #my_surv <- survival::survfit(cv_fit, s = "lambda.min", x = my_x, y = my_y)
-  
 
   
   #Adding the relevant data bits to list to return
   cox_data[["CV"]] <- cv_fit
-  #cox_data[["Cox fit"]] <- fit
   #cox_data[["Cox Performance"]] <- model_perf
   cox_data[["Coefficients"]] <- Coefficients
   cox_data[["Active Coefficients"]] <- Active.Coefficients
   cox_data[["Active Index"]] <- Active.Index
   cox_data[["Active Genes"]] <- active_genes
   cox_data[["Predictors"]] <- my_predictors
-  #cox_data[["Predicted Survival"]] <- my_surv
-  #cox_data[["Finished Coefficients"]] <- active_coefs_df
+  cox_data[["Finished Coefficients"]] <- active_coefs_df
   
   
   #Returning our finished output----
