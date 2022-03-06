@@ -202,6 +202,9 @@ for(gs in gene_sizes){
 #Binding the gene size and c-index vectors together to get the finished data
 #frame
 mad_cindices_coad_df <- as.data.frame(cbind(gene_sizes, mad_cindices))
+mad_cindices_coad_df$method <- rep("MAD", nrow(mad_cindices_coad_df))
+mad_cindices_coad_df <- mad_cindices_coad_df[,2:4]
+colnames(mad_cindices_coad_df)[2] <- "c_index"
 write.csv(mad_cindices_coad_df,
           "Data/Reproducible-results/Data/mad_cindices_coad_across_gene_size.csv")
 
@@ -233,6 +236,9 @@ for(gs in gene_sizes){
 #Binding the gene size and c-index vectors together to get the finished data
 #frame
 sde_cindices_coad_df <- as.data.frame(cbind(gene_sizes, sde_cindices))
+sde_cindices_coad_df$method <- rep("SDE", nrow(sde_cindices_coad_df))
+sde_cindices_coad_df <- sde_cindices_coad_df[,2:4]
+colnames(sde_cindices_coad_df)[2] <- "c_index"
 write.csv(sde_cindices_coad_df,
           "Data/Reproducible-results/Data/sde_cindices_coad_across_gene_size.csv")
 
@@ -277,10 +283,16 @@ for(gs in gene_sizes){
 #frame
 mirna_high_cindices_coad_df <- as.data.frame(cbind(gene_sizes,
                                                    mirna_high_cindices))
+
+colnames(mirna_high_cindices_coad_df) [2] <- "c_index"
+mirna_high_cindices_coad_df$mirna_type <- rep("high",
+                                              nrow(mirna_high_cindices_coad_df))
+
 write.csv(mirna_high_cindices_coad_df,
           "Data/Reproducible-results/Data/mirna_high_cindices_coad_across_gene_size.csv")
 
 
+#Medium miRNA-miRNA target number
 #Loading the medium miRNA-miRNA target file
 load("Data/Reproducible-results/Data/400_510_targets.RData", verbose = TRUE)
 
@@ -307,11 +319,130 @@ for(gs in gene_sizes){
 #Binding the gene size and c-index vectors together to get the finished data
 #frame
 mirna_medium_cindices_coad_df <- as.data.frame(cbind(gene_sizes,
-                                                   mirna_high_cindices))
-write.csv(mirna_high_cindices_coad_df,
+                                                   mirna_medium_cindices))
+
+colnames(mirna_medium_cindices_coad_df) [2] <- "c_index"
+mirna_medium_cindices_coad_df$mirna_type <- rep("medium",
+                                                nrow(mirna_medium_cindices_coad_df))
+
+write.csv(mirna_medium_cindices_coad_df,
           "Data/Reproducible-results/Data/mirna_medium_cindices_coad_across_gene_size.csv")
 
+#low miRNA-miRNA target number
+#Loading the low miRNA-miRNA target file
+load("Data/Reproducible-results/Data/100_10_targets.RData", verbose = TRUE)
 
+low.mirna.genes <- mirna.ranking
+
+for(gs in gene_sizes){
+  cox_model <- cox_model_fitter(my.seed = 1,
+                                cox.predictors = low.mirna.genes,
+                                cox.df = cox_df,
+                                gene.num = gs,
+                                tumor.stage = FALSE,
+                                tumor.n = FALSE,
+                                tumor.m = FALSE,
+                                my.filename = paste0("Data/Reproducible-results/Data/low_mirna_coad_coefs_",gs,"_genes.csv"))
+  
+  #Getting the top concordance index from the cross validation and then rounding
+  #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+  #the mirna_medium_cindices list with the result
+  top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+  mirna_low_cindices[which(gene_sizes==gs)] <- top_cindex
+  
+}
+
+#Binding the gene size and c-index vectors together to get the finished data
+#frame
+mirna_low_cindices_coad_df <- as.data.frame(cbind(gene_sizes,
+                                                     mirna_low_cindices))
+
+colnames(mirna_low_cindices_coad_df)[2] <- "c_index"
+mirna_low_cindices_coad_df$mirna_type <- rep("low",
+                                             nrow(mirna_low_cindices_coad_df))
+
+write.csv(mirna_low_cindices_coad_df,
+          "Data/Reproducible-results/Data/mirna_low_cindices_coad_across_gene_size.csv")
+
+
+#Binding all the rows of the 3 different miRNA data frames together into 1 big
+#data frame
+all_mirna_metrics_coad_df <- bind_rows(mirna_low_cindices_coad_df,
+                                            mirna_medium_cindices_coad_df,
+                                            mirna_high_cindices_coad_df)
+
+#Reordering the labels to make them look nicer on the plot
+all_mirna_metrics_coad_df$mirna_type <- factor(all_mirna_metrics_coad_df$mirna_type,
+                                               levels = c("low", "medium", "high"))
+
+#Basic miRNA-miRNA target plot
+all_mirna_metrics_coad_plot <- ggplot(data = all_mirna_metrics_coad_df,
+                                      aes(x=gene_sizes, y=c_index, color=mirna_type))
+
+#Making the plot much nicer
+all_mirna_metrics_coad_plot_finished <-all_mirna_metrics_coad_plot +
+  geom_line(size=2.5) + geom_point(size=3.0)+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 40, face = "bold"),
+        legend.title = element_text(size = 30, face = "bold"),
+        legend.position = "bottom", 
+        legend.text = element_text(size = 35, face = "plain"),
+        axis.text=element_text(size=25, face="bold"))+
+  xlab("Gene Size")+ ylab("Mean Concordance Index")+
+  ggtitle("miRNA-miRNA Target Number")+ 
+  labs(color="miRNA-miRNA Target Number")+
+  scale_color_viridis_d()
+
+
+#Saving the finished graph in .svg format
+ggsave(filename = "Data/Reproducible-results/Figures/mirna_mirna_target_num_across_gene_size.svg",
+       plot     = print(all_mirna_metrics_coad_plot_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 34, height = 34,
+       units    = "cm")
+
+
+#Optimal gene size for MAD, SDE, and miRNA high metric----
+#First bind the data frames together
+methods_optimal_gene_coad_df <- bind_rows(mad_cindices_coad_df, 
+                                        sde_cindices_coad_df,
+                                        mirna_high_cindices_coad_df)
+
+methods_optimal_gene_coad_df <- methods_optimal_gene_coad_df[,1:3]
+
+methods_optimal_gene_coad_df$method[119:177] <- rep("miRNA", 58)
+
+#Saving the data frame
+write.csv(methods_optimal_gene_coad_df,
+          "Data/Reproducible-results/Data/individual_optimal_gene_point_coad_data.csv")
+
+#Basic miRNA-miRNA target plot
+methods_optimal_gene_coad_plot <- ggplot(data = methods_optimal_gene_coad_df,
+                                      aes(x=gene_sizes, y=c_index, color=method))
+
+#Making the plot much nicer
+methods_optimal_gene_coad_plot_finished <-methods_optimal_gene_coad_plot +
+  geom_line(size=2.5) + geom_point(size=3.0)+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 40, face = "bold"),
+        legend.title = element_text(size = 30, face = "bold"),
+        legend.position = "bottom", 
+        legend.text = element_text(size = 35, face = "plain"),
+        axis.text=element_text(size=25, face="bold"))+
+  xlab("Gene Size")+ ylab("Mean Concordance Index")+
+  ggtitle("Optimal Gene Number")+ 
+  labs(color="Method")+
+  scale_color_viridis_d()
+
+
+#Saving the finished graph in .svg format
+ggsave(filename = "Data/Reproducible-results/Figures/individual_metrics_optimal_gene_size.svg",
+       plot     = print(methods_optimal_gene_coad_plot_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 34, height = 34,
+       units    = "cm")
 
 
 
