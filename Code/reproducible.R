@@ -6,6 +6,7 @@
 library(data.table)
 library(ggplot2)
 library(phateR)
+library(SummarizedExperiment)
 library(survival)
 library(survminer)
 library(svglite)
@@ -158,10 +159,10 @@ saveRDS(sde.genes,
 # cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="A", replacement="")
 # cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="B", replacement="")
 # cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="C", replacement="")
-# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage iv", replacement = 4)
-# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage iii", replacement = 3)
-# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage ii", replacement = 2)
-# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage i", replacement = 1)
+# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage IV", replacement = 4)
+# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage III", replacement = 3)
+# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage II", replacement = 2)
+# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage I", replacement = 1)
 # cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="a", replacement="")
 # cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="b", replacement="")
 # cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
@@ -443,6 +444,378 @@ ggsave(filename = "Data/Reproducible-results/Figures/individual_metrics_optimal_
        device   = "svg", dpi=300,
        width    = 34, height = 34,
        units    = "cm")
+
+
+
+
+#Now doing all of these steps for the rectal cancer data set from TCGA-READ
+#Now getting our Colon cancer bulk data set----
+#TCGA-READ
+# read_query <- GDCquery(project       = "TCGA-READ",
+#                        data.category = "Transcriptome Profiling",
+#                        data.type     = "Gene Expression Quantification",
+#                        workflow.type = "HTSeq - FPKM")
+# 
+# #Downloading the files
+# GDCdownload(query           = read_query,
+#             method          = "api",
+#             files.per.chunk = 10,
+#             directory       = "Data/Reproducible-results/Data/Bulk-data/")
+# 
+
+#Making the SummarizedExperiment object
+# read_data_se <- GDCprepare(read_query, summarizedExperiment = TRUE,
+#                            directory = "Data/Reproducible-results/Data/Bulk-data/")
+# read_data_df <- as.data.frame(colData(read_data_se))
+# read_data_df$vital_status <- factor(read_data_df$vital_status,
+#                                     levels = c("Alive", "Dead"),
+#                                     labels = c(0,1))
+# read_data_df$vital_status <- as.numeric(as.character(read_data_df$vital_status))
+# 
+# 
+# bulk_rna_df <- read_data_se@assays@data@listData[["HTSeq - FPKM"]]
+# colnames(bulk_rna_df) <- read_data_se@colData@rownames
+# rownames(bulk_rna_df) <- read_data_se@rowRanges@elementMetadata@listData[["external_gene_name"]]
+# bulk_rna_df <- t(bulk_rna_df)
+# bulk_rna_df <- as.data.frame(bulk_rna_df)
+# bulk_rownames <- rownames(bulk_rna_df)
+# bulk_rna_df$barcode <- bulk_rownames
+# 
+# bulk_rna_df_unique <- subset(bulk_rna_df,
+#                              select = unique(colnames(bulk_rna_df)))
+# read_data_df_unique <- subset(read_data_df,
+#                               select = unique(colnames(read_data_df)))
+# merged_df <- merge(bulk_rna_df_unique, read_data_df_unique, by = 'barcode')
+# rownames(merged_df) <- merged_df$barcode
+# merged_df <- merged_df[,2:length(colnames(merged_df))]
+# 
+# 
+# 
+# merged_df$days_to_last_follow_up <- ifelse(merged_df$vital_status==1,
+#                                            merged_df$days_to_death,
+#                                            merged_df$days_to_last_follow_up)
+# 
+# merged_df <- filter(merged_df, days_to_last_follow_up != "NA")
+# 
+# 
+# cox_time <- merged_df$days_to_last_follow_up
+# cox_event <- merged_df$vital_status
+# cox_tumor <- merged_df$ajcc_pathologic_stage
+# cox_tumor_n <- merged_df$ajcc_pathologic_n
+# cox_tumor_m <- merged_df$ajcc_pathologic_m
+# cox_gender <- merged_df$gender
+# cox_eth <- merged_df$ethnicity
+# cox_race <- merged_df$race
+# cox_type <- merged_df$definition
+# cox_df <- subset(merged_df, select=c(TSPAN6:AC007389.5))
+# cox_df$days.to.last.follow.up <- cox_time
+# cox_df$vital.status <- cox_event
+# cox_df$tumor.stage <- cox_tumor
+# cox_df$ajcc.m <- cox_tumor_m
+# cox_df$ajcc.n <- cox_tumor_n
+# cox_df$race <- cox_race
+# cox_df$ethnicity <- cox_eth
+# cox_df$gender <- cox_gender
+# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="A", replacement="")
+# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="B", replacement="")
+# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern="C", replacement="")
+# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage IV", replacement = 4)
+# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage III", replacement = 3)
+# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage II", replacement = 2)
+# cox_df$tumor.stage <- gsub(cox_df$tumor.stage, pattern = "Stage I", replacement = 1)
+# cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="a", replacement="")
+# cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="b", replacement="")
+# cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="c", replacement="")
+# cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N0", replacement=0)
+# cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N1", replacement=1)
+# cox_df$ajcc.n <- gsub(cox_df$ajcc.n, pattern="N2", replacement=2)
+# cox_df$sample.type <- cox_type
+# cox_df <- filter(cox_df, !tumor.stage=="not reported")
+# cox_df <- cox_df[complete.cases(cox_df[, "ajcc.m"]), ]
+# cox_df$days.to.last.follow.up <- ifelse(cox_df$days.to.last.follow.up < 1, 1,
+#                                         cox_df$days.to.last.follow.up)
+# saveRDS(cox_df, "Data/TCGA-READ/read_df_finished.rds")
+
+cox_df <- readRDS("Data/Reproducible-results/Data/read_df_finished.rds")
+
+#Getting ideal gene number for MAD metric on TCGA-READ----
+gene_sizes <- seq(100, 3000, 50)
+mad_cindices <- rep(0, length(gene_sizes))
+
+#Loading in the MAD and SDE files if they aren't already loaded into the 
+#environment from earlier
+mad.genes <-readRDS("Data/Reproducible-results/Data/mad_colon_and_rectal_cancer.rds")
+sde.genes <- readRDS("Data/Reproducible-results/Data/sde_colon_and_rectal_cancer.rds")
+
+for(gs in gene_sizes){
+  cox_model <- cox_model_fitter(my.seed = 1,
+                                cox.predictors = mad.genes,
+                                cox.df = cox_df,
+                                gene.num = gs,
+                                tumor.stage = FALSE,
+                                tumor.n = FALSE,
+                                tumor.m = FALSE,
+                                my.filename = paste0("Data/Reproducible-results/Data/mad_read_coefs_",gs,"_genes.csv"))
+  
+  #Getting the top concordance index from the cross validation and then rounding
+  #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+  #the mad_cindices list with the result
+  top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+  mad_cindices[which(gene_sizes==gs)] <- top_cindex
+  
+}
+
+#Binding the gene size and c-index vectors together to get the finished data
+#frame
+mad_cindices_read_df <- as.data.frame(cbind(gene_sizes, mad_cindices))
+mad_cindices_read_df$method <- rep("MAD", nrow(mad_cindices_read_df))
+mad_cindices_read_df <- mad_cindices_read_df[,2:4]
+colnames(mad_cindices_read_df)[2] <- "c_index"
+write.csv(mad_cindices_read_df,
+          "Data/Reproducible-results/Data/mad_cindices_read_across_gene_size.csv")
+
+
+
+
+#Getting ideal gene number for SDE metric on TCGA-read----
+gene_sizes <- seq(100, 3000, 50)
+sde_cindices <- rep(0, length(gene_sizes))
+
+for(gs in gene_sizes){
+  cox_model <- cox_model_fitter(my.seed = 1,
+                                cox.predictors = sde.genes,
+                                cox.df = cox_df,
+                                gene.num = gs,
+                                tumor.stage = FALSE,
+                                tumor.n = FALSE,
+                                tumor.m = FALSE,
+                                my.filename = paste0("Data/Reproducible-results/Data/sde_read_coefs_",gs,"_genes.csv"))
+  
+  #Getting the top concordance index from the cross validation and then rounding
+  #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+  #the sde_cindices list with the result
+  top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+  sde_cindices[which(gene_sizes==gs)] <- top_cindex
+  
+}
+
+#Binding the gene size and c-index vectors together to get the finished data
+#frame
+sde_cindices_read_df <- as.data.frame(cbind(gene_sizes, sde_cindices))
+sde_cindices_read_df$method <- rep("SDE", nrow(sde_cindices_read_df))
+sde_cindices_read_df <- sde_cindices_read_df[,2:4]
+colnames(sde_cindices_read_df)[2] <- "c_index"
+write.csv(sde_cindices_read_df,
+          "Data/Reproducible-results/Data/sde_cindices_read_across_gene_size.csv")
+
+
+#Getting ideal gene number for miRNA metric on TCGA-read----
+#For this metric we don't know which combination of miRNA and miRNA targets
+#will yield the best result in advance so we are trying 3 different miRNA-
+#miRNA target combinations that encompass specific areas of our grid search.
+#They are low miRNA number and low miRNA target number, medium miRNA number and
+#medium miRNA target number, and high miRNA number and high miRNA target number.
+#Once the ideal miRNA-miRNA target pair is known from the grid search we will
+#also include a gene size search for it here
+gene_sizes <- seq(100, 3000, 50)
+mirna_high_cindices <- rep(0, length(gene_sizes))
+mirna_medium_cindices <- rep(0, length(gene_sizes))
+mirna_low_cindices <- rep(0, length(gene_sizes))
+
+#Loading the high miRNA-miRNA target file
+load("Data/Reproducible-results/Data/800_1010_targets.RData", verbose = TRUE)
+
+high.mirna.genes <- mirna.ranking
+
+for(gs in gene_sizes){
+  cox_model <- cox_model_fitter(my.seed = 1,
+                                cox.predictors = high.mirna.genes,
+                                cox.df = cox_df,
+                                gene.num = gs,
+                                tumor.stage = FALSE,
+                                tumor.n = FALSE,
+                                tumor.m = FALSE,
+                                my.filename = paste0("Data/Reproducible-results/Data/high_mirna_read_coefs_",gs,"_genes.csv"))
+  
+  #Getting the top concordance index from the cross validation and then rounding
+  #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+  #the mirna_high_cindices list with the result
+  top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+  mirna_high_cindices[which(gene_sizes==gs)] <- top_cindex
+  
+}
+
+#Binding the gene size and c-index vectors together to get the finished data
+#frame
+mirna_high_cindices_read_df <- as.data.frame(cbind(gene_sizes,
+                                                   mirna_high_cindices))
+
+colnames(mirna_high_cindices_read_df) [2] <- "c_index"
+mirna_high_cindices_read_df$mirna_type <- rep("high",
+                                              nrow(mirna_high_cindices_read_df))
+
+write.csv(mirna_high_cindices_read_df,
+          "Data/Reproducible-results/Data/mirna_high_cindices_read_across_gene_size.csv")
+
+
+#Medium miRNA-miRNA target number
+#Loading the medium miRNA-miRNA target file
+load("Data/Reproducible-results/Data/400_510_targets.RData", verbose = TRUE)
+
+medium.mirna.genes <- mirna.ranking
+
+for(gs in gene_sizes){
+  cox_model <- cox_model_fitter(my.seed = 1,
+                                cox.predictors = medium.mirna.genes,
+                                cox.df = cox_df,
+                                gene.num = gs,
+                                tumor.stage = FALSE,
+                                tumor.n = FALSE,
+                                tumor.m = FALSE,
+                                my.filename = paste0("Data/Reproducible-results/Data/medium_mirna_read_coefs_",gs,"_genes.csv"))
+  
+  #Getting the top concordance index from the cross validation and then rounding
+  #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+  #the mirna_medium_cindices list with the result
+  top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+  mirna_medium_cindices[which(gene_sizes==gs)] <- top_cindex
+  
+}
+
+#Binding the gene size and c-index vectors together to get the finished data
+#frame
+mirna_medium_cindices_read_df <- as.data.frame(cbind(gene_sizes,
+                                                     mirna_medium_cindices))
+
+colnames(mirna_medium_cindices_read_df) [2] <- "c_index"
+mirna_medium_cindices_read_df$mirna_type <- rep("medium",
+                                                nrow(mirna_medium_cindices_read_df))
+
+write.csv(mirna_medium_cindices_read_df,
+          "Data/Reproducible-results/Data/mirna_medium_cindices_read_across_gene_size.csv")
+
+#low miRNA-miRNA target number
+#Loading the low miRNA-miRNA target file
+load("Data/Reproducible-results/Data/100_10_targets.RData", verbose = TRUE)
+
+low.mirna.genes <- mirna.ranking
+
+for(gs in gene_sizes){
+  cox_model <- cox_model_fitter(my.seed = 1,
+                                cox.predictors = low.mirna.genes,
+                                cox.df = cox_df,
+                                gene.num = gs,
+                                tumor.stage = FALSE,
+                                tumor.n = FALSE,
+                                tumor.m = FALSE,
+                                my.filename = paste0("Data/Reproducible-results/Data/low_mirna_read_coefs_",gs,"_genes.csv"))
+  
+  #Getting the top concordance index from the cross validation and then rounding
+  #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+  #the mirna_medium_cindices list with the result
+  top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+  mirna_low_cindices[which(gene_sizes==gs)] <- top_cindex
+  
+}
+
+#Binding the gene size and c-index vectors together to get the finished data
+#frame
+mirna_low_cindices_read_df <- as.data.frame(cbind(gene_sizes,
+                                                  mirna_low_cindices))
+
+colnames(mirna_low_cindices_read_df)[2] <- "c_index"
+mirna_low_cindices_read_df$mirna_type <- rep("low",
+                                             nrow(mirna_low_cindices_read_df))
+
+write.csv(mirna_low_cindices_read_df,
+          "Data/Reproducible-results/Data/mirna_low_cindices_read_across_gene_size.csv")
+
+
+#Binding all the rows of the 3 different miRNA data frames together into 1 big
+#data frame
+all_mirna_metrics_read_df <- bind_rows(mirna_low_cindices_read_df,
+                                       mirna_medium_cindices_read_df,
+                                       mirna_high_cindices_read_df)
+
+#Reordering the labels to make them look nicer on the plot
+all_mirna_metrics_read_df$mirna_type <- factor(all_mirna_metrics_read_df$mirna_type,
+                                               levels = c("low", "medium", "high"))
+
+#Basic miRNA-miRNA target plot
+all_mirna_metrics_read_plot <- ggplot(data = all_mirna_metrics_read_df,
+                                      aes(x=gene_sizes, y=c_index, color=mirna_type))
+
+#Making the plot much nicer
+all_mirna_metrics_read_plot_finished <-all_mirna_metrics_read_plot +
+  geom_line(size=2.5) + geom_point(size=3.0)+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 40, face = "bold"),
+        legend.title = element_text(size = 30, face = "bold"),
+        legend.position = "bottom", 
+        legend.text = element_text(size = 35, face = "plain"),
+        axis.text=element_text(size=25, face="bold"))+
+  xlab("Gene Size")+ ylab("Mean Concordance Index")+
+  ggtitle("miRNA-miRNA Target Number")+ 
+  labs(color="miRNA-miRNA Target Number")+
+  scale_color_viridis_d()
+
+
+#Saving the finished graph in .svg format
+ggsave(filename = "Data/Reproducible-results/Figures/mirna_mirna_target_num_across_gene_size.svg",
+       plot     = print(all_mirna_metrics_read_plot_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 34, height = 34,
+       units    = "cm")
+
+
+#Optimal gene size for MAD, SDE, and miRNA high metric----
+#First bind the data frames together
+methods_optimal_gene_read_df <- bind_rows(mad_cindices_read_df, 
+                                          sde_cindices_read_df,
+                                          mirna_high_cindices_read_df)
+
+methods_optimal_gene_read_df <- methods_optimal_gene_read_df[,1:3]
+
+methods_optimal_gene_read_df$method[119:177] <- rep("miRNA", 58)
+
+#Saving the data frame
+write.csv(methods_optimal_gene_read_df,
+          "Data/Reproducible-results/Data/individual_optimal_gene_point_read_data.csv")
+
+#Basic miRNA-miRNA target plot
+methods_optimal_gene_read_plot <- ggplot(data = methods_optimal_gene_read_df,
+                                         aes(x=gene_sizes, y=c_index, color=method))
+
+#Making the plot much nicer
+methods_optimal_gene_read_plot_finished <-methods_optimal_gene_read_plot +
+  geom_line(size=2.5) + geom_point(size=3.0)+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 40, face = "bold"),
+        legend.title = element_text(size = 30, face = "bold"),
+        legend.position = "bottom", 
+        legend.text = element_text(size = 35, face = "plain"),
+        axis.text=element_text(size=25, face="bold"))+
+  xlab("Gene Size")+ ylab("Mean Concordance Index")+
+  ggtitle("Optimal Gene Number")+ 
+  labs(color="Method")+
+  scale_color_viridis_d()
+
+
+#Saving the finished graph in .svg format
+ggsave(filename = "Data/Reproducible-results/Figures/individual_metrics_optimal_gene_size.svg",
+       plot     = print(methods_optimal_gene_read_plot_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 34, height = 34,
+       units    = "cm")
+
+
+
+
+
+
+
 
 
 
