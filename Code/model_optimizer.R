@@ -73,28 +73,26 @@ getIntersection <- function(gene.list1 = NULL,
 #Optimization for just 2 metrics----
 two_weight_optimizer <- function(my.start        =0,
                                  my.finish       =1,
-                                 step.size       =0.1, 
-                                 my.index        =1,
-                                 my.list.length  =11,
-                                 first.metric    =mad.ranking,
-                                 second.metric   =vim.sdes.ranking,
-                                 my.filename     ="Data/Exported-data/R-objects/two_metric_optimization.RData"){
+                                 step.size       =0.1,
+                                 first.metric    =mad.genes,
+                                 second.metric   =sde.genes,
+                                 my.filename     ="Data/Reproducible-results/Data/two_metric_optimization.rds"){
   
   #Setting up weights, loop-indexer, and the list that will store the results
   weights <- seq(from = my.start, to=my.finish, by=step.size)
-  df_index <- my.index
   integrated_gene_lists <- vector(mode = "list", length = 11)
   
   #Doing the grid search
-  for (x in weights) {
-    current_ranking <- two_metric_geneRank(ranking1 = first.metric, ranking2 = second.metric,  a1=x, a2=1-x)
+  for (w in weights) {
+    current_ranking <- two_metric_geneRank(ranking1 = first.metric,
+                                           ranking2 = second.metric,
+                                           a1=w, a2=1-w)
     current_ranking <- as.data.frame(current_ranking)
-    integrated_gene_lists[[df_index]] <- current_ranking
-    df_index <- df_index + 1
+    integrated_gene_lists[[w]] <- current_ranking
   }
   
-  #Saving the output of the grid search to a .RData
-  save(integrated_gene_lists, file = my.filename)
+  #Saving the output of the grid search to a .rds
+  saveRDS(integrated_gene_lists, file = my.filename)
   return(integrated_gene_lists)
 }
 
