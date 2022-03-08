@@ -569,7 +569,6 @@ for(gs in gene_sizes){
 #frame
 mad_cindices_read_df <- as.data.frame(cbind(gene_sizes, mad_cindices))
 mad_cindices_read_df$method <- rep("MAD", nrow(mad_cindices_read_df))
-mad_cindices_read_df <- mad_cindices_read_df[,2:4]
 colnames(mad_cindices_read_df)[2] <- "c_index"
 write.csv(mad_cindices_read_df,
           "Data/Reproducible-results/Data/mad_cindices_read_across_gene_size.csv")
@@ -577,7 +576,7 @@ write.csv(mad_cindices_read_df,
 
 
 
-#Getting ideal gene number for SDE metric on TCGA-read----
+#Getting ideal gene number for SDE metric on TCGA-READ----
 gene_sizes <- seq(100, 3000, 50)
 sde_cindices <- rep(0, length(gene_sizes))
 
@@ -603,7 +602,6 @@ for(gs in gene_sizes){
 #frame
 sde_cindices_read_df <- as.data.frame(cbind(gene_sizes, sde_cindices))
 sde_cindices_read_df$method <- rep("SDE", nrow(sde_cindices_read_df))
-sde_cindices_read_df <- sde_cindices_read_df[,2:4]
 colnames(sde_cindices_read_df)[2] <- "c_index"
 write.csv(sde_cindices_read_df,
           "Data/Reproducible-results/Data/sde_cindices_read_across_gene_size.csv")
@@ -624,6 +622,8 @@ mirna_low_cindices <- rep(0, length(gene_sizes))
 
 #Loading the high miRNA-miRNA target file
 load("Data/Reproducible-results/Data/800_1010_targets.RData", verbose = TRUE)
+load("Data/Reproducible-results/Data/1000_110_targets.RData", verbose = TRUE)
+load("Data/Reproducible-results/Data/1000_1010_targets.RData", verbose = TRUE)
 
 high.mirna.genes <- mirna.ranking
 
@@ -635,7 +635,7 @@ for(gs in gene_sizes){
                                 tumor.stage = FALSE,
                                 tumor.n = FALSE,
                                 tumor.m = FALSE,
-                                my.filename = paste0("Data/Reproducible-results/Data/high_mirna_read_coefs_",gs,"_genes.csv"))
+                                my.filename = paste0("Data/Reproducible-results/Data/high_mirna3_read_coefs_",gs,"_genes.csv"))
   
   #Getting the top concordance index from the cross validation and then rounding
   #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
@@ -655,7 +655,7 @@ mirna_high_cindices_read_df$mirna_type <- rep("high",
                                               nrow(mirna_high_cindices_read_df))
 
 write.csv(mirna_high_cindices_read_df,
-          "Data/Reproducible-results/Data/mirna_high_cindices_read_across_gene_size.csv")
+          "Data/Reproducible-results/Data/mirna_high_cindices_read_across_gene_size3.csv")
 
 
 #Medium miRNA-miRNA target number
@@ -737,6 +737,8 @@ all_mirna_metrics_read_df <- bind_rows(mirna_low_cindices_read_df,
                                        mirna_medium_cindices_read_df,
                                        mirna_high_cindices_read_df)
 
+all_mirna_metrics_read_df <- all_mirna_metrics_read_df[,1:3]
+
 #Reordering the labels to make them look nicer on the plot
 all_mirna_metrics_read_df$mirna_type <- factor(all_mirna_metrics_read_df$mirna_type,
                                                levels = c("low", "medium", "high"))
@@ -762,7 +764,7 @@ all_mirna_metrics_read_plot_finished <-all_mirna_metrics_read_plot +
 
 
 #Saving the finished graph in .svg format
-ggsave(filename = "Data/Reproducible-results/Figures/mirna_mirna_target_num_across_gene_size.svg",
+ggsave(filename = "Data/Reproducible-results/Figures/mirna_mirna_target_num_across_gene_size_read.svg",
        plot     = print(all_mirna_metrics_read_plot_finished, newpage = FALSE),
        device   = "svg", dpi=300,
        width    = 34, height = 34,
@@ -804,19 +806,129 @@ methods_optimal_gene_read_plot_finished <-methods_optimal_gene_read_plot +
 
 
 #Saving the finished graph in .svg format
-ggsave(filename = "Data/Reproducible-results/Figures/individual_metrics_optimal_gene_size.svg",
+ggsave(filename = "Data/Reproducible-results/Figures/individual_metrics_optimal_gene_size_read.svg",
        plot     = print(methods_optimal_gene_read_plot_finished, newpage = FALSE),
        device   = "svg", dpi=300,
        width    = 34, height = 34,
        units    = "cm")
 
 
+#Random sample of genes (10 random samples taken) for READ.
+#We will take the average of these 10 samplings. We will select the same number
+#of genes as the number of genes that give our miRNA metric the best performance
+#(350 genes)
+random_read1 <- sample(colnames(cox_df), size = 350)
+random_read2 <- sample(colnames(cox_df), size = 350)
+random_read3 <- sample(colnames(cox_df), size = 350)
+random_read4 <- sample(colnames(cox_df), size = 350)
+random_read5 <- sample(colnames(cox_df), size = 350)
+random_read6 <- sample(colnames(cox_df), size = 350)
+random_read7 <- sample(colnames(cox_df), size = 350)
+random_read8 <- sample(colnames(cox_df), size = 350)
+random_read9 <- sample(colnames(cox_df), size = 350)
+random_read10 <- sample(colnames(cox_df), size = 350)
+
+#Saving the random results for reproducibility
+write.csv(random_read1, "Data/Reproducible-results/Data/random_read_genes1.csv")
+write.csv(random_read2, "Data/Reproducible-results/Data/random_read_genes2.csv")
+write.csv(random_read3, "Data/Reproducible-results/Data/random_read_genes3.csv")
+write.csv(random_read4, "Data/Reproducible-results/Data/random_read_genes4.csv")
+write.csv(random_read5, "Data/Reproducible-results/Data/random_read_genes5.csv")
+write.csv(random_read6, "Data/Reproducible-results/Data/random_read_genes6.csv")
+write.csv(random_read7, "Data/Reproducible-results/Data/random_read_genes7.csv")
+write.csv(random_read8, "Data/Reproducible-results/Data/random_read_genes8.csv")
+write.csv(random_read9, "Data/Reproducible-results/Data/random_read_genes9.csv")
+write.csv(random_read10, "Data/Reproducible-results/Data/random_read_genes10.csv")
+
+#Putting all the gene vectors together in a list to loop over for cox model
+random_read_gene_list <- list(random_read1, random_read2, random_read3,
+                              random_read4, random_read5, random_read6,
+                              random_read7, random_read8, random_read9,
+                              random_read10)
 
 
+all_random_gene_cindices <- seq(1,10, 1)
+
+for(rg in all_random_gene_cindices){
+  current_genes <- random_read_gene_list[[rg]]
+  cox_model <- cox_model_fitter(my.seed = 1,
+                                cox.predictors = current_genes,
+                                cox.df = cox_df,
+                                gene.num = 350,
+                                tumor.stage = FALSE,
+                                tumor.n = FALSE,
+                                tumor.m = FALSE,
+                                my.filename = paste0("Data/Reproducible-results/Data/random_read_coefs_for_random_genes.csv"))
+  
+  #Getting the top concordance index from the cross validation and then rounding
+  #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+  #the all_random_gene_cindices list with the result
+  top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+  all_random_gene_cindices[rg] <- top_cindex
+  
+}
+
+write.csv(all_random_gene_cindices,
+          "Data/Reproducible-results/Data/read_random_genes.csv")
+
+mean_random <- mean(all_random_gene_cindices)
+
+#Now constructing a data frame of all the methods up to this point
+read_methods_comp_df <- data.frame(Method=c("MAD", "SDE", 
+                                            "miRNA", "Random Genes"),
+                                   c_index=c(0.6932, 0.7224, 
+                                             0.7425, mean_random))
+
+write.csv(read_methods_comp_df, "Data/Reproducible-results/read_method_comparison_df.csv")
 
 
+#Factoring the levels to make the plot nicer
+read_methods_comp_df$Method <- factor(read_methods_comp_df$Method,
+                                      levels = c("miRNA", "MAD", "SDE",
+                                                 "Random Genes"))
 
+#Plotting the comparison of methods for READ
+individual_graph_read <-ggplot(data = read_methods_comp_df,
+                               aes(x=Method, y=c_index, fill=Method))+
+  geom_bar(stat = "identity")+
+  labs(title = "TCGA-READ",
+       x = "Method",
+       y = "Concordance Index",
+       fill = "Concordance Index")+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 40,
+                                  family = "sans"),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "grey"),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 34, family = "sans", angle = 45, vjust = 0.58),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "none")
 
+individual_graph_read + coord_cartesian(ylim = c(0.5,0.75))+ 
+  scale_fill_manual(values = c("#FDE725FF","#404788FF", "#404788FF", "#404788FF")) 
+
+individual_graph_read <- individual_graph_read + coord_cartesian(ylim = c(0.5,0.75))+ 
+  scale_fill_manual(values = c("#FDE725FF","#404788FF", "#404788FF", "#404788FF")) 
+
+#Saving the result
+ggsave(filename = "Data/Reproducible-results/Figures/methods_comparison_read.svg",
+       plot     = print(individual_graph_read, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 34, height = 34,
+       units    = "cm")
+
+#MAD + SDE metric for READ
+#We first do alpha weight optimization and then fit the elastic-net penalized
+#cox model to every combination of alpha and assess its performance through 
+#10-fold cross-validation
+
+#Weight optimization
+mad_sde_read_optimized <- two_weight_optimizer(first.metric = mad.genes,
+                                               second.metric = sde.genes,
+                                               my.filename = "Data/Reproducible-results/Data/mad_sde_read_optimized.RData")
 
 
 
