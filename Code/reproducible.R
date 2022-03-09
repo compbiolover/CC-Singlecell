@@ -873,18 +873,66 @@ write.csv(all_random_gene_cindices,
 
 mean_random <- mean(all_random_gene_cindices)
 
-#Now constructing a data frame of all the methods up to this point
+
+write.csv(read_methods_comp_df, "Data/Reproducible-results/Data/read_method_comparison_df.csv")
+
+
+
+#MAD + SDE metric for READ
+#We first do alpha weight optimization and then fit the elastic-net penalized
+#cox model to every combination of alpha and assess its performance through 
+#10-fold cross-validation
+
+#Weight optimization
+mad_sde_read_optimized <- two_weight_optimizer(first.metric = mad.genes,
+                                               second.metric = sde.genes,
+                                               my.filename = "Data/Reproducible-results/Data/mad_sde_read_optimized.rds")
+
+
+
+
+
+#Elastic-net penalized cox model----
+c_index <- rep(0, 59)
+gene_sizes <- seq(100, 3000, 50)
+
+for(gs in gene_sizes){
+  for(ms in mad_sde_read_optimized[1:11]){
+    cox_model <- cox_model_fitter(my.seed = 1,
+                                  cox.predictors = ms,
+                                  cox.df = cox_df,
+                                  gene.num = gs,
+                                  tumor.stage = FALSE,
+                                  tumor.n = FALSE,
+                                  tumor.m = FALSE,
+                                  my.filename = paste0("Data/Reproducible-results/Data/mad_sde_read_coefs_",gs,"_genes_",ms,"_index.csv"))
+    
+    #Getting the top concordance index from the cross validation and then rounding
+    #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+    #the c_index list with the result
+    top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+    c_index[which(gene_sizes==gs)] <- top_cindex
+    
+  }
+  
+  
+}
+
+mad_sde_finished_df <- as.data.frame(cbind(gene_sizes, c_index))
+
+write.csv(mad_sde_finished_df, "Data/Reproducible-results/Data/mad_sde_read_df.csv")
+  
+#Now constructing a data frame of all the methods
 read_methods_comp_df <- data.frame(Method=c("MAD", "SDE", 
-                                            "miRNA", "Random Genes"),
+                                            "miRNA", "MAD + SDE" ,
+                                            "Random Genes"),
                                    c_index=c(0.6932, 0.7224, 
-                                             0.7425, mean_random))
-
-write.csv(read_methods_comp_df, "Data/Reproducible-results/read_method_comparison_df.csv")
-
+                                             0.7425,0.6932, mean_random))
 
 #Factoring the levels to make the plot nicer
 read_methods_comp_df$Method <- factor(read_methods_comp_df$Method,
                                       levels = c("miRNA", "MAD", "SDE",
+                                                 "MAD + SDE",
                                                  "Random Genes"))
 
 #Plotting the comparison of methods for READ
@@ -898,20 +946,22 @@ individual_graph_read <-ggplot(data = read_methods_comp_df,
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 40,
                                   family = "sans"),
         panel.background = element_blank(),
-        axis.line = element_line(colour = "grey"),
+        axis.line = element_line(colour = "grey", size = 2.5, lineend = "round"),
         axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
         axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
-        axis.text.x = element_text(size = 34, family = "sans", angle = 45, vjust = 0.58),
+        axis.text.x = element_text(size = 34, family = "sans", angle = 45, vjust = 0.50),
         axis.text.y = element_text(size = 40, family = "sans"),
         legend.text = element_text(size = 25, family = "sans"),
         legend.title = element_text(size = 40, family = "sans"),
         legend.position = "none")
 
 individual_graph_read + coord_cartesian(ylim = c(0.5,0.75))+ 
-  scale_fill_manual(values = c("#FDE725FF","#404788FF", "#404788FF", "#404788FF")) 
+  scale_fill_manual(values = c("#FDE725FF","#404788FF", "#404788FF",
+                               "#404788FF", "#404788FF")) 
 
 individual_graph_read <- individual_graph_read + coord_cartesian(ylim = c(0.5,0.75))+ 
-  scale_fill_manual(values = c("#FDE725FF","#404788FF", "#404788FF", "#404788FF")) 
+  scale_fill_manual(values = c("#FDE725FF","#404788FF", "#404788FF",
+                               "#404788FF", "#404788FF")) 
 
 #Saving the result
 ggsave(filename = "Data/Reproducible-results/Figures/methods_comparison_read.svg",
@@ -920,132 +970,178 @@ ggsave(filename = "Data/Reproducible-results/Figures/methods_comparison_read.svg
        width    = 34, height = 34,
        units    = "cm")
 
-#MAD + SDE metric for READ
+
+
+
+#MAD + SDE metric for COAD
 #We first do alpha weight optimization and then fit the elastic-net penalized
 #cox model to every combination of alpha and assess its performance through 
 #10-fold cross-validation
 
 #Weight optimization
-mad_sde_read_optimized <- two_weight_optimizer(first.metric = mad.genes,
+mad_sde_coad_optimized <- two_weight_optimizer(first.metric = mad.genes,
                                                second.metric = sde.genes,
-                                               my.filename = "Data/Reproducible-results/Data/mad_sde_read_optimized.RData")
-
-
-
-#MiRNA metric----
-#Due to it taking a while I am just including the file that we get from this
-#metric. I can run it overnight so that we can show that the files are the same
-
-# mirna.genes <- mirna_calculator(cancer.type1 = "colorectal cancer",
-#                                 cancer.type2 = "colon cancer",
-#                                 max.miR.targets = 810,
-#                                 cancer.up = TRUE,
-#                                 mirna.remove = c("hsa-miR-129-2-3p",
-#                                                  "hsa-miR-129-1-3p",
-#                                                  "hsa-miR-454-3p",
-#                                                  "hsa-miR-365a-5p"),
-#                                 max.mirnas = 500,
-#                                 ts.org = "Human",
-#                                 ts.version = "7.2",
-#                                 print.ts.targets = TRUE,
-#                                 save.mirna.genes = TRUE,
-#                                 mirna.gene.filename = "Data/Reproducible-results/mirna_genes_global_search_mirna_500_810_targets.csv",
-#                                 mirna.gene.rfile = "Data/Reproducible-results/mirna_genes_global_search_mirna_500_810_targets.RData")
-
-mirna.ranking <- readRDS("Data/Reproducible-results/Data/500_mirna_810_targets_colon_and_rectal_cancer_mirna_genes.rds")
-
-#Optimizing the weights of the three metric linear model----
-#Due to this step taking a while I am including its output and will run this
-#overnight and show that the outputs are the same
-# mad_sdes_mirna_optimized <- three_weight_optimizer(first.metric  = mad.genes,
-#                                                    second.metric = mirna.ranking,
-#                                                    third.metric  = sde.genes,
-#                                                    my.filename   = "~/Desktop/Optimized-model.RData")
-
-
-load("Data/Reproducible-results/Data/Optimization_500_810_targets_for_colon_cancer.RData",
-     verbose = TRUE)
-
-
-mad_sdes_mirna_optimized <- integrated_gene_lists
+                                               my.filename = "Data/Reproducible-results/Data/mad_sde_coad_optimized.rds")
 
 
 
 #Elastic-net penalized cox model----
-cox_df <- readRDS("Data/TCGA-COAD/coad_df_finished_v2.rds")
-cox_models <- vector(mode = "list", length = 12)
-my_cindicies <- vector(mode = "numeric", length = 1)
-my_active_coefs <- vector(mode = "character", length = 1)
-counter <- 1
+c_index <- rep(0, 59)
+gene_sizes <- seq(100, 3000, 50)
 
-#Just showing the top performing result from the grid search for colon cancer
-#here
-for (x in mad_sdes_mirna_optimized[1:121]) {
-  current_weight <- x
-  current_cox <- cox_model_fitter(my.seed = 1,
+for(gs in gene_sizes){
+  for(ms in mad_sde_coad_optimized[1:11]){
+    cox_model <- cox_model_fitter(my.seed = 1,
+                                  cox.predictors = ms,
                                   cox.df = cox_df,
-                                  gene.num = 1800,
-                                  cox.predictors = current_weight,
+                                  gene.num = gs,
                                   tumor.stage = FALSE,
                                   tumor.n = FALSE,
                                   tumor.m = FALSE,
-                                  regular.cox = TRUE,
-                                  save.regular.cox.genes = TRUE,
-                                  my.filename = "~/Desktop/coad_active_genes.csv") 
+                                  my.filename = paste0("Data/Reproducible-results/Data/mad_sde_coad_coefs_",gs,"_genes_",ms,"_index.csv"))
+    
+    #Getting the top concordance index from the cross validation and then rounding
+    #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+    #the c_index list with the result
+    top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+    c_index[which(gene_sizes==gs)] <- top_cindex
+    
+  }
   
-  cox_models[[as.character(counter)]] <- current_cox
-  counter <- counter + 1
   
-  #Storing all of the c-index values in a vector that we can use later to build
-  #the plot
-  c_finder <-current_cox$CV$index[1]
-  current_c <- current_cox$CV$cvm[c_finder]
-  current_c <- round(current_c, digits = 4)
-  my_cindicies <- c(my_cindicies, current_c)
-  current_coefs <- length(current_cox$`Active Coefficients`)
-  my_active_coefs <- c(my_active_coefs, current_coefs)
 }
 
+mad_sde_finished_df <- as.data.frame(cbind(gene_sizes, c_index))
 
+write.csv(mad_sde_finished_df, "Data/Reproducible-results/Data/mad_sde_coad_df.csv")
 
-#Just showing the top performing result from the grid search for rectal cancer
-#here
-load("Data/Reproducible-results/Data/Optimization_800_510_targets_for_rectal_cancer.RData",
-     verbose = TRUE)
+#Random sample of genes (10 random samples taken) for COAD.
+#We will take the average of these 10 samplings. We will select the same number
+#of genes as the number of genes that give our miRNA metric the best performance
+#(1,900 genes)
+random_coad1 <- sample(colnames(cox_df), size = 1900)
+random_coad2 <- sample(colnames(cox_df), size = 1900)
+random_coad3 <- sample(colnames(cox_df), size = 1900)
+random_coad4 <- sample(colnames(cox_df), size = 1900)
+random_coad5 <- sample(colnames(cox_df), size = 1900)
+random_coad6 <- sample(colnames(cox_df), size = 1900)
+random_coad7 <- sample(colnames(cox_df), size = 1900)
+random_coad8 <- sample(colnames(cox_df), size = 1900)
+random_coad9 <- sample(colnames(cox_df), size = 1900)
+random_coad10 <- sample(colnames(cox_df), size = 1900)
 
-mad_sdes_mirna_optimized <- integrated_gene_lists
+#Saving the random results for reproducibility
+write.csv(random_coad1, "Data/Reproducible-results/Data/random_coad_genes1.csv")
+write.csv(random_coad2, "Data/Reproducible-results/Data/random_coad_genes2.csv")
+write.csv(random_coad3, "Data/Reproducible-results/Data/random_coad_genes3.csv")
+write.csv(random_coad4, "Data/Reproducible-results/Data/random_coad_genes4.csv")
+write.csv(random_coad5, "Data/Reproducible-results/Data/random_coad_genes5.csv")
+write.csv(random_coad6, "Data/Reproducible-results/Data/random_coad_genes6.csv")
+write.csv(random_coad7, "Data/Reproducible-results/Data/random_coad_genes7.csv")
+write.csv(random_coad8, "Data/Reproducible-results/Data/random_coad_genes8.csv")
+write.csv(random_coad9, "Data/Reproducible-results/Data/random_coad_genes9.csv")
+write.csv(random_coad10, "Data/Reproducible-results/Data/random_coad_genes10.csv")
 
-cox_df <- readRDS("Data/TCGA-READ/read_df_finished_v2.rds")
+#Putting all the gene vectors together in a list to loop over for cox model
+random_coad_gene_list <- list(random_coad1, random_coad2, random_coad3,
+                              random_coad4, random_coad5, random_coad6,
+                              random_coad7, random_coad8, random_coad9,
+                              random_coad10)
 
-cox_models <- vector(mode = "list", length = 12)
-my_cindicies <- vector(mode = "numeric", length = 1)
-my_active_coefs <- vector(mode = "character", length = 1)
-counter <- 1
+all_random_gene_cindices <- seq(1,10, 1)
 
-for (x in mad_sdes_mirna_optimized[15]) {
-  current_weight <- x
-  current_cox <- cox_model_fitter(my.seed = 1,
-                                  cox.df = cox_df,
-                                  gene.num = 1100,
-                                  cox.predictors = current_weight,
-                                  tumor.stage = FALSE,
-                                  tumor.n = FALSE,
-                                  tumor.m = FALSE,
-                                  regular.cox = TRUE,
-                                  save.regular.cox.genes = TRUE,
-                                  my.filename = "~/Desktop/read_active_genes.csv") 
+for(rg in all_random_gene_cindices){
+  current_genes <- random_coad_gene_list[[rg]]
+  cox_model <- cox_model_fitter(my.seed = 1,
+                                cox.predictors = current_genes,
+                                cox.df = cox_df,
+                                gene.num = 1900,
+                                tumor.stage = FALSE,
+                                tumor.n = FALSE,
+                                tumor.m = FALSE,
+                                my.filename = paste0("Data/Reproducible-results/Data/random_coad_coefs_for_random_genes.csv"))
   
-  cox_models[[as.character(counter)]] <- current_cox
-  counter <- counter + 1
+  #Getting the top concordance index from the cross validation and then rounding
+  #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+  #the all_random_gene_cindices list with the result
+  top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+  all_random_gene_cindices[rg] <- top_cindex
   
-  #Storing all of the c-index values in a vector that we can use later to build the plot
-  c_finder <-current_cox$CV$index[1]
-  current_c <- current_cox$CV$cvm[c_finder]
-  current_c <- round(current_c, digits = 4)
-  my_cindicies <- c(my_cindicies, current_c)
-  current_coefs <- length(current_cox$`Active Coefficients`)
-  my_active_coefs <- c(my_active_coefs, current_coefs)
 }
+
+write.csv(all_random_gene_cindices,
+          "Data/Reproducible-results/Data/coad_random_genes.csv")
+
+mean_random <- mean(all_random_gene_cindices)
+
+
+#Now constructing a data frame of all the methods
+coad_methods_comp_df <- data.frame(Method=c("MAD", "SDE", 
+                                            "miRNA", "MAD + SDE" ,
+                                            "Random Genes"),
+                                   c_index=c(0.6395, 0.6721, 
+                                             0.7076,0.6395, mean_random))
+
+#Factoring the levels to make the plot nicer
+coad_methods_comp_df$Method <- factor(coad_methods_comp_df$Method,
+                                      levels = c("miRNA", "MAD", "SDE",
+                                                 "MAD + SDE",
+                                                 "Random Genes"))
+
+
+
+
+write.csv(coad_methods_comp_df, "Data/Reproducible-results/Data/coad_method_comparison_df.csv")
+
+
+#Plotting the comparison of methods for COAD
+individual_graph_coad <-ggplot(data = coad_methods_comp_df,
+                               aes(x=Method, y=c_index, fill=Method))+
+  geom_bar(stat = "identity")+
+  labs(title = "TCGA-COAD",
+       x = "Method",
+       y = "Concordance Index",
+       fill = "Concordance Index")+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 40,
+                                  family = "sans"),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "grey", size = 2.5, lineend = "round"),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 34, family = "sans", angle = 45, vjust = 0.50),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "none")
+
+individual_graph_coad + coord_cartesian(ylim = c(0.5,0.72))+ 
+  scale_fill_manual(values = c("#FDE725FF","#404788FF", "#404788FF",
+                               "#404788FF", "#404788FF")) 
+
+individual_graph_coad <- individual_graph_coad + coord_cartesian(ylim = c(0.5,0.72))+
+  scale_fill_manual(values = c("#FDE725FF","#404788FF", "#404788FF",
+                               "#404788FF", "#404788FF"))
+
+#Saving the result
+ggsave(filename = "Data/Reproducible-results/Figures/methods_comparison_coad.svg",
+       plot     = print(individual_graph_coad, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 34, height = 34,
+       units    = "cm")
+
+
+
+
+#CC Singlecell MS grid search COAD
+#See server_speedup_coad.R for the code
+
+
+#CC Singlecell MS grid search READ
+#See server_speedup_read.R for the code
+
+
+
+
 
 #KM risk calculation for COAD----
 patient_risk <- risk_score_calculator(my.file = "~/Desktop/coad_active_genes.csv",
