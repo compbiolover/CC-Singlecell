@@ -43,7 +43,6 @@ cox_model_fitter <- function(my.seed       =1,
   #the packages will be installed
   #from CRAN and then loaded.
   require(BiocGenerics)
-  require(caret)
   require(doParallel)
   require(glmnet)
   require(lmtest)
@@ -126,8 +125,8 @@ cox_model_fitter <- function(my.seed       =1,
  
   
   #Saving the coefficients of the model
-  active_coefs_df <- cbind(active_genes, Active.Coefficients)
-  write.csv(active_coefs_df, file = my.filename)
+  # active_coefs_df <- cbind(active_genes, Active.Coefficients)
+  # write.csv(active_coefs_df, file = my.filename)
   
   #Assessing the performance of the 10-fold cross-validation
   #on the entire data set----
@@ -155,7 +154,7 @@ cox_model_fitter <- function(my.seed       =1,
   cox_data[["Active Index"]] <- Active.Index
   cox_data[["Active Genes"]] <- active_genes
   cox_data[["Predictors"]] <- my_predictors
-  cox_data[["Finished Coefficients"]] <- active_coefs_df
+  #cox_data[["Finished Coefficients"]] <- active_coefs_df
   
   
   #Returning our finished output----
