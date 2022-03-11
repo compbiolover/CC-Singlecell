@@ -1139,6 +1139,189 @@ ggsave(filename = "Data/Reproducible-results/Figures/methods_comparison_coad.svg
 #CC Singlecell MS grid search READ
 #See server_speedup_read.R for the code
 
+#Function to take the grid search output files and make a nice data frame to 
+#plot
+data_extractor <- function(mirna_num=100){
+  all_dfs <- vector(mode = "list", length = 8)
+  counter <- 1
+  files <- list.files("Data/Reproducible-results/Data/", pattern = "top_cindices_mirna_used_combo_*")
+  for(f in files ){
+    current_file <- read.csv(file = paste0("Data/Reproducible-results/Data/", f))
+    colnames(current_file) <- c("mirna", "c_index")
+    current_file$mirna <- rep(mirna_num[counter], nrow(current_file))
+    current_file$mirna_targets <-seq(10, 1010, by=100)
+    current_file <- select(mirna, mirna_targets, c_index, .data = current_file)
+    all_dfs[[counter]] <- current_file
+    counter <- counter + 1
+    
+  }
+  return(all_dfs)
+}
+
+#Data extractor for READ
+data_extractor_read <- function(mirna_num=100){
+  all_dfs <- vector(mode = "list", length = 8)
+  counter <- 1
+  files <- list.files("Data/Reproducible-results/Data/TCGA-READ-CC-Singlecell-MS/", pattern = "top_cindices_mirna_used_combo_*")
+  for(f in files ){
+    current_file <- read.csv(file = paste0("Data/Reproducible-results/Data/TCGA-READ-CC-Singlecell-MS/", f))
+    colnames(current_file) <- c("mirna", "c_index")
+    current_file$mirna <- rep(mirna_num[counter], nrow(current_file))
+    current_file$mirna_targets <-seq(10, 1010, by=100)
+    current_file <- select(mirna, mirna_targets, c_index, .data = current_file)
+    all_dfs[[counter]] <- current_file
+    counter <- counter + 1
+    
+  }
+  return(all_dfs)
+}
+
+
+all_dfs_coad <- data_extractor(mirna_num = c(100, 200,300,400,500,600,700,800))
+
+cc_singlecell_ms_grid_search_coad_df_finished <- bind_rows(all_dfs)
+
+all_dfs_read <- data_extractor_read(mirna_num = c(100, 200,300,400,500,600,700,800,900,1000))
+
+cc_singlecell_ms_grid_search_read_df_finished <- bind_rows(all_dfs_read)
+
+
+#Plotting the heat map for the grid search data----
+#Making the heat map for CC Singlecell MS COAD
+heatmap_coad_ccs_ms <- ggplot(data = cc_singlecell_ms_grid_search_coad_df_finished, aes(x=mirna, y=mirna_targets, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of MiRNAs",
+       y = "# of MiRNA Targets",
+       title = "CC Singlecell MS COAD",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.5,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_search_heatmap.svg",
+       plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 30, height = 30,
+       units    = "cm")
+
+
+
+#Making the heat map for CC Singlecell MS READ
+heatmap_read_ccs_ms <- ggplot(data = cc_singlecell_ms_grid_search_read_df_finished, aes(x=mirna, y=mirna_targets, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of MiRNAs",
+       y = "# of MiRNA Targets",
+       title = "CC Singlecell MS READ",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.spacing.x = unit(1.0, "cm"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.5,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_read_ccs_ms_finished <- heatmap_read_ccs_ms + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_read_grid_search_heatmap.svg",
+       plot     = print(heatmap_read_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
+
+
+
+#Making the heat map for CC Singlecell MM COAD
+data_extractor <- function(mirna_num=100){
+  all_dfs <- vector(mode = "list", length = 8)
+  counter <- 1
+  files <- list.files("Data/Reproducible-results/Data/", pattern = "top_cindices_mirna_mad_used_combo_*")
+  for(f in files ){
+    current_file <- read.csv(file = paste0("Data/Reproducible-results/Data/", f))
+    colnames(current_file) <- c("mirna", "c_index")
+    current_file$mirna <- rep(mirna_num[counter], nrow(current_file))
+    current_file$mirna_targets <-seq(10, 1010, by=100)
+    current_file <- select(mirna, mirna_targets, c_index, .data = current_file)
+    all_dfs[[counter]] <- current_file
+    counter <- counter + 1
+    
+  }
+  return(all_dfs)
+}
+
+
+all_dfs_coad <- data_extractor(mirna_num = c(100, 200,300,400,500,600,700,800))
+
+cc_singlecell_mm_grid_search_coad_df_finished <- bind_rows(all_dfs)
+
+#write.csv(cc_singlecell_mm_grid_search_coad_df_finished, "Data/Reproducible-results/Data/cc_singlecell_mm_grid_search_coad_df.csv")
+
+heatmap_coad_ccs_mm <- ggplot(data = cc_singlecell_mm_grid_search_coad_df_finished, aes(x=mirna, y=mirna_targets, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of MiRNAs",
+       y = "# of MiRNA Targets",
+       title = "CC Singlecell MM COAD",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.5,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_mm_finished <- heatmap_coad_ccs_mm + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_coad_grid_search_heatmap.svg",
+       plot     = print(heatmap_coad_ccs_mm_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 30, height = 30,
+       units    = "cm")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
