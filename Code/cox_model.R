@@ -4,7 +4,8 @@
 #cox model to predict survival time
 
 
-cox_model_fitter <- function(my.seed       =1,
+cox_model_fitter <- function(my.seed       = 1,
+                             my.alpha      = 1,
                              cox.df        =NULL,
                              gene.num      =1800,
                              cox.predictors=NULL,
@@ -110,7 +111,8 @@ cox_model_fitter <- function(my.seed       =1,
   
   #The 10-fold cross-validation fit----
   cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C",
-                      maxit=100000, family="cox", parallel = TRUE, keep = TRUE)
+                      maxit=100000, family="cox", parallel = TRUE,
+                      alpha = my.alpha, foldid = my.foldid)
   
   
   #Looking to see which genes are the most important
