@@ -6,6 +6,7 @@
 
 cox_model_fitter <- function(my.seed       = 1,
                              my.alpha      = 1,
+                             my.dataset    = "COAD",
                              cox.df        =NULL,
                              gene.num      =1800,
                              cox.predictors=NULL,
@@ -108,11 +109,20 @@ cox_model_fitter <- function(my.seed       = 1,
   
   #The response object for the cox model----
   my_y <- Surv(time = cox.df$days.to.last.follow.up, event = cox.df$vital.status)
+  #my_foldid<-sample(1:10,size=length(my_y),replace=TRUE)
+  
+  if(my.dataset=="COAD"){
+    my_foldid <- read.csv("coad_fold_id_data.csv")
+  }else if (my.dataset=="READ"){
+    my_foldid <- read.csv("read_fold_id_data.csv")
+  }else if(my.dataset=="GBM"){
+    my_foldid <- read.csv("gbm_fold_id_data.csv")
+  }
   
   #The 10-fold cross-validation fit----
   cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C",
                       maxit=100000, family="cox", parallel = TRUE,
-                      alpha = my.alpha, foldid = my.foldid)
+                      alpha = my.alpha, foldid = my_foldid)
   
   
   #Looking to see which genes are the most important
