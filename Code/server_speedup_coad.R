@@ -235,7 +235,12 @@ source("model_optimizer.R")
 # write.csv(top_cindices, file = paste0("top_cindices_mirna_mad_used_combo_",c,"_index_",top_index_used,"_df.csv"))
 # 
 #For CC Singlecell MMS
-combo_used <- c("800_10", "800_110", "800_210", "800_310", "800_410", "800_510", "800_610", "800_710", "800_810", "800_910", "800_1010")
+combo_used <- c("400_10", "400_110", "400_210", "400_310", "400_410", "400_510", "400_610", "400_710", "400_810", "400_910", "400_1010",
+                "300_10", "300_110", "300_210", "300_310", "300_410", "300_510", "300_610", "300_710", "300_810", "300_910", "300_1010",
+                "200_10", "200_110", "200_210", "200_310", "200_410", "200_510", "200_610", "200_710", "200_810", "200_910", "200_1010",
+                "100_10", "100_110", "100_210", "100_310", "100_410", "100_510", "100_610", "100_710", "100_810", "100_910", "100_1010")
+
+
 mirna_used <- gsub(combo_used[1], pattern = "_10", replacement = "")
 data_set <- "coad"
 top_cindices <- c()
@@ -248,7 +253,7 @@ for(c in combo_used){
   mirna_mad_sde_optimized <- three_weight_optimizer(first.metric = mirna.genes,
                                               second.metric = mad.genes,
                                               third.metric  = sde.genes,
-                                              my.filename = paste0("Optimization_",c,"_targets_cc_singlecell_mms_",data_set,".rds"))
+                                              my.filename = paste0("Optimizations/Optimization_",c,"_targets_cc_singlecell_mms_",data_set,".rds"))
   
   
   
@@ -264,6 +269,8 @@ for(c in combo_used){
                                   tumor.stage = FALSE,
                                   tumor.n = FALSE,
                                   tumor.m = FALSE,
+                                  my.alpha = 1,
+                                  my.dataset = "COAD",
                                   my.filename = paste0("cc_singlecell_mms_",data_set,"_coefs_",gs,"_genes_",mm,"_index.csv"))
     
     #Getting the top concordance index from the cross validation and then rounding
