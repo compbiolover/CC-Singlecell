@@ -372,6 +372,8 @@ all_mirna_metrics_coad_df <- bind_rows(mirna_low_cindices_coad_df,
                                             mirna_medium_cindices_coad_df,
                                             mirna_high_cindices_coad_df)
 
+all_mirna_metrics_coad_df <- all_mirna_metrics_coad_df[,2:4]
+
 #Reordering the labels to make them look nicer on the plot
 all_mirna_metrics_coad_df$mirna_type <- factor(all_mirna_metrics_coad_df$mirna_type,
                                                levels = c("low", "medium", "high"))
@@ -435,11 +437,11 @@ methods_optimal_gene_coad_plot_finished <-methods_optimal_gene_coad_plot +
   xlab("Gene Size")+ ylab("Mean Concordance Index")+
   ggtitle("Optimal Gene Number")+ 
   labs(color="Method")+
-  scale_color_viridis_d()
+  scale_color_manual(values = c("#21908CFF","#FDE725FF", "#440154FF"))
 
 
 #Saving the finished graph in .svg format
-ggsave(filename = "Data/Reproducible-results/Figures/individual_metrics_optimal_gene_size.svg",
+ggsave(filename = "Data/Reproducible-results/Figures/individual_metrics_optimal_gene_size_coad.svg",
        plot     = print(methods_optimal_gene_coad_plot_finished, newpage = FALSE),
        device   = "svg", dpi=300,
        width    = 34, height = 34,
@@ -737,7 +739,7 @@ all_mirna_metrics_read_df <- bind_rows(mirna_low_cindices_read_df,
                                        mirna_medium_cindices_read_df,
                                        mirna_high_cindices_read_df)
 
-all_mirna_metrics_read_df <- all_mirna_metrics_read_df[,1:3]
+all_mirna_metrics_read_df <- all_mirna_metrics_read_df[,2:4]
 
 #Reordering the labels to make them look nicer on the plot
 all_mirna_metrics_read_df$mirna_type <- factor(all_mirna_metrics_read_df$mirna_type,
@@ -785,6 +787,8 @@ methods_optimal_gene_read_df$method[119:177] <- rep("miRNA", 58)
 write.csv(methods_optimal_gene_read_df,
           "Data/Reproducible-results/Data/individual_optimal_gene_point_read_data.csv")
 
+methods_optimal_gene_read_df <- methods_optimal_gene_read_df[,2:4]
+
 #Basic miRNA-miRNA target plot
 methods_optimal_gene_read_plot <- ggplot(data = methods_optimal_gene_read_df,
                                          aes(x=gene_sizes, y=c_index, color=method))
@@ -802,7 +806,7 @@ methods_optimal_gene_read_plot_finished <-methods_optimal_gene_read_plot +
   xlab("Gene Size")+ ylab("Mean Concordance Index")+
   ggtitle("Optimal Gene Number")+ 
   labs(color="Method")+
-  scale_color_viridis_d()
+  scale_color_manual(values = c("#21908CFF","#FDE725FF", "#440154FF"))
 
 
 #Saving the finished graph in .svg format
@@ -1144,7 +1148,7 @@ ggsave(filename = "Data/Reproducible-results/Figures/methods_comparison_coad.svg
 data_extractor <- function(mirna_num=100){
   all_dfs <- vector(mode = "list", length = 8)
   counter <- 1
-  files <- list.files("Data/Reproducible-results/Data/", pattern = "top_cindices_mirna_used_combo_*")
+  files <- list.files("Data/Reproducible-results/Data/", pattern = "top_cindices_mirna_mad_read_used_combo_*")
   for(f in files ){
     current_file <- read.csv(file = paste0("Data/Reproducible-results/Data/", f))
     colnames(current_file) <- c("mirna", "c_index")
@@ -1185,6 +1189,9 @@ all_dfs_read <- data_extractor_read(mirna_num = c(100, 200,300,400,500,600,700,8
 
 cc_singlecell_ms_grid_search_read_df_finished <- bind_rows(all_dfs_read)
 
+all_dfs_read <- data_extractor(mirna_num = c(100, 200,300,400,500,600,700,800,900,1000))
+
+cc_singlecell_mm_grid_search_read_df_finished <- bind_rows(all_dfs_read)
 
 #Plotting the heat map for the grid search data----
 #Making the heat map for CC Singlecell MS COAD
@@ -1277,15 +1284,15 @@ all_dfs_coad <- data_extractor(mirna_num = c(100, 200,300,400,500,600,700,800))
 
 cc_singlecell_mm_grid_search_coad_df_finished <- bind_rows(all_dfs)
 
-#write.csv(cc_singlecell_mm_grid_search_coad_df_finished, "Data/Reproducible-results/Data/cc_singlecell_mm_grid_search_coad_df.csv")
+#write.csv(cc_singlecell_mm_grid_search_coad_df_finished, "Data/Reproducible-results/Data/cc_singlecell_mm_grid_search_coad_df_alpha_1.csv")
 
 heatmap_coad_ccs_mm <- ggplot(data = cc_singlecell_mm_grid_search_coad_df_finished, aes(x=mirna, y=mirna_targets, fill=c_index))+
-  geom_tile()+
+  geom_tile(size=1.5)+
   scale_fill_gradient(low = "white", high = "red")+
-  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  geom_text(aes(label = round(c_index, 4)), color = "white", size=4)+ 
   coord_fixed()+
-  labs(x ="# of MiRNAs",
-       y = "# of MiRNA Targets",
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
        title = "CC Singlecell MM COAD",
        fill = "Concordance Index")+
   theme(panel.background = element_blank(),
@@ -1303,10 +1310,10 @@ heatmap_coad_ccs_mm <- ggplot(data = cc_singlecell_mm_grid_search_coad_df_finish
 heatmap_coad_ccs_mm_finished <- heatmap_coad_ccs_mm + scale_fill_viridis_c()
 
 #Now saving the heat map
-ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_coad_grid_search_heatmap.svg",
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_coad_grid_search_heatmap3.svg",
        plot     = print(heatmap_coad_ccs_mm_finished, newpage = FALSE),
-       device   = "svg", dpi=300,
-       width    = 30, height = 30,
+       device   = "svg", dpi=410,
+       width    = 34, height = 34,
        units    = "cm")
 
 
@@ -1316,6 +1323,39 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_coad_grid_
 
 
 
+
+#Making the heat map for CC Singlecell MM READ
+write.csv(cc_singlecell_mm_grid_search_read_df_finished, "Data/Reproducible-results/Data/cc_singlecell_mm_grid_search_read_df_alpha_1.csv")
+
+heatmap_read_ccs_mm <- ggplot(data = cc_singlecell_mm_grid_search_read_df_finished, aes(x=mirna, y=mirna_targets, fill=c_index))+
+  geom_tile(size=1.5)+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white", size=4)+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MM READ Alpha = 1",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.5,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_read_ccs_mm_finished <- heatmap_read_ccs_mm + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_read_grid_search_heatmap_alpha1.svg",
+       plot     = print(heatmap_read_ccs_mm_finished, newpage = FALSE),
+       device   = "svg", dpi=410,
+       width    = 34, height = 34,
+       units    = "cm")
 
 
 
