@@ -109,14 +109,14 @@ cox_model_fitter <- function(my.seed       = 1,
   
   #The response object for the cox model----
   my_y <- Surv(time = cox.df$days.to.last.follow.up, event = cox.df$vital.status)
-  #my_foldid<-sample(1:10,size=length(my_y),replace=TRUE)
+  my_foldid<-sample(1:10,size=length(my_y),replace=TRUE)
   
   if(my.dataset=="COAD"){
-    my_foldid <- read.csv("coad_fold_id_data.csv")
+    my_foldid <- readRDS(file = "coad_df_fold_id.rds")
   }else if (my.dataset=="READ"){
-    my_foldid <- read.csv("read_fold_id_data.csv")
+    my_foldid <- readRDS(file = "read_df_fold_id.rds")
   }else if(my.dataset=="GBM"){
-    my_foldid <- read.csv("gbm_fold_id_data.csv")
+    my_foldid <- readRDS(file = "gbm_df_fold_id.rds")
   }
   
   #The 10-fold cross-validation fit----
