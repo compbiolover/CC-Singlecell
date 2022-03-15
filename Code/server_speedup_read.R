@@ -1,5 +1,5 @@
 #Name: server_speedup_read.R
-#Purpose: To exploit the power of the lab servers for READ dataset
+#Purpose: To use the power of the lab servers for READ dataset
 
 #mad_sde_read_optimized <- readRDS(file = "mad_sde_read_optimized.rds")
 cox_df <- readRDS(file = "read_df_finished.rds")
@@ -51,7 +51,7 @@ alpha_value <- c(0.0,0.5,1.0)
      
      for(ms in mirna_sde_optimized[1:11]){
        cox_model <- cox_model_fitter(my.seed = 1,
-                                     my.alpha = alpha_value,
+                                     my.alpha = a,
                                      my.dataset = "READ",
                                      cox.predictors = ms,
                                      cox.df = cox_df,

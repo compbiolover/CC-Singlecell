@@ -1,5 +1,5 @@
 #Name: server_speedup_coad.R
-#Purpose: To exploit the power of the lab servers for COAD data set
+#Purpose: To use the power of the lab servers for COAD data set
 
 #mad_sde_coad_optimized <- readRDS(file = "mad_sde_coad_optimized.rds")
 cox_df <- readRDS(file = "coad_df_finished.rds")
@@ -50,7 +50,7 @@ for(a in alpha_value){
     
     for(ms in mirna_sde_optimized[1:11]){
       cox_model <- cox_model_fitter(my.seed = 1,
-                                    my.alpha = alpha_value,
+                                    my.alpha = a,
                                     my.dataset = "COAD",
                                     cox.predictors = ms,
                                     cox.df = cox_df,
