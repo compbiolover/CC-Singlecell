@@ -31,9 +31,10 @@ alpha_value <- c(0.0,0.5,1.0)
 
  mirna_used <- gsub(combo_used[1], pattern = "_10", replacement = "")
  data_set <- "read"
- top_cindices <- c()
+ # top_cindices <- c()
 
  for(a in alpha_value){
+   top_cindices <- c()
    for(c in combo_used){
      my_cindices <- rep(0, 11)
      counter <- 1
