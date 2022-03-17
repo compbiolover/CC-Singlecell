@@ -896,7 +896,7 @@ mad_sde_read_optimized <- two_weight_optimizer(first.metric = mad.genes,
 
 
 
-#Elastic-net penalized cox model----
+#Penalized cox model----
 c_index <- rep(0, 59)
 gene_sizes <- seq(100, 3000, 50)
 
@@ -989,7 +989,7 @@ mad_sde_coad_optimized <- two_weight_optimizer(first.metric = mad.genes,
 
 
 
-#Elastic-net penalized cox model----
+#Penalized cox model----
 c_index <- rep(0, 59)
 gene_sizes <- seq(100, 3000, 50)
 
@@ -1395,6 +1395,11 @@ coad_mm_05$mirna_num <- rep(seq(100,800,100), 11)
 coad_mm_05$mirna_target <- rep(seq(10, 1010, by=100), 8)
 
 
+coad_mm_1 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_1_cc_singlecell_mm_coad_used_combo_100_1010_index_10_df.csv")
+colnames(coad_mm_1) <- c("number", "c_index")
+coad_mm_1$mirna_num <- rep(seq(100,800,100), 11)
+coad_mm_1$mirna_target <- rep(seq(10, 1010, by=100), 8)
+
 
 
 
@@ -1464,6 +1469,43 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_coad_grid_
 
 
 
+
+#Alpha 1
+heatmap_coad_ccs_mm_1 <- ggplot(data = coad_mm_1, aes(x=mirna_num, y=mirna_target, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MM COAD Alpha = 1",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans", margin=margin(0,20,0,0)),
+        legend.position = "bottom",
+        legend.key.width = unit(2.5,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_mm_finished <- heatmap_coad_ccs_mm_1 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_coad_grid_search_heatmap_alpha_1.svg",
+       plot     = print(heatmap_coad_ccs_mm_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 34, height = 34,
+       units    = "cm")
+
+
+
+
+
+
 #CC Singlecell MM READ
 read_mm_0 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0_cc_singlecell_mm_read_used_combo_100_1010_index_1_df.csv")
 colnames(read_mm_0) <- c("number", "c_index")
@@ -1476,7 +1518,10 @@ read_mm_05$mirna_num <- rep(seq(100,1000,100), 11)
 read_mm_05$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 
-
+read_mm_1 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_1_cc_singlecell_mm_read_used_combo_100_1010_index_10_df.csv")
+colnames(read_mm_1) <- c("number", "c_index")
+read_mm_1$mirna_num <- rep(seq(100,1000,100), 11)
+read_mm_1$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 
 
@@ -1543,6 +1588,36 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_read_grid_
        width    = 32, height = 32,
        units    = "cm")
 
+#Alpha 1
+heatmap_read_ccs_mm_1 <- ggplot(data = read_mm_1, aes(x=mirna_num, y=mirna_target, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MM READ Alpha = 1",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.0,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_read_ccs_mm_finished <- heatmap_read_ccs_mm_1 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_read_grid_search_heatmap_alpha_1.svg",
+       plot     = print(heatmap_read_ccs_mm_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
 
 
 
