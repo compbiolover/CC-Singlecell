@@ -81,6 +81,7 @@ two_weight_optimizer <- function(my.start        =0,
   #Setting up weights, loop-indexer, and the list that will store the results
   weights <- seq(from = my.start, to=my.finish, by=step.size)
   integrated_gene_lists <- vector(mode = "list", length = 11)
+  list_num <- seq(from = 1, to=length(weights), by=1)
   
   #Doing the grid search
   for (w in weights) {
@@ -88,13 +89,44 @@ two_weight_optimizer <- function(my.start        =0,
                                            ranking2 = second.metric,
                                            a1=w, a2=1-w)
     current_ranking <- as.data.frame(current_ranking)
-    integrated_gene_lists[[w]] <- current_ranking
+    integrated_gene_lists[[list_num[which(weights==w)]]] <- current_ranking
   }
   
   #Saving the output of the grid search to a .rds
   saveRDS(integrated_gene_lists, file = my.filename)
   return(integrated_gene_lists)
 }
+
+
+#Old 2 weight optimizer----
+two_weight_optimizer_old <- function(my.start        =0,
+                                 my.finish       =1,
+                                 step.size       =0.1,
+                                 first.metric    =mad.genes,
+                                 second.metric   =sde.genes,
+                                 my.filename     ="Data/Reproducible-results/Data/two_metric_optimization.RData"){
+  
+  #Setting up weights, loop-indexer, and the list that will store the results
+  weights <- seq(from = my.start, to=my.finish, by=step.size)
+  integrated_gene_lists <- vector(mode = "list", length = 11)
+  counter <- 1
+  
+  #Doing the grid search
+  for (w in weights) {
+    current_ranking <- two_metric_geneRank(ranking1 = first.metric,
+                                           ranking2 = second.metric,
+                                           a1=w, a2=1-w)
+    current_ranking <- as.data.frame(current_ranking)
+    integrated_gene_lists[[counter]] <- current_ranking
+    counter <- counter + 1
+  }
+  
+  #Saving the output of the grid search to a .rds
+  save(integrated_gene_lists, file = my.filename)
+  return(integrated_gene_lists)
+}
+
+
 
 #Optimization for all 3 metrics (MAD, SDE and miRNA)----
 three_weight_optimizer <- function(my.start        =0,
