@@ -61,7 +61,7 @@ cc_tumor_fpkm <- sqrt(cc_tumor_fpkm)
 cc_tumor_fpkm <- magic_denoiser(sc.data = cc_tumor_fpkm,
                                 magic.seed = 123, magic.solver = 'approximate')
 saveRDS(cc_tumor_fpkm,
-        file = "Data/Reproducible-results/denoised-colon-and-rectal-single-cell-data_v3.rds")
+        file = "Data/Reproducible-results/denoised-colon-and-rectal-single-cell-data.rds")
 
 
 #Generating the VIM based pseudotime progression with Monocle3----
