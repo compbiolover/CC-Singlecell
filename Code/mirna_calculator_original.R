@@ -13,7 +13,7 @@ mirna_calculator <- function(ts.org                      ="Human",
                              mirna.remove                ="hsa-miR-129-1-3p",
                              max.mirnas                  =1559,
                              save.mirna.genes            =TRUE,
-                             mirna.gene.rfile            ="~/Desktop/my_mirnas.rds"){
+                             mirna.ranking.name          ="~/Desktop/my_mirnas.rds"){
   
   #Loading required package----
   require(hoardeR)
@@ -81,8 +81,8 @@ mirna_calculator <- function(ts.org                      ="Human",
   miRNA_targets <- vector(mode = "list", length = length(common_mirnas))
   for (m in common_mirnas[1:length(common_mirnas)]) {
     percent_done <- (my_num/length(common_mirnas))*100
-    #print(percent_done)
-    #print(m)
+    print(percent_done)
+    print(m)
     current_target <- targetScan(mirna=common_mirnas[my_num],
                                  species=ts.org,
                                  release=ts.version,
@@ -152,7 +152,7 @@ mirna_calculator <- function(ts.org                      ="Human",
   mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
   mirna.ranking <- sort(mirna.ranking, decreasing = TRUE)
   if(save.mirna.genes==TRUE){
-    saveRDS(mirna.ranking, file = mirna.gene.rfile)
+    saveRDS(mirna.ranking, file = mirna.ranking.name)
   }
   #Return object----
   return(mirna.ranking)
