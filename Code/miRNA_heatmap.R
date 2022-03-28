@@ -27,7 +27,7 @@ for(mt in mirna_targets[1:11]){
                                                    ),
                                   max.mirnas = mirna_num,
                                   save.mirna.genes = TRUE,
-                                  mirna.ranking.name = paste0("~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/Data/TCGA-READ/Mirna/Global_Search/Inputs/RData/",mirna_num,"_",mt,"_targets_mirna_ranking.rds"))
+                                  mirna.ranking.name = paste0("~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/Data/TCGA-COAD/Mirna/Global_Search/Inputs/RData/",mirna_num,"_",mt,"_targets_mirna_ranking.rds"))
 
 }
 
