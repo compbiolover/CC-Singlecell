@@ -11,14 +11,9 @@ mirna_calculator <- function(ts.org                      ="Human",
                              cancer.type2                ="rectal cancer",
                              print.ts.targets            =TRUE,
                              mirna.remove                ="hsa-miR-129-1-3p",
-                             save.mirna.raw.targets      =TRUE,
-                             mirna.raw.targets.filename  ="~/Desktop/TargetScan_output.RData",
                              max.mirnas                  =1559,
                              save.mirna.genes            =TRUE,
-                             mirna.gene.filename         ="~/Desktop/my_mirnas.csv",
-                             mirna.gene.rfile            ="~/Desktop/my_mirnas.RData",
-                             write.heatmap.data          =TRUE,
-                             heatmap.data.name           ="~/Desktop/my_heatmap_data.csv"){
+                             mirna.gene.rfile            ="~/Desktop/my_mirnas.rds"){
   
   #Loading required package----
   require(hoardeR)
@@ -101,10 +96,6 @@ mirna_calculator <- function(ts.org                      ="Human",
   }
   
   
-  if(save.mirna.raw.targets==TRUE){
-    save(miRNA_targets, file = mirna.raw.targets.filename)
-    
-  }
   
   #Simplifying the output of the TargetScan commands to 
   #just the Gene name and the miRNA columns
@@ -154,9 +145,6 @@ mirna_calculator <- function(ts.org                      ="Human",
     }
   }
   
-  if(write.heatmap.data==TRUE){
-    write.csv(miRNA_score, file = heatmap.data.name)
-  }
   
   #Now calculating the row sums of each gene for total number of
   #the miRNA interactions----
@@ -164,8 +152,7 @@ mirna_calculator <- function(ts.org                      ="Human",
   mirna.ranking<-abs(mirna_gene_list)/sum(abs(mirna_gene_list))
   mirna.ranking <- sort(mirna.ranking, decreasing = TRUE)
   if(save.mirna.genes==TRUE){
-    write.csv(mirna.ranking, file = mirna.gene.filename)
-    save(mirna.ranking, file = mirna.gene.rfile)
+    saveRDS(mirna.ranking, file = mirna.gene.rfile)
   }
   #Return object----
   return(mirna.ranking)
