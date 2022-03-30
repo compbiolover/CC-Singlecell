@@ -137,8 +137,8 @@ cox_model_fitter <- function(my.seed       = 1,
  
   
   #Saving the coefficients of the model
-  # active_coefs_df <- cbind(active_genes, Active.Coefficients)
-  # write.csv(active_coefs_df, file = my.filename)
+  active_coefs_df <- cbind(active_genes, Active.Coefficients)
+  write.csv(active_coefs_df, file = my.filename)
   
   #Assessing the performance of the 10-fold cross-validation
   #on the entire data set----
