@@ -1147,19 +1147,19 @@ ggsave(filename = "Data/Reproducible-results/Figures/methods_comparison_coad.svg
 #Reading in the results files of the CC Singlecell MS COAD grid search
 coad_ms_0 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0_cc_singlecell_ms_coad_used_combo_100_1010_index_5_df.csv")
 colnames(coad_ms_0) <- c("number", "c_index")
-coad_ms_0$mirna_num <- rep(seq(100,800,100), each = 11)
+coad_ms_0$mirna_num <- rep(seq(800,100,-100), each = 11)
 coad_ms_0$mirna_target <- rep(seq(10, 1010, by=100), times = 8)
 
 coad_ms_05 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.5_cc_singlecell_ms_coad_used_combo_100_1010_index_5_df.csv")
 colnames(coad_ms_05) <- c("number", "c_index")
 coad_ms_05 <- coad_ms_05[89:176,]
-coad_ms_05$mirna_num <- rep(seq(800,100,100), each = 11)
+coad_ms_05$mirna_num <- rep(seq(800,100,-100), each = 11)
 coad_ms_05$mirna_target <- rep(seq(10, 1010, by=100), times = 8)
 
 coad_ms_1 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_1_cc_singlecell_ms_coad_used_combo_100_1010_index_5_df.csv")
 colnames(coad_ms_1) <- c("number", "c_index")
 coad_ms_1 <- coad_ms_1[177:264,]
-coad_ms_1$mirna_num <- rep(seq(800,100,100),each = 11)
+coad_ms_1$mirna_num <- rep(seq(800,100,-100),each = 11)
 coad_ms_1$mirna_target <- rep(seq(10, 1010, by=100), times = 8)
 
 
@@ -1260,22 +1260,22 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_
 
 
 #Reading in the results files of the CC Singlecell MS READ grid search
-read_ms_0 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0_cc_singlecell_ms_read_used_combo_100_1010_index_8_df copy.csv")
+read_ms_0 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0_cc_singlecell_ms_read_used_combo_100_1010_index_8_df.csv")
 colnames(read_ms_0) <- c("number", "c_index")
-read_ms_0$mirna_num <- rep(seq(1000,100,100), 11)
+read_ms_0$mirna_num <- rep(seq(1000,100,-100), 11)
 read_ms_0$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 
 read_ms_05 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0.5_cc_singlecell_ms_read_used_combo_100_1010_index_8_df.csv")
 colnames(read_ms_05) <- c("number", "c_index")
 read_ms_05 <- read_ms_05[111:220,]
-read_ms_05$mirna_num <- rep(seq(1000,100,100), 11)
+read_ms_05$mirna_num <- rep(seq(1000,100,-100), 11)
 read_ms_05$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 read_ms_1 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_1_cc_singlecell_ms_read_used_combo_100_1010_index_11_df.csv")
 colnames(read_ms_1) <- c("number", "c_index")
 read_ms_1 <- read_ms_1[221:330,]
-read_ms_1$mirna_num <- rep(seq(1000,100,100), 11)
+read_ms_1$mirna_num <- rep(seq(1000,100,-100), 11)
 read_ms_1$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 
@@ -1379,18 +1379,18 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_read_grid_
 #CC Singlecell MM COAD
 coad_mm_0 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0_cc_singlecell_mm_coad_used_combo_100_1010_index_5_df.csv")
 colnames(coad_mm_0) <- c("number", "c_index")
-coad_mm_0$mirna_num <- rep(seq(800,100,100), 11)
+coad_mm_0$mirna_num <- rep(seq(800,100,-100), 11)
 coad_mm_0$mirna_target <- rep(seq(10, 1010, by=100), 8)
 
 coad_mm_05 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.5_cc_singlecell_mm_coad_used_combo_100_1010_index_10_df.csv")
 colnames(coad_mm_05) <- c("number", "c_index")
-coad_mm_05$mirna_num <- rep(seq(800,100,100), 11)
+coad_mm_05$mirna_num <- rep(seq(800,100,-100), 11)
 coad_mm_05$mirna_target <- rep(seq(10, 1010, by=100), 8)
 
 
 coad_mm_1 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_1_cc_singlecell_mm_coad_used_combo_100_1010_index_10_df.csv")
 colnames(coad_mm_1) <- c("number", "c_index")
-coad_mm_1$mirna_num <- rep(seq(800,100,100), 11)
+coad_mm_1$mirna_num <- rep(seq(800,100,-100), 11)
 coad_mm_1$mirna_target <- rep(seq(10, 1010, by=100), 8)
 
 
@@ -1500,18 +1500,18 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_coad_grid_
 #CC Singlecell MM READ
 read_mm_0 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0_cc_singlecell_mm_read_used_combo_100_1010_index_1_df.csv")
 colnames(read_mm_0) <- c("number", "c_index")
-read_mm_0$mirna_num <- rep(seq(1000,100,100), 11)
+read_mm_0$mirna_num <- rep(seq(1000,100,-100), 11)
 read_mm_0$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 read_mm_05 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0.5_cc_singlecell_mm_read_used_combo_100_1010_index_7_df.csv")
 colnames(read_mm_05) <- c("number", "c_index")
-read_mm_05$mirna_num <- rep(seq(1000,100,100), 11)
+read_mm_05$mirna_num <- rep(seq(1000,100,-100), 11)
 read_mm_05$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 
 read_mm_1 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_1_cc_singlecell_mm_read_used_combo_100_1010_index_10_df.csv")
 colnames(read_mm_1) <- c("number", "c_index")
-read_mm_1$mirna_num <- rep(seq(1000,100,100), 11)
+read_mm_1$mirna_num <- rep(seq(1000,100,-100), 11)
 read_mm_1$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 
@@ -1614,18 +1614,18 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_read_grid_
 #CC Singlecell MMS COAD
 coad_mms_0 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0_cc_singlecell_mms_coad_used_combo_100_1010_index_86_df.csv")
 colnames(coad_mms_0) <- c("number", "c_index")
-coad_mms_0$mirna_num <- rep(seq(800,100,100), each=11)
+coad_mms_0$mirna_num <- rep(seq(800,100,-100), each=11)
 coad_mms_0$mirna_target <- rep(seq(10, 1010, by=100),times =8)
 
 coad_mms_05 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.5_cc_singlecell_mms_coad_used_combo_100_1010_index_17_df.csv")
 colnames(coad_mms_05) <- c("number", "c_index")
-coad_mms_05$mirna_num <- rep(seq(800,100,100), each = 11)
+coad_mms_05$mirna_num <- rep(seq(800,100,-100), each = 11)
 coad_mms_05$mirna_target <- rep(seq(10, 1010, by=100), times = 8)
 
 
 coad_mms_1 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_1_cc_singlecell_mms_coad_used_combo_100_1010_index_17_df.csv")
 colnames(coad_mms_1) <- c("number", "c_index")
-coad_mms_1$mirna_num <- rep(seq(800,100,100), each = 11)
+coad_mms_1$mirna_num <- rep(seq(800,100,-100), each = 11)
 coad_mms_1$mirna_target <- rep(seq(10, 1010, by=100), times = 8)
 
 
@@ -1731,7 +1731,7 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mms_coad_grid
 #CC Singlecell MMS READ
 read_mms_0 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0_cc_singlecell_mms_read_used_combo_900_1010_index_56_df.csv")
 colnames(read_mms_0) <- c("number", "c_index")
-read_mms_0$mirna_num <- rep(seq(1000,100,100), each=11)
+read_mms_0$mirna_num <- rep(seq(1000,100,-100), each=11)
 read_mms_0$mirna_target <- rep(seq(10, 1010, by=100), times=10)
 
 read_mms_05 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0.5_cc_singlecell_mms_read_used_combo_100_1010_index_7_df.csv")
@@ -2135,16 +2135,16 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_
 
 
 #KM risk calculation for COAD----
-#Now loading the top performing result (alpha 1, 200 miRNA and 1010 miRNA targets)
-mirna_sde_optimized <- readRDS("~/Desktop/Optimization_200_1010_targets_cc_singlecell_ms_1_alpha_coad.rds")
+#Now loading the top performing result (alpha 1, 700 miRNA and 1010 miRNA targets)
+mirna_sde_optimized <- readRDS("~/Desktop/Optimization_700_1010_targets_cc_singlecell_ms_1_alpha_coad.rds")
 data_set <- "coad"
-a <- 1
+a <- 0.5
 counter <- 1
 my_cindices <-c()
 
 for(ms in mirna_sde_optimized[1:11]){
   cox_model <- cox_model_fitter(my.seed = 1,
-                                my.alpha = 1,
+                                my.alpha = 0.5,
                                 my.dataset = "COAD",
                                 cox.predictors = ms,
                                 cox.df = cox_df,
@@ -2167,47 +2167,44 @@ top_cindex <-max(my_cindices)
 top_index <- which(my_cindices==top_cindex)
 print(top_index)
 print(top_cindex)
-top_index_used <- top_index[1]
-#print(my_cindices[top_index_used])
-#print(top_index_used)
-top_cindices <- c(top_cindices, top_cindex)
-index <- index+1
-}
-
-mirna_num <- rep(seq(100,800,100), each=11)
-mirna_targets <- seq(10,1010,100)
-top_cindices_df <- data.frame(mirna_num, mirna_targets, top_cindices)
-write.csv(top_cindices_df, file = paste0("top_cindices_alpha_",a,"_cc_singlecell_ms_coad_df.csv"))
 
 
-patient_risk <- risk_score_calculator(my.file = "~/Desktop/coad_active_genes.csv",
-                                      my.title = "TCGA-COAD",
-                                      tumor.data = FALSE,
-                                      n.data = FALSE, 
-                                      cox.df = cox_df,
-                                      show.pval = TRUE,
-                                      show.pval.method = FALSE)
-patient_risk
+
+patient_risk <- risk_score_calculator(my.file = "~/Desktop/cc_singlecell_ms_coad_alpha_0.5_coefs__index.csv",
+                                      tumor.data = FALSE, n.data = FALSE,
+                                      cox.df = cox_df, plot.title = "TCGA-COAD")
+patient_risk$`KM Plot`
+
+#Saving the KM plot to .svg format
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_km_plot.svg",
+       plot     = print(patient_risk$`KM Plot`$plot, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 34, height = 34,
+       units    = "cm")
 
 
 #KM risk calculation for READ----
-patient_risk <- risk_score_calculator(my.file = "~/Desktop/read_active_genes.csv",
-                                      tumor.data = FALSE,
-                                      n.data = FALSE, 
-                                      cox.df = cox_df, 
-                                      plot.title = "TCGA-READ Test")
-patient_risk
+patient_risk <- risk_score_calculator(my.file = "~/Desktop/cc_singlecell_ms_read_alpha_1_coefs__index.csv",
+                                      tumor.data = FALSE, n.data = FALSE,
+                                      cox.df = cox_df, plot.title = "TCGA-READ")
+patient_risk$`KM Plot`
 
+#Saving the KM plot to .svg format
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_read_km_plot.svg",
+       plot     = print(patient_risk$`KM Plot`$plot, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 34, height = 34,
+       units    = "cm")
 
 
 #For plotting the COAD coefficients----
-coad_coef_df <- read.csv("~/Desktop/coad_active_genes.csv")
+coad_coef_df <- read.csv("~/Desktop/cc_singlecell_ms_coad_alpha_1_coefs__index.csv")
 coad_coef_df <- coad_coef_df[,2:3]
 colnames(coad_coef_df) <- c("Gene", "coefs")
-coad_coef_df_sub <- filter(coad_coef_df, abs(coefs)>0.5)
+coad_coef_df$hazard_ratio <- exp(coad_coef_df$coefs)
+coad_coef_df$effect_size <- ifelse(coad_coef_df$hazard_ratio>1,abs(1- coad_coef_df$hazard_ratio)*100, (1 - coad_coef_df$hazard_ratio)*100)
 
-
-coad_coef_plot <- ggplot(data = coad_coef_df_sub, aes(x=Gene, y=coefs,
+coad_coef_plot <- ggplot(data = coad_coef_df, aes(x=Gene, y=effect_size,
                                                       color=Gene, fill=Gene))+
   geom_col()+
   theme_bw()+
@@ -2215,7 +2212,8 @@ coad_coef_plot <- ggplot(data = coad_coef_df_sub, aes(x=Gene, y=coefs,
   ylab("Coefficients")+
   xlab("Gene")+
   theme(legend.position = "none",
-        plot.title = element_text(hjust = 0.5, face = "bold", size = 40, family = "sans"),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40,
+                                  family = "sans"),
         axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
         axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
         axis.text.x = element_text(size = 30, family = "sans"),
@@ -2229,6 +2227,15 @@ coad_coef_plot <- ggplot(data = coad_coef_df_sub, aes(x=Gene, y=coefs,
 
 
 coad_coef_plot
+
+#Saving the KM plot to .svg format
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_coef_plot.svg",
+       plot     = print(coad_coef_plot, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 40, height = 40,
+       units    = "cm")
+
+
 
 #For plotting the READ coefficients-----
 read_coef_df <- read.csv("~/Desktop/read_active_genes.csv")
