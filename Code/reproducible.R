@@ -451,7 +451,7 @@ ggsave(filename = "Data/Reproducible-results/Figures/individual_metrics_optimal_
 
 
 #Now doing all of these steps for the rectal cancer data set from TCGA-READ
-#Now getting our Colon cancer bulk data set----
+#Now getting our rectal cancer bulk data set----
 #TCGA-READ
 # read_query <- GDCquery(project       = "TCGA-READ",
 #                        data.category = "Transcriptome Profiling",
@@ -1145,25 +1145,22 @@ ggsave(filename = "Data/Reproducible-results/Figures/methods_comparison_coad.svg
 
 
 #Reading in the results files of the CC Singlecell MS COAD grid search
-coad_ms_0 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0_cc_singlecell_ms_coad_used_combo_100_1010_index_5_df copy.csv")
+coad_ms_0 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0_cc_singlecell_ms_coad_used_combo_100_1010_index_5_df.csv")
 colnames(coad_ms_0) <- c("number", "c_index")
-coad_ms_0$mirna_num <- rep(seq(100,800,100), 11)
-coad_ms_0$mirna_target <- rep(seq(10, 1010, by=100), 8)
+coad_ms_0$mirna_num <- rep(seq(100,800,100), each = 11)
+coad_ms_0$mirna_target <- rep(seq(10, 1010, by=100), times = 8)
 
-coad_ms_05 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.5_cc_singlecell_ms_coad_used_combo_100_1010_index_5_df copy.csv")
+coad_ms_05 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.5_cc_singlecell_ms_coad_used_combo_100_1010_index_5_df.csv")
 colnames(coad_ms_05) <- c("number", "c_index")
 coad_ms_05 <- coad_ms_05[89:176,]
-coad_ms_05$mirna_num <- rep(seq(100,800,100), 11)
-coad_ms_05$mirna_target <- rep(seq(10, 1010, by=100), 8)
+coad_ms_05$mirna_num <- rep(seq(800,100,100), each = 11)
+coad_ms_05$mirna_target <- rep(seq(10, 1010, by=100), times = 8)
 
-coad_ms_1 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_1_cc_singlecell_ms_coad_used_combo_100_1010_index_5_df copy.csv")
+coad_ms_1 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_1_cc_singlecell_ms_coad_used_combo_100_1010_index_5_df.csv")
 colnames(coad_ms_1) <- c("number", "c_index")
 coad_ms_1 <- coad_ms_1[177:264,]
-coad_ms_1$mirna_num <- rep(seq(100,800,100), 11)
-coad_ms_1$mirna_target <- rep(seq(10, 1010, by=100), 8)
-
-
-
+coad_ms_1$mirna_num <- rep(seq(800,100,100),each = 11)
+coad_ms_1$mirna_target <- rep(seq(10, 1010, by=100), times = 8)
 
 
 #Plotting the results of the CC Singlecell MS COAD grid search
@@ -1254,7 +1251,7 @@ heatmap_coad_ccs_ms_1 <- ggplot(data = coad_ms_1, aes(x=mirna_num, y=mirna_targe
 heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_1 + scale_fill_viridis_c()
 
 #Now saving the heat map
-ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_search_heatmap_alpha_1.svg",
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_search_heatmap_alpha_1_test.svg",
        plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
        device   = "svg", dpi=300,
        width    = 32, height = 32,
@@ -1265,20 +1262,20 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_
 #Reading in the results files of the CC Singlecell MS READ grid search
 read_ms_0 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0_cc_singlecell_ms_read_used_combo_100_1010_index_8_df copy.csv")
 colnames(read_ms_0) <- c("number", "c_index")
-read_ms_0$mirna_num <- rep(seq(100,1000,100), 11)
+read_ms_0$mirna_num <- rep(seq(1000,100,100), 11)
 read_ms_0$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 
 read_ms_05 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0.5_cc_singlecell_ms_read_used_combo_100_1010_index_8_df.csv")
 colnames(read_ms_05) <- c("number", "c_index")
 read_ms_05 <- read_ms_05[111:220,]
-read_ms_05$mirna_num <- rep(seq(100,1000,100), 11)
+read_ms_05$mirna_num <- rep(seq(1000,100,100), 11)
 read_ms_05$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 read_ms_1 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_1_cc_singlecell_ms_read_used_combo_100_1010_index_11_df.csv")
 colnames(read_ms_1) <- c("number", "c_index")
 read_ms_1 <- read_ms_1[221:330,]
-read_ms_1$mirna_num <- rep(seq(100,1000,100), 11)
+read_ms_1$mirna_num <- rep(seq(1000,100,100), 11)
 read_ms_1$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 
@@ -1382,18 +1379,18 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_read_grid_
 #CC Singlecell MM COAD
 coad_mm_0 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0_cc_singlecell_mm_coad_used_combo_100_1010_index_5_df.csv")
 colnames(coad_mm_0) <- c("number", "c_index")
-coad_mm_0$mirna_num <- rep(seq(100,800,100), 11)
+coad_mm_0$mirna_num <- rep(seq(800,100,100), 11)
 coad_mm_0$mirna_target <- rep(seq(10, 1010, by=100), 8)
 
 coad_mm_05 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.5_cc_singlecell_mm_coad_used_combo_100_1010_index_10_df.csv")
 colnames(coad_mm_05) <- c("number", "c_index")
-coad_mm_05$mirna_num <- rep(seq(100,800,100), 11)
+coad_mm_05$mirna_num <- rep(seq(800,100,100), 11)
 coad_mm_05$mirna_target <- rep(seq(10, 1010, by=100), 8)
 
 
 coad_mm_1 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_1_cc_singlecell_mm_coad_used_combo_100_1010_index_10_df.csv")
 colnames(coad_mm_1) <- c("number", "c_index")
-coad_mm_1$mirna_num <- rep(seq(100,800,100), 11)
+coad_mm_1$mirna_num <- rep(seq(800,100,100), 11)
 coad_mm_1$mirna_target <- rep(seq(10, 1010, by=100), 8)
 
 
@@ -1503,18 +1500,18 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_coad_grid_
 #CC Singlecell MM READ
 read_mm_0 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0_cc_singlecell_mm_read_used_combo_100_1010_index_1_df.csv")
 colnames(read_mm_0) <- c("number", "c_index")
-read_mm_0$mirna_num <- rep(seq(100,1000,100), 11)
+read_mm_0$mirna_num <- rep(seq(1000,100,100), 11)
 read_mm_0$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 read_mm_05 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0.5_cc_singlecell_mm_read_used_combo_100_1010_index_7_df.csv")
 colnames(read_mm_05) <- c("number", "c_index")
-read_mm_05$mirna_num <- rep(seq(100,1000,100), 11)
+read_mm_05$mirna_num <- rep(seq(1000,100,100), 11)
 read_mm_05$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 
 read_mm_1 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_1_cc_singlecell_mm_read_used_combo_100_1010_index_10_df.csv")
 colnames(read_mm_1) <- c("number", "c_index")
-read_mm_1$mirna_num <- rep(seq(100,1000,100), 11)
+read_mm_1$mirna_num <- rep(seq(1000,100,100), 11)
 read_mm_1$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 
@@ -1617,19 +1614,19 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mm_read_grid_
 #CC Singlecell MMS COAD
 coad_mms_0 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0_cc_singlecell_mms_coad_used_combo_100_1010_index_86_df.csv")
 colnames(coad_mms_0) <- c("number", "c_index")
-coad_mms_0$mirna_num <- rep(seq(100,800,100), 11)
-coad_mms_0$mirna_target <- rep(seq(10, 1010, by=100), 8)
+coad_mms_0$mirna_num <- rep(seq(800,100,100), each=11)
+coad_mms_0$mirna_target <- rep(seq(10, 1010, by=100),times =8)
 
-coad_mms_05 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.5_cc_singlecell_mms_coad_used_combo_100_1010_index_10_df.csv")
+coad_mms_05 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.5_cc_singlecell_mms_coad_used_combo_100_1010_index_17_df.csv")
 colnames(coad_mms_05) <- c("number", "c_index")
-coad_mms_05$mirna_num <- rep(seq(100,800,100), 11)
-coad_mms_05$mirna_target <- rep(seq(10, 1010, by=100), 8)
+coad_mms_05$mirna_num <- rep(seq(800,100,100), each = 11)
+coad_mms_05$mirna_target <- rep(seq(10, 1010, by=100), times = 8)
 
 
-coad_mms_1 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_1_cc_singlecell_mms_coad_used_combo_100_1010_index_10_df.csv")
+coad_mms_1 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_1_cc_singlecell_mms_coad_used_combo_100_1010_index_17_df.csv")
 colnames(coad_mms_1) <- c("number", "c_index")
-coad_mms_1$mirna_num <- rep(seq(100,800,100), 11)
-coad_mms_1$mirna_target <- rep(seq(10, 1010, by=100), 8)
+coad_mms_1$mirna_num <- rep(seq(800,100,100), each = 11)
+coad_mms_1$mirna_target <- rep(seq(10, 1010, by=100), times = 8)
 
 
 
@@ -1734,18 +1731,18 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mms_coad_grid
 #CC Singlecell MMS READ
 read_mms_0 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0_cc_singlecell_mms_read_used_combo_900_1010_index_56_df.csv")
 colnames(read_mms_0) <- c("number", "c_index")
-read_mms_0$mirna_num <- rep(seq(100,1000,100), 11)
-read_mms_0$mirna_target <- rep(seq(10, 1010, by=100), 10)
+read_mms_0$mirna_num <- rep(seq(1000,100,100), each=11)
+read_mms_0$mirna_target <- rep(seq(10, 1010, by=100), times=10)
 
 read_mms_05 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_0.5_cc_singlecell_mms_read_used_combo_100_1010_index_7_df.csv")
 colnames(read_mms_05) <- c("number", "c_index")
-read_mms_05$mirna_num <- rep(seq(100,1000,100), 11)
+read_mms_05$mirna_num <- rep(seq(1000,100,100), 11)
 read_mms_05$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 
 read_mms_1 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_1_cc_singlecell_mms_read_used_combo_100_1010_index_10_df.csv")
 colnames(read_mms_1) <- c("number", "c_index")
-read_mms_1$mirna_num <- rep(seq(100,1000,100), 11)
+read_mms_1$mirna_num <- rep(seq(1000,100,100), 11)
 read_mms_1$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
 
@@ -1847,14 +1844,342 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_mms_read_grid
 
 
 
+#Additional alpha values for glmnet on COAD for CC Singlecell MS
+alpha_01_df <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.1_cc_singlecell_ms_coad_df.csv")
+alpha_02_df <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.2_cc_singlecell_ms_coad_df.csv")
+alpha_03_df <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.3_cc_singlecell_ms_coad_df.csv")
+alpha_04_df <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.4_cc_singlecell_ms_coad_df.csv")
+alpha_06_df <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.6_cc_singlecell_ms_coad_df.csv")
+alpha_07_df <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.7_cc_singlecell_ms_coad_df.csv")
+alpha_08_df <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.8_cc_singlecell_ms_coad_df.csv")
+alpha_09_df <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0.9_cc_singlecell_ms_coad_df.csv")
 
 
+colnames(alpha_01_df) <- c("X", "mirna_num", "mirna_target", "c_index")
+colnames(alpha_02_df) <- c("X", "mirna_num", "mirna_target", "c_index")
+colnames(alpha_03_df) <- c("X", "mirna_num", "mirna_target", "c_index")
+colnames(alpha_04_df) <- c("X", "mirna_num", "mirna_target", "c_index")
+colnames(alpha_06_df) <- c("X", "mirna_num", "mirna_target", "c_index")
+colnames(alpha_07_df) <- c("X", "mirna_num", "mirna_target", "c_index")
+colnames(alpha_08_df) <- c("X", "mirna_num", "mirna_target", "c_index")
+colnames(alpha_09_df) <- c("X", "mirna_num", "mirna_target", "c_index")
+
+alpha_01_df$mirna_num <- rep(seq(800,100,100), each=11)
+alpha_02_df$mirna_num <- rep(seq(800,100,100), each=11)
+alpha_03_df$mirna_num <- rep(seq(800,100,100), each=11)
+alpha_04_df$mirna_num <- rep(seq(800,100,100), each=11)
+alpha_06_df$mirna_num <- rep(seq(800,100,100), each=11)
+alpha_07_df$mirna_num <- rep(seq(800,100,100), each=11)
+alpha_08_df$mirna_num <- rep(seq(800,100,100), each=11)
+alpha_09_df$mirna_num <- rep(seq(800,100,100), each=11)
+
+
+
+#Alpha 0.1
+heatmap_coad_ccs_ms_01 <- ggplot(data = alpha_01_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MS COAD Alpha = 0.1",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.0,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_01 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_search_heatmap_alpha_01.svg",
+       plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
+
+
+#Alpha 0.2
+heatmap_coad_ccs_ms_02 <- ggplot(data = alpha_02_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MS COAD Alpha = 0.2",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.0,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_02 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_search_heatmap_alpha_02.svg",
+       plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
+
+
+#Alpha 0.3
+heatmap_coad_ccs_ms_03 <- ggplot(data = alpha_03_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MS COAD Alpha = 0.3",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.0,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_03 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_search_heatmap_alpha_03.svg",
+       plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
+
+
+#Alpha 0.4
+heatmap_coad_ccs_ms_04 <- ggplot(data = alpha_04_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MS COAD Alpha = 0.4",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.0,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_04 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_search_heatmap_alpha_04.svg",
+       plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
+
+
+
+#Alpha 0.6
+heatmap_coad_ccs_ms_06 <- ggplot(data = alpha_06_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MS COAD Alpha = 0.6",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.0,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_06 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_search_heatmap_alpha_06.svg",
+       plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
+
+
+#Alpha 0.7
+heatmap_coad_ccs_ms_07 <- ggplot(data = alpha_07_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MS COAD Alpha = 0.7",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.0,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_07 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_search_heatmap_alpha_07.svg",
+       plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
+
+
+#Alpha 0.8
+heatmap_coad_ccs_ms_08 <- ggplot(data = alpha_08_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MS COAD Alpha = 0.8",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.0,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_08 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_search_heatmap_alpha_08.svg",
+       plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
+
+#Alpha 0.9
+heatmap_coad_ccs_ms_09 <- ggplot(data = alpha_09_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MS COAD Alpha = 0.9",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.0,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_09 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_search_heatmap_alpha_09.svg",
+       plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
 
 
 
 
 
 #KM risk calculation for COAD----
+#Now loading the top performing result (alpha 1, 200 miRNA and 1010 miRNA targets)
+mirna_sde_optimized <- readRDS("~/Desktop/Optimization_200_1010_targets_cc_singlecell_ms_1_alpha_coad.rds")
+data_set <- "coad"
+a <- 1
+counter <- 1
+my_cindices <-c()
+
+for(ms in mirna_sde_optimized[1:11]){
+  cox_model <- cox_model_fitter(my.seed = 1,
+                                my.alpha = 1,
+                                my.dataset = "COAD",
+                                cox.predictors = ms,
+                                cox.df = cox_df,
+                                gene.num = 1900,
+                                tumor.stage = FALSE,
+                                tumor.n = FALSE,
+                                tumor.m = FALSE,
+                                my.filename = paste0("~/Desktop/cc_singlecell_ms_",data_set,"_alpha_",a,"_coefs__index.csv"))
+  
+  #Getting the top concordance index from the cross validation and then rounding
+  #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+  #the c_index list with the result
+  current_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+  my_cindices[counter] <- current_cindex
+  counter <- counter + 1
+  
+}
+
+top_cindex <-max(my_cindices)
+top_index <- which(my_cindices==top_cindex)
+print(top_index)
+print(top_cindex)
+top_index_used <- top_index[1]
+#print(my_cindices[top_index_used])
+#print(top_index_used)
+top_cindices <- c(top_cindices, top_cindex)
+index <- index+1
+}
+
+mirna_num <- rep(seq(100,800,100), each=11)
+mirna_targets <- seq(10,1010,100)
+top_cindices_df <- data.frame(mirna_num, mirna_targets, top_cindices)
+write.csv(top_cindices_df, file = paste0("top_cindices_alpha_",a,"_cc_singlecell_ms_coad_df.csv"))
+
+
 patient_risk <- risk_score_calculator(my.file = "~/Desktop/coad_active_genes.csv",
                                       my.title = "TCGA-COAD",
                                       tumor.data = FALSE,
