@@ -3,9 +3,11 @@
 #Author: Andrew Willems <awillems@vols.utk.edu>
 
 #Loading needed packages----
+library(boot)
 library(data.table)
 library(ggplot2)
 library(phateR)
+library(selectiveInference)
 library(SummarizedExperiment)
 library(survival)
 library(survminer)
@@ -2135,7 +2137,7 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_grid_
 
 
 #KM risk calculation for COAD----
-#Now loading the top performing result (alpha 1, 700 miRNA and 1010 miRNA targets)
+#Now loading the top performing result (alpha = 1, 700 miRNA and 1010 miRNA targets)
 mirna_sde_optimized <- readRDS("~/Desktop/Optimization_700_1010_targets_cc_singlecell_ms_1_alpha_coad.rds")
 data_set <- "coad"
 a <- 0.5
@@ -2170,14 +2172,17 @@ print(top_cindex)
 
 
 
-patient_risk <- risk_score_calculator(my.file = "~/Desktop/cc_singlecell_ms_coad_alpha_0.5_coefs__index.csv",
+patient_risk <- risk_score_calculator(my.file = "~/Desktop/cc_singlecell_ms_coad_alpha_1_coefs__index.csv",
                                       tumor.data = FALSE, n.data = FALSE,
-                                      cox.df = cox_df, plot.title = "TCGA-COAD")
+                                      set.ci = TRUE, cox.df = cox_df, 
+                                      set.test = TRUE, my.km.plot = "test_coad_km.svg",
+                                      plot.title = "TCGA-COAD")
 patient_risk$`KM Plot`
+
 
 #Saving the KM plot to .svg format
 ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_km_plot.svg",
-       plot     = print(patient_risk$`KM Plot`$plot, newpage = FALSE),
+       plot     = print(patient_risk$`KM Plot`, newpage = FALSE),
        device   = "svg", dpi=300,
        width    = 34, height = 34,
        units    = "cm")
@@ -2186,7 +2191,9 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_km_pl
 #KM risk calculation for READ----
 patient_risk <- risk_score_calculator(my.file = "~/Desktop/cc_singlecell_ms_read_alpha_1_coefs__index.csv",
                                       tumor.data = FALSE, n.data = FALSE,
-                                      cox.df = cox_df, plot.title = "TCGA-READ")
+                                      set.ci = TRUE,
+                                      cox.df = cox_df, 
+                                      plot.title = "TCGA-READ")
 patient_risk$`KM Plot`
 
 #Saving the KM plot to .svg format
@@ -2202,22 +2209,27 @@ coad_coef_df <- read.csv("~/Desktop/cc_singlecell_ms_coad_alpha_1_coefs__index.c
 coad_coef_df <- coad_coef_df[,2:3]
 colnames(coad_coef_df) <- c("Gene", "coefs")
 coad_coef_df$hazard_ratio <- exp(coad_coef_df$coefs)
-coad_coef_df$effect_size <- ifelse(coad_coef_df$hazard_ratio>1,abs(1- coad_coef_df$hazard_ratio)*100, (1 - coad_coef_df$hazard_ratio)*100)
+coad_coef_df$effect_size <- ifelse(coad_coef_df$hazard_ratio>1,
+                                   abs(1- coad_coef_df$hazard_ratio)*100,
+                                   (1 - coad_coef_df$hazard_ratio)*100)
 
-coad_coef_plot <- ggplot(data = coad_coef_df, aes(x=Gene, y=effect_size,
+coad_coef_df_sub <- filter(coad_coef_df, effect_size>80.0)
+coad_coef_df_sub <- filter(coad_coef_df_sub, Gene != "ZNF705D")
+
+coad_coef_plot <- ggplot(data = coad_coef_df_sub, aes(x=Gene, y=effect_size,
                                                       color=Gene, fill=Gene))+
   geom_col()+
   theme_bw()+
   ggtitle("COAD Coefficients")+
-  ylab("Coefficients")+
-  xlab("Gene")+
+  ylab("Effect Size (%)")+
+  xlab("Genes")+
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0.5, face = "bold", size = 40,
                                   family = "sans"),
         axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
         axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
         axis.text.x = element_text(size = 30, family = "sans"),
-        axis.text.y = element_text(size = 40, family = "sans"),
+        axis.text.y = element_text(size = 30, family = "sans"),
         legend.text = element_text(size = 25, family = "sans"),
         legend.title = element_text(size = 40, family = "sans"))+
   scale_color_viridis_d(direction = -1)+
@@ -2229,11 +2241,65 @@ coad_coef_plot <- ggplot(data = coad_coef_df, aes(x=Gene, y=effect_size,
 coad_coef_plot
 
 #Saving the KM plot to .svg format
-ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_coef_plot.svg",
+ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_coef_plot_no_znf705.svg",
        plot     = print(coad_coef_plot, newpage = FALSE),
        device   = "svg", dpi=300,
        width    = 40, height = 40,
        units    = "cm")
+
+
+#Citation for ZNF705D at: Authentication of differential gene expression in oral squamous cell carcinoma using machine learning applications
+#(https://bmcoralhealth.biomedcentral.com/articles/10.1186/s12903-021-01642-9)
+
+#Citation for TAL2 at: TAL2, a helix-loop-helix gene activated by the (7;9)(q34;q32) translocation in human T-cell leukemia
+# (https://www.pnas.org/doi/abs/10.1073/pnas.88.24.11416)
+
+#Citation for ST6GALNAC3 at:Comprehensive analysis of coexpressed long noncoding RNAs and genes in breast cancer
+# (https://obgyn.onlinelibrary.wiley.com/doi/abs/10.1111/jog.13840?casa_token=3sf94uCg6UUAAAAA:50KHN5Q3La4JCZkKTugJBA8YLia2mJEFnGjhJKQw5ZEshIwXSh_pIMPKOTHfeOevB6V8R_Eysd_E2Ks)
+# and at: Biomarker potential of ST6GALNAC3 and ZNF660 promoter hypermethylation in prostate cancer tissue and liquid biopsies
+# (https://febs.onlinelibrary.wiley.com/doi/full/10.1002/1878-0261.12183)
+
+#Citation for HTR2C at: A zebrafish embryo screen utilizing gastrulation identifies the HTR2C inhibitor pizotifen as a suppressor of EMT-mediated metastasis
+# (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8824480/)
+
+#Citation for HS6ST3 at: Silencing HS6ST3 inhibits growth and progression of breast cancer cells through suppressing IGF1R and inducing XAF1
+# (https://www.sciencedirect.com/science/article/pii/S0014482716304281?casa_token=zKk2Dvoylr8AAAAA:VZVqZE-BKry_Mg6fZXidN-ZMjdLKL2QfBWKKuH126dhlnYDOz0-Mkru0WRu8Ud1UHuvHUiAVZuY)
+
+#Citation for GRIK3 at: CircASXL1 knockdown represses the progression of colorectal cancer by downregulating GRIK3 expression by sponging miR-1205
+# (https://link.springer.com/article/10.1186/s12957-021-02275-6)
+
+#Citation for FABP7 at: FABP7 promotes cell proliferation and survival in colon cancer through MEK/ERK signaling pathway
+# (https://www.sciencedirect.com/science/article/pii/S0753332218327021)
+
+#Citation for AJAP1 at: Downregulation of TET1 Promotes Bladder Cancer Cell Proliferation and Invasion by Reducing DNA Hydroxymethylation of AJAP1
+# (https://www.frontiersin.org/articles/10.3389/fonc.2020.00667/full)
+
+#Citation for AC079612.1 at: Mechanism of lnc-AC079612.1.1-1∶1 in hepatic metastasis of colon cancer (this looks like a really low quality journal)
+# (https://pesquisa.bvsalud.org/portal/resource/pt/wpr-693273)
+
+#Now that we see the active coefficients and their hazard ratios we will attempt
+#to use a relatively new technique to get p-values for the alpha value of our
+#best fit model and attempt inference for both p-values of individual active
+#genes and 95% confidence intervals
+betas <- as.numeric(coad_alpha1$Active.Coefficients)
+my_x <- read.csv("~/Desktop/x_matrix.csv")
+rownames(my_x) <- my_x$X
+my_x$X <- NULL
+my_x$X.Intercept. <- NULL
+my_x <- as.matrix(my_x)
+my_y <- read.csv("~/Desktop/y_matrix.csv")
+time <- my_y$time
+my_status <- my_y$status
+
+checkcols <- function(A) {
+  b = rnorm(nrow(A))
+  a = sort(t(A)%*%b)
+  if (any(diff(a)==0)) return(TRUE)
+  return(FALSE)
+}
+
+fixedLassoInf(x = my_x, time, beta = betas, status = my_status,
+              lambda = 0.01073, family = "cox", verbose = TRUE)
 
 
 
