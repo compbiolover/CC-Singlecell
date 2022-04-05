@@ -2214,6 +2214,15 @@ coad_coef_df$effect_size <- ifelse(coad_coef_df$hazard_ratio>1,
                                    (1 - coad_coef_df$hazard_ratio)*100)
 
 coad_coef_df_sub <- filter(coad_coef_df, effect_size>80.0)
+
+#These top 10 active genes are associated with an FDR corrected p-value pathway
+#of NOTCH3 which has been implicated in colon cancer here from reactome: 
+#1. A third Notch in colorectal cancer progression and metastasis (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7537388/)
+#2. AKT-dependent NOTCH3 activation drives tumor progression in a model of mesenchymal colorectal cancer (https://pubmed.ncbi.nlm.nih.gov/32749453/)
+#3. The miR-1-NOTCH3-Asef pathway is important for colorectal tumor cell migration (https://pubmed.ncbi.nlm.nih.gov/24244701/)
+#4. Role of Notch signaling in colorectal cancer (https://pubmed.ncbi.nlm.nih.gov/19793799/)
+#The FDR corrected p-values are seen in the report. 
+
 coad_coef_df_sub <- filter(coad_coef_df_sub, Gene != "ZNF705D")
 
 coad_coef_plot <- ggplot(data = coad_coef_df_sub, aes(x=Gene, y=effect_size,
@@ -2271,8 +2280,8 @@ ggsave(filename = "Data/Reproducible-results/Figures/cc_singlecell_ms_coad_coef_
 #Citation for FABP7 at: FABP7 promotes cell proliferation and survival in colon cancer through MEK/ERK signaling pathway
 # (https://www.sciencedirect.com/science/article/pii/S0753332218327021)
 
-#Citation for AJAP1 at: Downregulation of TET1 Promotes Bladder Cancer Cell Proliferation and Invasion by Reducing DNA Hydroxymethylation of AJAP1
-# (https://www.frontiersin.org/articles/10.3389/fonc.2020.00667/full)
+#Citation for AJAP1 at: Tumor-associated methylation of the putative tumor suppressor AJAP1 gene and association between decreased AJAP1 expression and shorter survival in patients with glioma
+# (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4013351/)
 
 #Citation for AC079612.1 at: Mechanism of lnc-AC079612.1.1-1∶1 in hepatic metastasis of colon cancer (this looks like a really low quality journal)
 # (https://pesquisa.bvsalud.org/portal/resource/pt/wpr-693273)
@@ -2298,8 +2307,166 @@ checkcols <- function(A) {
   return(FALSE)
 }
 
-fixedLassoInf(x = my_x, time, beta = betas, status = my_status,
+
+#Test Cox data to see if I can get the p-values from it
+data("CoxExample")
+x <- CoxExample$x
+y <- CoxExample$y
+
+x = scale(x, TRUE, TRUE)
+
+fit <- glmnet(x, y, family = "cox", standardize = FALSE)
+
+
+set.seed(1)
+cvfit <- cv.glmnet(x, y, family = "cox", type.measure = "C")
+lambda <- cvfit$lambda.min
+beta <- as.numeric(coef(fit, x=x, y=y, s=lambda/1000, exact = TRUE))
+time <- y[,"time"]
+my_status <- y[,"status"]
+
+lass_coefs_coad <- fixedLassoInf(x = x, time, beta = betas, status = my_status,
               lambda = 0.01073, family = "cox", verbose = TRUE)
+
+lass_coefs_ex <- fixedLassoInf(x = x, time, beta = beta, status = my_status,
+                            lambda = lambda, family = "cox", verbose = TRUE)
+
+#Got really side-tracked with this because I was trying to see if I could use significance to improve the interpretability of the model.
+#Still don't have this working yet. It might be a really good way to make the model more parsimonious than the 156 active genes we have
+#currently. This paper by Taylor et al. "Statistical learning and selective inference" (https://www.pnas.org/doi/full/10.1073/pnas.1507583112)
+#details the problem of selective inference after using other methods to select predictors and the challenges that are currently facing statisticians
+#as they do this. "Tractable Post-Selection Maximum Likelihood Inference for the Lasso" by Meir et al. also details that in essence
+#"Applying standard statistical methods after model selection may yield inefficient estimators and hypothesis tests that fail to achieve nominal type-I error rates.
+#The main issue is the fact that the post-selection distribution of the data differs from the original distribution. In particular, the observed data is constrained
+#to lie in a subset of the original sample space that is determined by the selected model.
+#This often makes the post-selection likelihood of the observed data intractable and maximum likelihood inference difficult." (https://arxiv.org/pdf/1705.09417.pdf)
+#(https://stats.stackexchange.com/questions/241082/testing-for-coefficients-significance-in-lasso-logistic-regression)
+#This other paper by Lockhart et al. "A SIGNIFICANCE TEST FOR THE LASSO" (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4285373/)
+#attempts to implement significance testing for lasso. If we can present confidence intervals and significance results for our method I think it would
+#make our model more rigorous as currently we can't say anything about the individual predictor's significance 
+
+#miRNA grid search at different alpha values
+mirna_alpha0 <- read.csv("~/Desktop/alpha_0_cindices.csv")
+mirna_alpha05 <- read.csv("~/Desktop/alpha_0.5_cindices.csv")
+mirna_alpha1 <- read.csv("~/Desktop/alpha_1_cindices.csv")
+
+
+colnames(mirna_alpha0) <- c("mirna_num", "c_index")
+mirna_alpha0$mirna_num <- rep(seq(800,100,-100), each=11)
+mirna_alpha0$mirna_targets <- rep(seq(10,1010,100), times=8)
+
+
+colnames(mirna_alpha05) <- c("mirna_num", "c_index")
+mirna_alpha05$mirna_num <- rep(seq(800,100,-100), each=11)
+mirna_alpha05$mirna_targets <- rep(seq(10,1010,100), times=8)
+
+colnames(mirna_alpha1) <- c("mirna_num", "c_index")
+mirna_alpha1$mirna_num <- rep(seq(800,100,-100), each=11)
+mirna_alpha1$mirna_targets <- rep(seq(10,1010,100), times=8)
+
+
+
+#miRNA only heat map
+#Alpha = 0
+heatmap_coad_mirna_0 <- ggplot(data = mirna_alpha0, aes(x=mirna_num, y=mirna_targets, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "miRNA COAD Alpha = 0",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.0,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_ms_finished <- heatmap_coad_mirna_0 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/mirna_coad_grid_search_heatmap_alpha_0.svg",
+       plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
+
+
+
+#Alpha = 0.5
+heatmap_coad_mirna_05 <- ggplot(data = mirna_alpha05, aes(x=mirna_num, y=mirna_targets, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "miRNA COAD Alpha = 0.5",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.0,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_ms_finished <- heatmap_coad_mirna_05 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/mirna_coad_grid_search_heatmap_alpha_05.svg",
+       plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
+
+
+#Alpha = 1
+heatmap_coad_mirna_1 <- ggplot(data = mirna_alpha1, aes(x=mirna_num, y=mirna_targets, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "miRNA COAD Alpha = 1",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.0,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_coad_ccs_ms_finished <- heatmap_coad_mirna_1 + scale_fill_viridis_c()
+
+#Now saving the heat map
+ggsave(filename = "Data/Reproducible-results/Figures/mirna_coad_grid_search_heatmap_alpha_1.svg",
+       plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 32, height = 32,
+       units    = "cm")
+
+
+
+
+
 
 
 
