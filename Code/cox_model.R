@@ -44,13 +44,13 @@ cox_model_fitter <- function(my.seed       = 1,
   #will be loaded. If they are not,
   #the packages will be installed
   #from CRAN and then loaded.
-  require(BiocGenerics)
-  require(doParallel)
-  require(glmnet)
-  require(lmtest)
-  require(parallel)
-  require(survival)
-  require(survminer)
+  suppressMessages(library(BiocGenerics))
+  suppressMessages(library(doParallel))
+  suppressMessages(library(glmnet))
+  suppressMessages(library(lmtest))
+  suppressMessages(library(parallel))
+  suppressMessages(library(survival))
+  suppressMessages(library(survminer))
   
   #Setting the seed for reproducible output----
   set.seed(my.seed)
@@ -111,18 +111,28 @@ cox_model_fitter <- function(my.seed       = 1,
   my_y <- Surv(time = cox.df$days.to.last.follow.up, event = cox.df$vital.status)
   my_foldid<-sample(1:10,size=length(my_y),replace=TRUE)
   
-  if(my.dataset=="COAD"){
-    my_foldid <- readRDS(file = "coad_df_fold_id.rds")
-  }else if (my.dataset=="READ"){
-    my_foldid <- readRDS(file = "read_df_fold_id.rds")
-  }else if(my.dataset=="GBM"){
-    my_foldid <- readRDS(file = "gbm_df_fold_id.rds")
-  }
+  # if(my.dataset=="COAD"){
+  #   my_foldid <- readRDS(file = "coad_df_fold_id.rds")
+  # }else if (my.dataset=="READ"){
+  #   my_foldid <- readRDS(file = "read_df_fold_id.rds")
+  # }else if(my.dataset=="GBM"){
+  #   my_foldid <- readRDS(file = "gbm_df_fold_id.rds")
+  # }
   
+  #Saving the x and y matrices for use to do inference and confidence interval
+  #construction later
+  # if(save.x==TRUE){
+  #   write.csv(my_x, file = x.filename)
+  # }
+  # 
+  # if(save.y==TRUE){
+  #   write.csv(my_y, file = y.filename)
+  # }
+  # 
   #The 10-fold cross-validation fit----
   cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C",
                       maxit=100000, family="cox", parallel = TRUE,
-                      alpha = my.alpha, foldid = my_foldid)
+                      alpha = 1)
   
   
   #Looking to see which genes are the most important
@@ -137,8 +147,8 @@ cox_model_fitter <- function(my.seed       = 1,
  
   
   #Saving the coefficients of the model
-  active_coefs_df <- cbind(active_genes, Active.Coefficients)
-  write.csv(active_coefs_df, file = my.filename)
+  # active_coefs_df <- cbind(active_genes, Active.Coefficients)
+  # write.csv(active_coefs_df, file = my.filename)
   
   #Assessing the performance of the 10-fold cross-validation
   #on the entire data set----

@@ -6,7 +6,9 @@ risk_score_calculator <- function(my.file=active_coefs.csv,
                                   n.data=FALSE,
                                   cox.df=cox_df,
                                   plot.title = "TCGA-COAD",
-                                  set.ci = TRUE){
+                                  set.ci = TRUE,
+                                  set.test = TRUE,
+                                  my.km.plot = "coad_km_plot.svg"){
   #Required packages----
   require(survival)
   
@@ -141,9 +143,10 @@ risk_score_calculator <- function(my.file=active_coefs.csv,
     #Plotting the outcome of the fit
     finished_plot <- km_plotter(km.fit = km_fit, data.source = converted_df,
                                 p.value = TRUE, pval.size = 8, 
-                                confidence.int = set.ci,
+                                confidence.int = set.ci, risk.table = TRUE,
+                                show.pval.method = set.test,
                                 surv.curv.size = 4.5,
-                                my.km.plot = "~/Desktop/test_read_km.svg",
+                                my.km.plot = my.km.plot,
                                 my.km.plot.type = "svg",
                                 plot.title = plot.title)
     #Viewing the finished plot
