@@ -18,8 +18,12 @@ This document encompasses all steps, code, and data used for the CC Singlecell p
 ```{r message=FALSE, echo=FALSE}
 #Loading needed packages
 library(data.table)
+library(DESeq2)
+library(DEsingle)
+library(edgeR)
 library(ggplot2)
 library(phateR)
+library(scDD)
 library(SummarizedExperiment)
 library(survival)
 library(survminer)
