@@ -2736,9 +2736,6 @@ all_nm_cells_fpkm <- subset(all_nm_cells_fpkm,
 normal_num <- rep("normal", 266)
 tumor_num <- rep("tumor", 375)
 all_nums <- c(tumor_num, normal_num)
-# nm_names <- rep(paste("NM",1:ncol(all_nm_cells_fpkm$denoised_sc_dataframe)))
-# tumor_names <- rep(paste("TM",1:ncol(all_tumor_cells_fpkm$denoised_sc_dataframe)))
-# all_names <- c(tumor_names, nm_names)
 
 
 
@@ -2934,6 +2931,48 @@ write.csv(finished_edger, file = "Outputs/edgeR_1927_genes.csv")
 saveRDS(finished_edger, file = "Outputs/edgeR_1927_genes.rds")
 ```
 
+```{r}
+#For finding the optimal number of genes----
+gene_sizes <- seq(100, 1930, 50)
+cox_df <-readRDS("Data/Reproducible-results/Data/read_df_finished.rds")
+my_cindices <- rep(0, length(gene_sizes))
+counter <- 1
+
+for(gs in gene_sizes){
+  current_cox <- cox_model_fitter(my.seed = 1, my.alpha = 1, cox.df = cox_df,
+                                  gene.num = gs, tumor.m = FALSE,
+                                  tumor.n = FALSE, tumor.stage = FALSE,
+                                  cox.predictors = rownames(finished_edger)[1:gs],
+                                  my.dataset = "READ",
+                                  my.filename = "Data/Reproducible-results/Rmarkdown/Outputs/edger_coefs.csv")
+  
+  my_cindices[counter] <- round(current_cox$CV$cvm[current_cox$CV$index[1]],
+                                digits = 4)
+  
+  counter <- counter + 1
+  
+}
+
+print(max(my_cindices))
+
+write.csv(max(my_cindices), file = "Data/Reproducible-results/Rmarkdown/Outputs/read_edger_top_cindex.csv")
+saveRDS(my_cindices, file = "Data/Reproducible-results/Rmarkdown/Outputs/read_edger_top_cindex.rds")
+```
+
+## Step 23: DEsingle for READ
+```{r}
+
+condition <- c(rep(1, ncol(all_tumor_cells_fpkm)), rep(2, ncol(all_nm_cells_fpkm)))
+condition <- factor(condition)
+names(condition) <- c(colnames(all_tumor_cells_fpkm), colnames(all_nm_cells_fpkm))
+
+sce <- SingleCellExperiment(assays=list(counts=deseq2_df$denoised_sc_dataframe))
+
+des_results <- DEsingle(counts = sce, group = condition, parallel = TRUE,
+                        BPPARAM = BiocParallel::bpparam())
+saveRDS(des_results, file = "Data/Reproducible-results/Rmarkdown/Outputs/des_results_read.rds")
+write.csv(des_results, file = "Data/Reproducible-results/Rmarkdown/Outputs/des_results_read.csv")
+```
 
 
 ```{r}
