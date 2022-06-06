@@ -17,6 +17,7 @@ cox_model_fitter <- function(my.seed       = 1,
                                                 "tumor.stage3", "tumor.stage4"),
                              remove.n.stage = c("ajcc.n0", "ajcc.n1", "ajcc.n2",
                                                 "ajcc.n3"),
+                             save.coefs    = TRUE,
                              my.filename   ="~/Desktop/my_models_active_coefs.csv"){
   
   #Doing input sanity checks----
@@ -144,14 +145,15 @@ cox_model_fitter <- function(my.seed       = 1,
   Active.Index <- which(as.logical(Coefficients) != 0)
   Active.Coefficients  <- Coefficients[Active.Index]
   active_genes <-rownames(Coefficients)[Active.Index]
- 
   
   #Saving the coefficients of the model
-  # active_coefs_df <- cbind(active_genes, Active.Coefficients)
-  # write.csv(active_coefs_df, file = my.filename)
+  if(save.coefs==TRUE){
+    active_coefs_df <- cbind(active_genes, Active.Coefficients)
+    write.csv(active_coefs_df, file = my.filename) 
+  }
   
   #Assessing the performance of the 10-fold cross-validation
-  #on the entire data set----
+  #on the entire data set
   # model_perf<- assess.glmnet(cv_fit, newx = my_x, newy = my_y)
   
   if(tumor.stage==TRUE & tumor.n==FALSE & tumor.m==FALSE){
