@@ -100,7 +100,10 @@ library_size_plot_1 <- ggplot() +
   scale_y_continuous(limits=c(0, 18), expand = c(0, 0))
 
 library_size_plot_1
+```
 
+
+```{r saving plot of magic pre-processing step 1}
 ggsave(filename = "~/Documents/Work/PhD Program/Hong Lab/Projects/CC-Singlecell/Data/Reproducible-results/Rmarkdown/Outputs/single_cell_library_histogram_pre_process_step_1.svg",
       device = "svg", units = "cm", dpi = 300, width = 20, height = 20,
       plot = library_size_plot_1)
@@ -193,7 +196,10 @@ sde.genes <- switchde_calculator(cc_tumor_fpkm$denoised_sc_dataframe,
                                  pseudo.time = cds_output$Pseudotime)
 
 head(sde.genes)
+```
 
+
+```{r saving sde metric}
 saveRDS(sde.genes,
         file = "Data/Reproducible-results/Rmarkdown/Outputs/sde_colon_and_rectal_cancer.rds")
 
@@ -377,7 +383,7 @@ They are low miRNA number and low miRNA target number, medium miRNA number and
 medium miRNA target number, and high miRNA number and high miRNA target number.
 Once the ideal miRNA-miRNA target pair is known from the grid search we will
 also include a gene size search for it here
-```{r ideal gene number for high miRNA metric on coad}
+```{r ideal gene number for high miRNA metric on COAD}
 #Getting ideal gene number for miRNA metric on TCGA-COAD
 #For this metric we don't know which combination of miRNA and miRNA targets
 #will yield the best result in advance so we are trying 3 different miRNA-
@@ -392,7 +398,8 @@ mirna_medium_cindices <- rep(0, length(gene_sizes))
 mirna_low_cindices <- rep(0, length(gene_sizes))
 
 #Loading the high miRNA-miRNA target file
-load("Data/Reproducible-results/Rmarkdown/Data/800_1010_targets.RData", verbose = TRUE)
+load("Data/Reproducible-results/Rmarkdown/Data/800_1010_targets.RData",
+     verbose = TRUE)
 
 high.mirna.genes <- mirna.ranking
 
@@ -428,7 +435,7 @@ write.csv(mirna_high_cindices_coad_df,
 ```
 
 ## Step 13b: Getting the ideal gene number for the medium `miRNA` metric on TCGA-COAD
-```{r ideal gene number for medium miRNA metric on coad}
+```{r ideal gene number for medium miRNA metric on COAD}
 #Medium miRNA-miRNA target number
 #Loading the medium miRNA-miRNA target file
 load("Data/Reproducible-results/Rmarkdown/Data/400_510_targets.RData", verbose = TRUE)
@@ -461,7 +468,10 @@ mirna_medium_cindices_coad_df <- as.data.frame(cbind(gene_sizes,
 colnames(mirna_medium_cindices_coad_df) [2] <- "c_index"
 mirna_medium_cindices_coad_df$mirna_type <- rep("medium",
                                                 nrow(mirna_medium_cindices_coad_df))
+```
 
+
+```{r saving ideal gene number for medium miRNA metric on COAD}
 write.csv(mirna_medium_cindices_coad_df,
           "Data/Reproducible-results/Rmarkdown/Outputs/mirna_medium_cindices_coad_across_gene_size.csv")
 ```
@@ -500,7 +510,10 @@ mirna_low_cindices_coad_df <- as.data.frame(cbind(gene_sizes,
 colnames(mirna_low_cindices_coad_df)[2] <- "c_index"
 mirna_low_cindices_coad_df$mirna_type <- rep("low",
                                              nrow(mirna_low_cindices_coad_df))
+```
 
+
+```{r saving ideal gene number for low miRNA metric on coad}
 write.csv(mirna_low_cindices_coad_df,
           "Data/Reproducible-results/Data/mirna_low_cindices_coad_across_gene_size.csv")
 ```
@@ -991,7 +1004,8 @@ mirna_medium_cindices <- rep(0, length(gene_sizes))
 mirna_low_cindices <- rep(0, length(gene_sizes))
 
 #Loading the high miRNA-miRNA target file
-load("Data/Reproducible-results/Rmarkdown/Data/800_1010_targets.RData", verbose = TRUE)
+load("Data/Reproducible-results/Rmarkdown/Data/800_1010_targets.RData",
+     verbose = TRUE)
 load("Data/Reproducible-results/Data/1000_110_targets.RData", verbose = TRUE)
 load("Data/Reproducible-results/Data/1000_1010_targets.RData", verbose = TRUE)
 
@@ -1032,7 +1046,8 @@ write.csv(mirna_high_cindices_read_df,
 ```{r ideal gene number for medium miRNA-miRNA target number on TCGA-READ}
 #Medium miRNA-miRNA target number
 #Loading the medium miRNA-miRNA target file
-load("Data/Reproducible-results/Rmarkdown/Data/400_510_targets.RData", verbose = TRUE)
+load("Data/Reproducible-results/Rmarkdown/Data/400_510_targets.RData",
+     verbose = TRUE)
 
 medium.mirna.genes <- mirna.ranking
 
@@ -1124,7 +1139,8 @@ all_mirna_metrics_read_df$mirna_type <- factor(all_mirna_metrics_read_df$mirna_t
 ```{r ideal miRNA plot on TCGA-READ}
 #Basic miRNA-miRNA target plot
 all_mirna_metrics_read_plot <- ggplot(data = all_mirna_metrics_read_df,
-                                      aes(x=gene_sizes, y=c_index, color=mirna_type))
+                                      aes(x=gene_sizes, y=c_index,
+                                          color=mirna_type))
 
 #Making the plot much nicer
 all_mirna_metrics_read_plot_finished <-all_mirna_metrics_read_plot +
@@ -1219,7 +1235,8 @@ mean_random <- mean(all_random_gene_cindices)
 ```
 
 ```{r fig2b data}
-#Data for MAD, SDE, and miRNA high metric, CC Singlecell MS, CC Singlecell MM, CC Singlecell MMS, MAD + SDE, and Random genes
+#Data for MAD, SDE, and miRNA high metric, CC Singlecell MS, CC Singlecell MM,
+#CC Singlecell MMS, MAD + SDE, and Random genes
 #First bind the data frames together
 
 mad_cindices_read_df <- read.csv("Data/Reproducible-results/Rmarkdown/Outputs/mad_cindices_read_across_gene_size.csv")
@@ -1249,7 +1266,14 @@ write.csv(methods_optimal_gene_read_df,
 
 ```{r fig2b plot}
 #Basic plot
-methods_optimal_gene_read_df$method <- factor(methods_optimal_gene_read_df$method, levels = c("CC Singlecell MMS", "CC Singlecell MS", "CC Singlecell MM", "miRNA", "MAD", "SDE", "MAD + SDE","Random Genes"))
+methods_optimal_gene_read_df$method <- factor(methods_optimal_gene_read_df$method,
+                                              levels = c("CC Singlecell MMS", 
+                                                         "CC Singlecell MS", 
+                                                         "CC Singlecell MM",
+                                                         "miRNA", "MAD", "SDE", 
+                                                         "MAD + SDE",
+                                                         "Random Genes"))
+
 methods_optimal_gene_read_plot <- ggplot(data = methods_optimal_gene_read_df,
                                          aes(x=method, y=c_index, fill=method))
 
@@ -1270,10 +1294,6 @@ methods_optimal_gene_read_plot_finished <-methods_optimal_gene_read_plot +
 
 methods_optimal_gene_read_plot_finished <- methods_optimal_gene_read_plot_finished + coord_cartesian(ylim = c(0.5,0.85))+ 
   scale_fill_manual(values = c("#FDE725FF","#FDE725FF", "#FDE725FF", "#FDE725FF","#404788FF", "#404788FF","#404788FF", "#404788FF")) 
-
-
-methods_optimal_gene_read_plot_finished
-
 ```
 
 
@@ -1285,9 +1305,6 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/individual_metric
        width    = 55, height = 55,
        units    = "cm")
 ```
-
-
-
 
 
 ```{r mad+sde metric for READ}
@@ -1305,7 +1322,6 @@ mad_sde_read_optimized <- two_weight_optimizer(first.metric = mad.genes,
 
 
 ```{r ideal gene size for mad+sde on TCGA-READ}
-
 c_index <- rep(0, 59)
 gene_sizes <- seq(100, 3000, 50)
 counter <- 1
@@ -1334,7 +1350,10 @@ for(gs in gene_sizes){
 }
 
 mad_sde_finished_df <- as.data.frame(cbind(gene_sizes, c_index))
+```
 
+
+```{r saving ideal gene size for mad+sde on TCGA-READ}
 write.csv(mad_sde_finished_df, "Data/Reproducible-results/Rmarkdown/Outputs/mad_sde_read_df.csv")
 ```
 
@@ -1368,7 +1387,7 @@ coad_ms_1$mirna_target <- rep(seq(10, 1010, by=100), times = 8)
 ```
 
 
-```{r plots for miRNA-miRNA target number grid search for COAD at alpha=0}
+```{r plots for miRNA-miRNA target number grid search for COAD at alpha 0}
 #Plotting the results of the CC Singlecell MS COAD grid search
 #Alpha 0
 heatmap_coad_ccs_ms_0 <- ggplot(data = coad_ms_0, aes(x=mirna_num, y=mirna_target, fill=c_index))+
@@ -1396,7 +1415,7 @@ heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_0 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plots for miRNA-miRNA target number grid search for COAD at alpha=0}
+```{r saving plots for miRNA-miRNA target number grid search for COAD at alpha 0}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_coad_grid_search_heatmap_alpha_0.svg",
        plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
@@ -1406,7 +1425,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_
 ```
 
 
-```{r plots for miRNA-miRNA target number grid search for COAD at alpha=0.5}
+```{r plots for miRNA-miRNA target number grid search for COAD at alpha 0.5}
 #Alpha 0.5
 heatmap_coad_ccs_ms_05 <- ggplot(data = coad_ms_05, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1433,7 +1452,7 @@ heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_05 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plots for miRNA-miRNA target number grid search for COAD at alpha=0.5}
+```{r saving plots for miRNA-miRNA target number grid search for COAD at alpha 0.5}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_coad_grid_search_heatmap_alpha_05.svg",
        plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
@@ -1443,7 +1462,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_
 ```
 
 
-```{r plots for miRNA-miRNA target number grid search for COAD at alpha=1}
+```{r plots for miRNA-miRNA target number grid search for COAD at alpha 1}
 #Alpha 1
 heatmap_coad_ccs_ms_1 <- ggplot(data = coad_ms_1, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1472,7 +1491,7 @@ heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_1 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plots for miRNA-miRNA target number grid search for COAD at alpha=0.5}
+```{r saving plots for miRNA-miRNA target number grid search for COAD at alpha 0.5}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_coad_grid_search_heatmap_alpha_1.svg",
        plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
@@ -1504,7 +1523,7 @@ read_ms_1$mirna_target <- rep(seq(10, 1010, by=100), 10)
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for READ at alpha=0}
+```{r plotting for miRNA-miRNA target number grid search for READ at alpha 0}
 #Plotting the results of the CC Singlecell MS READ grid search
 #READ MS Alpha 0
 heatmap_read_ccs_ms_0 <- ggplot(data = read_ms_0, aes(x=mirna_num, y=mirna_target, fill=c_index))+
@@ -1532,7 +1551,7 @@ heatmap_read_ms_0_ccs_ms_finished <- heatmap_read_ccs_ms_0 + scale_fill_viridis_
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for READ at alpha=0}
+```{r saving plotting for miRNA-miRNA target number grid search for READ at alpha 0}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_read_grid_search_heatmap_alpha_0.svg",
        plot     = print(heatmap_read_ms_0_ccs_ms_finished, newpage = FALSE),
@@ -1542,7 +1561,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for READ at alpha=0.5}
+```{r plotting for miRNA-miRNA target number grid search for READ at alpha 0.5}
 #READ MS Alpha 0.5
 heatmap_read_ccs_ms_05 <- ggplot(data = read_ms_05, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1569,7 +1588,7 @@ heatmap_read_ms_05_ccs_ms_finished <- heatmap_read_ccs_ms_05 + scale_fill_viridi
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for READ at alpha=0.5}
+```{r saving plotting for miRNA-miRNA target number grid search for READ at alpha 0.5}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_read_grid_search_heatmap_alpha_05.svg",
        plot     = print(heatmap_read_ms_05_ccs_ms_finished, newpage = FALSE),
@@ -1579,7 +1598,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for READ at alpha=1}
+```{r plotting for miRNA-miRNA target number grid search for READ at alpha 1}
 #READ MS Alpha 1
 heatmap_read_ccs_ms_1 <- ggplot(data = read_ms_1, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1606,7 +1625,7 @@ heatmap_read_ms_1_ccs_ms_finished <- heatmap_read_ccs_ms_1 + scale_fill_viridis_
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for READ at alpha=1}
+```{r saving plotting for miRNA-miRNA target number grid search for READ at alpha 1}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_read_grid_search_heatmap_alpha_1.svg",
        plot     = print(heatmap_read_ms_1_ccs_ms_finished, newpage = FALSE),
@@ -1616,7 +1635,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_
 ```
 
 
-```{r data for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha=0}
+```{r data for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha 0}
 #CC Singlecell MM COAD
 coad_mm_0 <- read.csv("Data/Reproducible-results/Data/Outputs/COAD/top_cindices_alpha_0_cc_singlecell_mm_coad_used_combo_100_1010_index_5_df.csv")
 colnames(coad_mm_0) <- c("number", "c_index")
@@ -1636,7 +1655,7 @@ coad_mm_1$mirna_target <- rep(seq(10, 1010, by=100), 8)
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha=0}
+```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha 0}
 #Alpha 0
 heatmap_coad_ccs_mm_0 <- ggplot(data = coad_mm_0, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1663,7 +1682,7 @@ heatmap_coad_ccs_mm_finished <- heatmap_coad_ccs_mm_0 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha=0}
+```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha 0}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mm_coad_grid_search_heatmap_alpha_0.svg",
        plot     = print(heatmap_coad_ccs_mm_finished, newpage = FALSE),
@@ -1673,7 +1692,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mm_
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha=0.5}
+```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha 0.5}
 #Alpha 0.5
 heatmap_coad_ccs_mm_05 <- ggplot(data = coad_mm_05, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1700,7 +1719,7 @@ heatmap_coad_ccs_mm_finished <- heatmap_coad_ccs_mm_05 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha=0.5}
+```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha 0.5}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mm_coad_grid_search_heatmap_alpha_05.svg",
        plot     = print(heatmap_coad_ccs_mm_finished, newpage = FALSE),
@@ -1710,7 +1729,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mm_
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha=1}
+```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha 1}
 #Alpha 1
 heatmap_coad_ccs_mm_1 <- ggplot(data = coad_mm_1, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1737,7 +1756,7 @@ heatmap_coad_ccs_mm_finished <- heatmap_coad_ccs_mm_1 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha=1}
+```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MM COAD at alpha 1}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mm_coad_grid_search_heatmap_alpha_1.svg",
        plot     = print(heatmap_coad_ccs_mm_finished, newpage = FALSE),
@@ -1759,7 +1778,6 @@ colnames(read_mm_05) <- c("number", "c_index")
 read_mm_05$mirna_num <- rep(seq(100,1000,100), 11)
 read_mm_05$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
-
 read_mm_1 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_1_cc_singlecell_mm_read_used_combo_100_1010_index_10_df.csv")
 colnames(read_mm_1) <- c("number", "c_index")
 read_mm_1$mirna_num <- rep(seq(100,1000,100), 11)
@@ -1767,7 +1785,7 @@ read_mm_1$mirna_target <- rep(seq(10, 1010, by=100), 10)
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MM READ at alpha=0}
+```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MM READ at alpha 0}
 #Alpha 0
 heatmap_read_ccs_mm_0 <- ggplot(data = read_mm_0, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1794,7 +1812,7 @@ heatmap_read_ccs_mm_finished <- heatmap_read_ccs_mm_0 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MM READ at alpha=0}
+```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MM READ at alpha 0}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mm_read_grid_search_heatmap_alpha_0.svg",
        plot     = print(heatmap_read_ccs_mm_finished, newpage = FALSE),
@@ -1804,7 +1822,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mm_
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MM READ at alpha=0.5}
+```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MM READ at alpha 0.5}
 #Alpha 0.5
 heatmap_read_ccs_mm_05 <- ggplot(data = read_mm_05, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1831,7 +1849,7 @@ heatmap_read_ccs_mm_finished <- heatmap_read_ccs_mm_05 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MM READ at alpha=0.5}
+```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MM READ at alpha 0.5}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mm_read_grid_search_heatmap_alpha_05.svg",
        plot     = print(heatmap_read_ccs_mm_finished, newpage = FALSE),
@@ -1841,7 +1859,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mm_
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MM READ at alpha=1}
+```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MM READ at alpha 1}
 #Alpha 1
 heatmap_read_ccs_mm_1 <- ggplot(data = read_mm_1, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1868,7 +1886,7 @@ heatmap_read_ccs_mm_finished <- heatmap_read_ccs_mm_1 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MM READ at alpha=1}
+```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MM READ at alpha 1}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/cc_singlecell_mm_read_grid_search_heatmap_alpha_1.svg",
        plot     = print(heatmap_read_ccs_mm_finished, newpage = FALSE),
@@ -1898,7 +1916,7 @@ coad_mms_1$mirna_target <- rep(seq(10, 1010, by=100), times = 8)
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MMS COAD at alpha=0}
+```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MMS COAD at alpha 0}
 #Alpha 0
 heatmap_coad_ccs_mms_0 <- ggplot(data = coad_mms_0, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1925,7 +1943,7 @@ heatmap_coad_ccs_mms_finished <- heatmap_coad_ccs_mms_0 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MMS COAD at alpha=0}
+```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MMS COAD at alpha 0}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_coad_grid_search_heatmap_alpha_0.svg",
        plot     = print(heatmap_coad_ccs_mms_finished, newpage = FALSE),
@@ -1935,7 +1953,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MMS COAD at alpha=0.5}
+```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MMS COAD at alpha 0.5}
 #Alpha 0.5
 heatmap_coad_ccs_mms_05 <- ggplot(data = coad_mms_05, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1962,7 +1980,7 @@ heatmap_coad_ccs_mms_finished <- heatmap_coad_ccs_mms_05 + scale_fill_viridis_c(
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MMS COAD at alpha=0.5}
+```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MMS COAD at alpha 0.5}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_coad_grid_search_heatmap_alpha_05.svg",
        plot     = print(heatmap_coad_ccs_mms_finished, newpage = FALSE),
@@ -1972,7 +1990,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MMS COAD at alpha=1}
+```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MMS COAD at alpha 1}
 #Alpha 1
 heatmap_coad_ccs_mms_1 <- ggplot(data = coad_mms_1, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -1999,7 +2017,7 @@ heatmap_coad_ccs_mms_finished <- heatmap_coad_ccs_mms_1 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MMS COAD at alpha=1}
+```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MMS COAD at alpha 1}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_coad_grid_search_heatmap_alpha_1.svg",
        plot     = print(heatmap_coad_ccs_mms_finished, newpage = FALSE),
@@ -2021,7 +2039,6 @@ colnames(read_mms_05) <- c("number", "c_index")
 read_mms_05$mirna_num <- rep(seq(100,1000,100), 11)
 read_mms_05$mirna_target <- rep(seq(10, 1010, by=100), 10)
 
-
 read_mms_1 <- read.csv("Data/Reproducible-results/Data/Outputs/READ/top_cindices_alpha_1_cc_singlecell_mms_read_used_combo_100_1010_index_10_df.csv")
 colnames(read_mms_1) <- c("number", "c_index")
 read_mms_1$mirna_num <- rep(seq(100,1000,100), 11)
@@ -2029,7 +2046,7 @@ read_mms_1$mirna_target <- rep(seq(10, 1010, by=100), 10)
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MMS READ at alpha=0}
+```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MMS READ at alpha 0}
 #Alpha 0
 heatmap_read_ccs_mms_0 <- ggplot(data = read_mms_0, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -2056,7 +2073,7 @@ heatmap_read_ccs_mms_finished <- heatmap_read_ccs_mms_0 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MMS READ at alpha=0}
+```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MMS READ at alpha 0}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_read_grid_search_heatmap_alpha_0.svg",
        plot     = print(heatmap_read_ccs_mms_finished, newpage = FALSE),
@@ -2066,7 +2083,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MMS READ at alpha=0.5}
+```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MMS READ at alpha 0.5}
 #Alpha 0.5
 heatmap_read_ccs_mms_05 <- ggplot(data = read_mms_05, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -2093,7 +2110,7 @@ heatmap_read_ccs_mms_finished <- heatmap_read_ccs_mms_05 + scale_fill_viridis_c(
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MMS READ at alpha=0.5}
+```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MMS READ at alpha 0.5}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_read_grid_search_heatmap_alpha_05.svg",
        plot     = print(heatmap_read_ccs_mms_finished, newpage = FALSE),
@@ -2103,7 +2120,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms
 ```
 
 
-```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MMS READ at alpha=1}
+```{r plotting for miRNA-miRNA target number grid search for CC Singlecell MMS READ at alpha 1}
 #Alpha 1
 heatmap_read_ccs_mms_1 <- ggplot(data = read_mms_1, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -2130,7 +2147,7 @@ heatmap_read_ccs_mms_finished <- heatmap_read_ccs_mms_1 + scale_fill_viridis_c()
 ```
 
 
-```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MMS READ at alpha=1}
+```{r saving plotting for miRNA-miRNA target number grid search for CC Singlecell MMS READ at alpha 1}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_read_grid_search_heatmap_alpha_1.svg",
        plot     = print(heatmap_read_ccs_mms_finished, newpage = FALSE),
@@ -2160,7 +2177,7 @@ alpha_09_df$mirna_num <- rep(seq(100,800,100), each=11)
 ```
 
 
-```{r alpha=0.6 plot for COAD}
+```{r alpha 0.6 plot for COAD}
 #Alpha 0.6
 heatmap_coad_ccs_ms_06 <- ggplot(data = alpha_06_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -2187,7 +2204,7 @@ heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_06 + scale_fill_viridis_c()
 ```
 
 
-```{r saving alpha=0.6 plot for COAD}
+```{r saving alpha 0.6 plot for COAD}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_coad_grid_search_heatmap_alpha_06.svg",
        plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
@@ -2197,7 +2214,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_
 ```
 
 
-```{r alpha=0.7 plot for COAD}
+```{r alpha 0.7 plot for COAD}
 #Alpha 0.7
 heatmap_coad_ccs_ms_07 <- ggplot(data = alpha_07_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -2224,7 +2241,7 @@ heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_07 + scale_fill_viridis_c()
 ```
 
 
-```{r saving alpha=0.7 plot for COAD}
+```{r saving alpha 0.7 plot for COAD}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_coad_grid_search_heatmap_alpha_07.svg",
        plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
@@ -2234,7 +2251,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_
 ```
 
 
-```{r alpha=0.8 plot for COAD}
+```{r alpha 0.8 plot for COAD}
 #Alpha 0.8
 heatmap_coad_ccs_ms_08 <- ggplot(data = alpha_08_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -2261,7 +2278,7 @@ heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_08 + scale_fill_viridis_c()
 ```
 
 
-```{r saving alpha=0.8 plot for COAD}
+```{r saving alpha 0.8 plot for COAD}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_coad_grid_search_heatmap_alpha_08.svg",
        plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
@@ -2271,7 +2288,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_
 ```
 
 
-```{r alpha=0.9 plot for COAD}
+```{r alpha 0.9 plot for COAD}
 #Alpha 0.9
 heatmap_coad_ccs_ms_09 <- ggplot(data = alpha_09_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
   geom_tile()+
@@ -2298,7 +2315,7 @@ heatmap_coad_ccs_ms_finished <- heatmap_coad_ccs_ms_09 + scale_fill_viridis_c()
 ```
 
 
-```{r saving alpha=0.9 plot for COAD}
+```{r saving alpha 0.9 plot for COAD}
 #Now saving the heat map
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_coad_grid_search_heatmap_alpha_09.svg",
        plot     = print(heatmap_coad_ccs_ms_finished, newpage = FALSE),
