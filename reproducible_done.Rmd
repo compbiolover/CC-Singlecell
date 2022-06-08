@@ -929,7 +929,7 @@ all_random_gene_cindices <- read.csv("Data/Reproducible-results/Rmarkdown/Data/c
 mean_random <- mean(all_random_gene_cindices$x)
 ```
 
-## Step 14c: Getting ideal gene size MAD + SDE performance for COAD
+## Step 14c: Getting ideal gene size MAD + SDE performance for COAD (0.6607)
 ```{r getting ideal MAD + SDE gene performance COAD}
 mad.genes <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/mad_colon_and_rectal_cancer.rds")
 sde.genes <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/sde_colon_and_rectal_cancer.rds")
@@ -999,7 +999,7 @@ for(a in alpha_value[3]){
 
 ```
 
-## Step 14d: Getting ideal gene size for CC Singlecell MS on COAD
+## Step 14d: Getting ideal gene size for CC Singlecell MS on COAD. It occurs at the 49th gene size value (2500 genes). At this value with the 21st combo used (700_910 with an alpha value of 1 and the 10th value of the weighted linear model [mirna_sde_optimized]) we get a concordance index of 0.7445. 
 ```{r getting ideal cc singlecell ms (miRNA + SDE) gene performance COAD}
 combo_used <- c("800_10", "800_110", "800_210", "800_310", "800_410", "800_510", "800_610", "800_710", "800_810", "800_910", "800_1010",
                 "700_10", "700_110", "700_210", "700_310", "700_410", "700_510", "700_610", "700_710", "700_810", "700_910", "700_1010")
@@ -1062,6 +1062,7 @@ for(a in alpha_value[3]){
   }
 
   write.csv(top_cindices, file = paste0("cc_singlecell_ms_coad_df_ideal_gene_size.csv"))
+  write.csv(my_cindices, file = paste0("cc_singlecell_ms_coad_df_all_gene_size_data.csv"))
 }
 
         
