@@ -6,6 +6,7 @@
 cell_dataset_builder <- function(vim.genes=vim,
                                  cell.data=denoised_sc,
                                  cell.meta=gene_metadata,
+                                 norm.flag=c("log"),
                                  graph.root=1.5,
                                  show.traj=TRUE,
                                  point.size=2.5,
@@ -29,7 +30,7 @@ cell_dataset_builder <- function(vim.genes=vim,
   #Making the CDS object----
   vim_genes <- vim.genes
   cell_data_set <- new_cell_data_set(cell.data, gene_metadata = cell.meta)
-  cds <- preprocess_cds(cell_data_set, num_dim=100, method="PCA")
+  cds <- preprocess_cds(cell_data_set, num_dim=100, method="PCA", norm_method = norm.flag)
   cds <- reduce_dimension(cds, reduction_method = "UMAP")
   cds <- cluster_cells(cds, random_seed = 123)
   partition_plot <-plot_cells(cds, color_cells_by="partition")
