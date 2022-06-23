@@ -1,0 +1,68 @@
+#Loading the needed functions from their respective files
+source("cox_model.R")
+source("model_optimizer.R")
+
+
+#Getting ideal gene number for SDE metric on TCGA-GBM
+gene_sizes <- seq(100, 3000, 50)
+sde.genes <- readRDS("sde_gbm_cancer.rds")
+mad.genes <- readRDS("mad_gbm_cancer.rds")
+load("gbm_df.RData", verbose = TRUE)
+
+
+combo_used <- "1"
+
+alpha_value <- c(0.0,0.5,1.0)
+
+gene_sizes <- seq(100, 3000, 50)
+data_set <- "gbm"
+
+
+for(a in alpha_value[3]){
+  top_cindices <- c()
+  for(c in combo_used[11]){
+    my_cindices <- rep(0, 11)
+    counter <- 1
+    mad_sde_optimized <- two_weight_optimizer(first.metric = mad.genes,
+                                              second.metric = sde.genes,
+                                              my.filename = paste0("Optimization_mad_sde",data_set,".rds"))
+    
+    
+    
+    index <- 1
+    
+    for(md in mad_sde_optimized[1:11]){
+      for(gs in gene_sizes){
+        cox_model <- cox_model_fitter(my.seed = 1,
+                                      my.alpha = a,
+                                      cox.predictors = md,
+                                      cox.df = cox_df,
+                                      gene.num = gs,
+                                      tumor.stage = FALSE,
+                                      tumor.n = FALSE,
+                                      tumor.m = FALSE,
+                                      my.filename = paste0("mad_sde_gbm_coefs.csv"))
+        
+        #Getting the top concordance index from the cross validation and then rounding
+        #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+        #the c_index list with the result
+        current_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+        my_cindices[counter] <- current_cindex
+        counter <- counter + 1
+        index <- index+1
+        
+      }
+      
+      top_cindex <-max(my_cindices)
+      top_index <- which(my_cindices==top_cindex)
+      print(top_index)
+      print(top_cindex)
+      top_index_used <- top_index[1]
+      top_cindices <- c(top_cindices, top_cindex)
+      index <- index+1
+    }
+    
+    write.csv(my_cindices, file = paste0("mad_sde_gbm_df.csv"))
+  }
+  
+}
