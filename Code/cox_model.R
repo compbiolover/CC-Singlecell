@@ -1,4 +1,4 @@
-#Name: cox_model.R----
+#Name: cox_model.R
 #Author: Andrew Willems <awillems@vols.utk.edu>
 #Purpose: Fit an arbitrarily large number of predictors (genes) to a
 #cox model to predict survival time
@@ -6,6 +6,7 @@
 
 cox_model_fitter <- function(my.seed       = 1,
                              my.alpha      = 1,
+                             use.foldids   = TRUE,
                              my.dataset    = "COAD",
                              cox.df        =NULL,
                              gene.num      =1800,
@@ -18,9 +19,10 @@ cox_model_fitter <- function(my.seed       = 1,
                              remove.n.stage = c("ajcc.n0", "ajcc.n1", "ajcc.n2",
                                                 "ajcc.n3"),
                              save.coefs    = TRUE,
+                             calc.auc      = TRUE,
                              my.filename   ="~/Desktop/my_models_active_coefs.csv"){
   
-  #Doing input sanity checks----
+  #Doing input sanity checks
   if(missing(my.seed)){
     stop("You must specify a seed for reproducible analysis.")
   }
@@ -108,32 +110,28 @@ cox_model_fitter <- function(my.seed       = 1,
   my_x <- model.matrix(my_predictors, cox.df)
   
   
-  #The response object for the cox model----
+  #The response object for the cox model
   my_y <- Surv(time = cox.df$days.to.last.follow.up, event = cox.df$vital.status)
   my_foldid<-sample(1:10,size=length(my_y),replace=TRUE)
   
-  # if(my.dataset=="COAD"){
-  #   my_foldid <- readRDS(file = "coad_df_fold_id.rds")
-  # }else if (my.dataset=="READ"){
-  #   my_foldid <- readRDS(file = "read_df_fold_id.rds")
-  # }else if(my.dataset=="GBM"){
-  #   my_foldid <- readRDS(file = "gbm_df_fold_id.rds")
-  # }
   
-  #Saving the x and y matrices for use to do inference and confidence interval
-  #construction later
-  # if(save.x==TRUE){
-  #   write.csv(my_x, file = x.filename)
-  # }
-  # 
-  # if(save.y==TRUE){
-  #   write.csv(my_y, file = y.filename)
-  # }
-  # 
-  #The 10-fold cross-validation fit----
+  if(use.foldids==TRUE){
+    if(my.dataset=="COAD"){
+      my_foldid <- readRDS(file = "coad_df_fold_id.rds")
+    }else if (my.dataset=="READ"){
+      my_foldid <- readRDS(file = "read_df_fold_id.rds")
+    }else if(my.dataset=="GBM"){
+      my_foldid <- readRDS(file = "gbm_df_fold_id.rds")
+    }
+  }
+  
+  
+  #The 10-fold cross-validation fit
   cv_fit <- cv.glmnet(x = my_x, y = my_y, nfolds = 10, type.measure = "C",
                       maxit=100000, family="cox", parallel = TRUE,
-                      alpha = 1)
+                      alpha = 1, keep = TRUE)
+  
+  # print(cv_fit$glmnet.fit)
   
   
   #Looking to see which genes are the most important
@@ -154,7 +152,14 @@ cox_model_fitter <- function(my.seed       = 1,
   
   #Assessing the performance of the 10-fold cross-validation
   #on the entire data set
-  # model_perf<- assess.glmnet(cv_fit, newx = my_x, newy = my_y)
+  if(calc.auc==TRUE){
+    model_perf<- assess.glmnet(cv_fit, newy = my_y , family = "cox", s = "lambda.min")
+    print(model_perf$C)
+    saveRDS(model_perf, file = "cox_model_auc.rds")
+  }
+  
+  
+  
   
   if(tumor.stage==TRUE & tumor.n==FALSE & tumor.m==FALSE){
     print("This is the genes + tumor stage predictor...")
@@ -170,7 +175,7 @@ cox_model_fitter <- function(my.seed       = 1,
   
 
   
-  #Adding the relevant data bits to list to return
+  #Adding the relevant data bits to a list to return
   cox_data[["CV"]] <- cv_fit
   #cox_data[["Cox Performance"]] <- model_perf
   cox_data[["Coefficients"]] <- Coefficients
