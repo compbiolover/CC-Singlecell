@@ -190,9 +190,8 @@ saveRDS(mad.genes,
 head(mad.genes)
 ```
 
-## Step Nine: We are now making the ranked list of genes from the single-cell data for our switchde (`SDE`) metric. 
+## Step 9: We are now making the ranked list of genes from the single-cell data for our switchde (`SDE`) metric. 
 ```{r sde metric}
-#Switchde metric for colon and rectal cancer----
 sde.genes <- switchde_calculator(cc_tumor_fpkm$denoised_sc_dataframe,
                                  pseudo.time = cds_output$Pseudotime)
 
@@ -206,7 +205,7 @@ saveRDS(sde.genes,
 
 ```
 
-## Step 10: Downloading the COAD bulk dataset from TCGA. We are using the FPKM (now called STAR - Counts) dataset.
+## Step 10: Downloading the COAD bulk dataset from TCGA. We are using the FPKM (now called STAR - Counts) dataset. See [here]https://docs.gdc.cancer.gov/Data/Release_Notes/Data_Release_Notes/#data-release-320
 ```{r TCGA-COAD download}
 #Now getting our colon cancer bulk data set
 #TCGA-COAD
@@ -335,7 +334,7 @@ colnames(mad_cindices_coad_df)[2] <- "c_index"
 Step 11b: Saving the data frame of the concordance index at various gene sizes for `MAD` metric on TCGA-COAD
 ```{r saving ideal gene number for mad on coad}
 write.csv(mad_cindices_coad_df,
-          "Data/Reproducible-results/Rmarkdown/Outputs/mad_cindices_coad_across_gene_size.csv")
+          file = "Data/Reproducible-results/Rmarkdown/Outputs/mad_cindices_coad_across_gene_size.csv")
 
 ```
 
@@ -380,7 +379,7 @@ colnames(sde_cindices_coad_df)[2] <- "c_index"
 Step 12b: Saving the data frame of the concordance index at various gene sizes for `SDE` metric on TCGA-COAD 
 ```{r saving ideal gene number for sde on coad}
 write.csv(sde_cindices_coad_df,
-          "Data/Reproducible-results/Rmarkdown/Outputs/sde_cindices_coad_across_gene_size.csv")
+          file = "Data/Reproducible-results/Rmarkdown/Outputs/sde_cindices_coad_across_gene_size.csv")
 ```
 
 Step 11c: Getting the gene size that maximizes the concordance index of `SDE` on COAD
@@ -1078,7 +1077,7 @@ for(a in alpha_value[3]){
 }
 ```
 
-#Step 14f: Finding performance of CC Singlecell MMS (miRNA + SDE + MAD) on COAD at the ideal points for both CC Singlecell MS and MM to save computation time and see if we improve performance. We use the gene size of CC Singlecell MS because it is the method with the best performance up to this point. With the MM ideal mirna combination and the MS gene size the concordance index is 0.7346. Wit the MS ideal miRNA combination and the MS gene size the concordance index is 0.7491. 
+#Step 14f: Finding performance of CC Singlecell MMS (miRNA + SDE + MAD) on COAD at the ideal points for both CC Singlecell MS and MM to save computation time and see if we improve performance. We use the gene size of CC Singlecell MS because it is the method with the best performance up to this point. With the MM ideal mirna combination and the MS gene size the concordance index is 0.7346. With the MS ideal miRNA combination and the MS gene size the concordance index is 0.7491. After the grid search for COAD in fig S3a we found a slightly better point and it has a c-index of 0.7514.  
 ```{r cc singlecell mms coad mm ideal mirna combo}
 combo_used <- c("800_10", "800_110", "800_210", "800_310", "800_410", "800_510", "800_610", "800_710", "800_810", "800_910", "800_1010",
                 "700_10", "700_110", "700_210", "700_310", "700_410", "700_510", "700_610", "700_710", "700_810", "700_910", "700_1010")
@@ -1220,7 +1219,7 @@ coad_methods_comp_df <- data.frame(Method=c("CC Singlecell MM",
                                             "CC Singlecell MMS","MAD", "SDE", 
                                             "miRNA", "MAD + SDE" ,
                                             "Random Genes"),
-                                   c_index=c(0.7351, 0.7445, 0.7491, 
+                                   c_index=c(0.7351, 0.7445, 0.7514, 
                                              0.6197,
                                              0.6495,
                                              0.7325,
@@ -1262,7 +1261,7 @@ methods_comp_coad_plot_finished <-methods_comp_coad_plot +
   xlab("Method")+ ylab("Mean Concordance Index")+
   ggtitle("TCGA-COAD")
 
-methods_comp_coad_plot_finished <- methods_comp_coad_plot_finished + coord_cartesian(ylim = c(0.5,0.75))+ 
+methods_comp_coad_plot_finished <- methods_comp_coad_plot_finished + coord_cartesian(ylim = c(0.5,0.76))+ 
   scale_fill_manual(values = c("#FDE725FF","#FDE725FF", "#FDE725FF", "#404788FF","#404788FF", "#404788FF","#404788FF", "#404788FF")) 
 
 
@@ -1281,9 +1280,10 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/methods_comp_coad
 
 ## Step 14g: Getting Kaplan Meier (KM) curve for top performing CC Singlecell MMS gene set to see if it separates risk groups
 ```{r fig2c (cc singlecell mms coad km curve)}
-fig2c_plot <- risk_score_calculator(my.file = "~/Desktop/cc_singlecell_mms_ideal_mirna_combo_coefs_of_top_performer_ms.csv",
+cox_df <- readRDS("Data/Reproducible-results/Rmarkdown/Data/coad_df_finished.rds")
+fig2c_plot <- risk_score_calculator(my.file = "~/Desktop/All-files-from-paper-draft-update/cc_singlecell_mms_ideal_mirna_fig_s3_coefs.csv",
                                       tumor.data = FALSE, n.data = FALSE,
-                                      set.ci = FALSE,
+                                      set.ci = TRUE,
                                       cox.df = cox_df, 
                                       plot.title = "TCGA-COAD")
 fig2c_plot$`KM Plot`
@@ -1301,28 +1301,26 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms
 
 
 ## Step 14h: Coefficient plot for to CC Singlecell MMS model on COAD data
-```{r fig2c data (cc singlecell mms coef plot)}
-#COAD coefficient data
-coad_coef_df <- read.csv("~/Desktop/cc_singlecell_mms_ideal_mirna_combo_coefs_of_top_performer_ms.csv")
+```{r fig4a data (cc singlecell mms COAD coef plot)}
+coad_coef_df <- read.csv("~/Desktop/All-files-from-paper-draft-update/cc_singlecell_mms_ideal_mirna_fig_s3_coefs.csv")
 coad_coef_df <- coad_coef_df[,2:3]
 colnames(coad_coef_df) <- c("Gene", "coefs")
 coad_coef_df$hazard_ratio <- exp(coad_coef_df$coefs)
 
 coad_coef_df_sub <- filter(coad_coef_df, hazard_ratio >4)
-coad_coef_df_sub <- filter(coad_coef_df_sub, Gene != "AL591684.1")
-coad_coef_df_sub <- filter(coad_coef_df_sub, Gene != "UNC5D")
-coad_coef_df_sub <- filter(coad_coef_df_sub, Gene != "ZNF705D")
-
+coad_coef_df_sub$log_hazard_ratio <- log10(coad_coef_df_sub$hazard_ratio)
+#coad_coef_df_sub <- filter(coad_coef_df_sub, Gene != "ZNF705D")
+#coad_coef_df_sub <- filter(coad_coef_df_sub, Gene != "UNC5D")
 ```
 
 
-```{r fig2c (cc singlecell mms coef plot)}
-coad_coef_plot <- ggplot(data = coad_coef_df_sub, aes(x=Gene, y=hazard_ratio,
+```{r fig4a (cc singlecell mms COAD coef plot)}
+coad_coef_plot <- ggplot(data = coad_coef_df_sub, aes(x=Gene, y=log_hazard_ratio,
                                                       color=Gene, fill=Gene))+
   geom_col()+
   theme_bw()+
   ggtitle("Top COAD Coefficients")+
-  ylab("Hazard Ratio")+
+  ylab("log(Hazard Ratio)")+
   xlab("Genes")+
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0.5, face = "bold", size = 40,
@@ -1343,17 +1341,26 @@ coad_coef_plot
 ```
 
 
-```{r saving fig 2d (cc singlecell mms coef plot)}
+```{r saving fig 4d (cc singlecell mms COAD coef plot)}
 #Saving the coefficients plot
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_coad_coef_plot.svg",
        plot     = print(coad_coef_plot, newpage = FALSE),
        device   = "svg", dpi=300,
        width    = 40, height = 40,
        units    = "cm")
-
-
 ```
 
+## Step 14i: Number of active genes for CC Singlecell MMS on COAD
+```{r active gene size COAD}
+coad_coef_df <- read.csv("~/Desktop/cc_singlecell_mms_ideal_mirna_combo_coefs_of_top_performer_ms.csv")
+coad_coef_df <- coad_coef_df[,2:3]
+colnames(coad_coef_df) <- c("Gene", "coefs")
+coad_coef_df$hazard_ratio <- exp(coad_coef_df$coefs)
+
+num_of_ag_coad <- nrow(coad_coef_df)
+
+coad_coef_df_sub <- filter(coad_coef_df, hazard_ratio >4)
+```
 
 
 ## Step Fifteen: Getting the bulk rectal cancer dataset
@@ -1521,7 +1528,7 @@ write.csv(sde_cindices_read_df,
 ```
 
 
-## Step 18: Ideal gene number for miRNA-miRNA target number on READ. C-index is 0.7512 at 2,750 genes
+## Step 18: Ideal gene number for miRNA-miRNA target number on READ. C-index is 0.7512 at 2,750 genes when using (1000_1010), 0.7898 at 350 genes when using (1000_110), and 0.7234 at 2,400 genes when using (800_1010)
 ```{r ideal gene number for high miRNA-miRNA target size on TCGA-READ}
 #Getting ideal gene number for miRNA metric on TCGA-READ
 #For this metric we don't know which combination of miRNA and miRNA targets
@@ -1701,22 +1708,22 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/mirna_mirna_targe
        units    = "cm")
 ```
 
-## Step 19: Random gene performance on READ. Its c-index is 0.67085
+## Step 19: Random gene performance on READ. Its c-index is 0.64411
 ```{r random gene performance for TCGA-READ}
 #Random sample of genes (10 random samples taken) for READ.
 #We will take the average of these 10 samplings. We will select the same number
 #of genes as the number of genes that give our miRNA metric the best performance
 #(2,750 genes)
-random_read1 <- sample(colnames(cox_df), size = 2750)
-random_read2 <- sample(colnames(cox_df), size = 2750)
-random_read3 <- sample(colnames(cox_df), size = 2750)
-random_read4 <- sample(colnames(cox_df), size = 2750)
-random_read5 <- sample(colnames(cox_df), size = 2750)
-random_read6 <- sample(colnames(cox_df), size = 2750)
-random_read7 <- sample(colnames(cox_df), size = 2750)
-random_read8 <- sample(colnames(cox_df), size = 2750)
-random_read9 <- sample(colnames(cox_df), size = 2750)
-random_read10 <- sample(colnames(cox_df), size = 2750)
+random_read1 <- sample(colnames(cox_df), size = 350)
+random_read2 <- sample(colnames(cox_df), size = 350)
+random_read3 <- sample(colnames(cox_df), size = 350)
+random_read4 <- sample(colnames(cox_df), size = 350)
+random_read5 <- sample(colnames(cox_df), size = 350)
+random_read6 <- sample(colnames(cox_df), size = 350)
+random_read7 <- sample(colnames(cox_df), size = 350)
+random_read8 <- sample(colnames(cox_df), size = 350)
+random_read9 <- sample(colnames(cox_df), size = 350)
+random_read10 <- sample(colnames(cox_df), size = 350)
 
 #Saving the random results for reproducibility
 # write.csv(random_read1, "Data/Reproducible-results/Rmarkdown/Outputs/random_read_genes1.csv")
@@ -1748,7 +1755,7 @@ for(rg in all_random_gene_cindices){
   cox_model <- cox_model_fitter(my.seed = 1,
                                 cox.predictors = current_genes,
                                 cox.df = cox_df,
-                                gene.num = 2750,
+                                gene.num = 350,
                                 tumor.stage = FALSE,
                                 tumor.n = FALSE,
                                 tumor.m = FALSE,
@@ -1838,14 +1845,14 @@ for(a in alpha_value[3]){
 ```
 
 
-## Step 21a: Ideal CC Singlecell MM gene size on READ. It is size index 18 (950 genes)
+## Step 21a: Ideal CC Singlecell MM gene size on READ. Its ideal weighted index is 11 (0.7898) and occurs at a gene size of 350 genes
 ```{r ideal cc singlecell mm gene size READ}
 combo_used <- c("1000_10", "1000_110", "1000_210", "1000_310", "1000_410", "1000_510", "1000_610", "1000_710", "1000_810", "1000_910", "1000_1010",
                  "900_10", "900_110", "900_210", "900_310", "900_410", "900_510", "900_610", "900_710", "900_810", "900_910", "900_1010")
 
 gene_sizes <- seq(100, 3000, 50)
 mad.genes <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/sde_colon_and_rectal_cancer.rds")
-cox_df <- readRDS("Data/Reproducible-results/Rmarkdown/Data/coad_df_finished.rds")
+cox_df <- readRDS("Data/Reproducible-results/Rmarkdown/Data/read_df_finished.rds")
 
 alpha_value <- c(0.0,0.5,1.0)
 
@@ -1855,7 +1862,7 @@ data_set <- "read"
 
 for(a in alpha_value[3]){
   top_cindices <- c()
-  for(c in combo_used[11]){
+  for(c in combo_used[2]){
     my_cindices <- rep(0, 11)
     counter <- 1
     load(file = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/Mirna/Inputs/",c,"_targets.RData"), verbose = TRUE)
@@ -1870,7 +1877,7 @@ for(a in alpha_value[3]){
 
 
 
-    for(mm in mirna_mad_optimized[10]){
+    for(mm in mirna_mad_optimized[1:11]){
       for(gs in gene_sizes){
         cox_model <- cox_model_fitter(my.seed = 1,
                                     my.alpha = a,
@@ -1909,7 +1916,7 @@ for(a in alpha_value[3]){
       }
 ```
 
-## Step 21b: Finding the best miRNA-miRNA target combo at the ideal gene size determined in 21a for CC Singlecell MM on READ
+## Step 21b: Finding the best miRNA-miRNA target combo at the ideal gene size determined in 21a for CC Singlecell MM on READ. Its ideal c-index is 0.802 and occurs at the "1000_610" miRNA-miRNA target combo
 ```{r ideal mirna combo for cc singlecell mm on READ}
 combo_used <- c("1000_10", "1000_110", "1000_210", "1000_310", "1000_410", "1000_510", "1000_610", "1000_710", "1000_810", "1000_910", "1000_1010",
                 "900_10", "900_110", "900_210", "900_310", "900_410", "900_510", "900_610", "900_710", "900_810", "900_910", "900_1010")
@@ -1945,9 +1952,9 @@ for(a in alpha_value[3]){
         cox_model <- cox_model_fitter(my.seed = 1,
                                     my.alpha = a,
                                     my.dataset = "READ",
-                                    cox.predictors = ms,
+                                    cox.predictors = mm,
                                     cox.df = cox_df,
-                                    gene.num = 950,
+                                    gene.num = 350,
                                     tumor.stage = FALSE,
                                     tumor.n = FALSE,
                                     tumor.m = FALSE,
@@ -1976,17 +1983,232 @@ for(a in alpha_value[3]){
 ```
 
 
+## Step 21c: Ideal CC Singlecell MS gene size on READ. Its ideal weighted index is 11 (0.7898) and occurs at a gene size of 350 genes 
+```{r ideal cc singlecell mm gene size READ}
+combo_used <- c("1000_10", "1000_110", "1000_210", "1000_310", "1000_410", "1000_510", "1000_610", "1000_710", "1000_810", "1000_910", "1000_1010",
+                 "900_10", "900_110", "900_210", "900_310", "900_410", "900_510", "900_610", "900_710", "900_810", "900_910", "900_1010")
+
+gene_sizes <- seq(100, 3000, 50)
+mad.genes <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/sde_colon_and_rectal_cancer.rds")
+cox_df <- readRDS("Data/Reproducible-results/Rmarkdown/Data/read_df_finished.rds")
+
+alpha_value <- c(0.0,0.5,1.0)
+
+mirna_used <- gsub(combo_used[1], pattern = "_10", replacement = "")
+data_set <- "read"
+
+
+for(a in alpha_value[3]){
+  top_cindices <- c()
+  for(c in combo_used[2]){
+    my_cindices <- rep(0, 11)
+    counter <- 1
+    load(file = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/Mirna/Inputs/",c,"_targets.RData"), verbose = TRUE)
+    mirna.genes <- mirna.ranking
+    mirna_mad_optimized <- two_weight_optimizer(first.metric = mirna.genes,
+                                                second.metric = mad.genes,
+                                                my.filename = paste0("Optimizations/Optimization_",c,"_targets_cc_singlecell_ms_",a,"_alpha_",data_set,".rds"))
+
+
+
+
+
+
+
+    for(mm in mirna_mad_optimized[1:11]){
+      for(gs in gene_sizes){
+        cox_model <- cox_model_fitter(my.seed = 1,
+                                    my.alpha = a,
+                                    my.dataset = "READ",
+                                    cox.predictors = mm,
+                                    cox.df = cox_df,
+                                    gene.num = gs,
+                                    tumor.stage = FALSE,
+                                    tumor.n = FALSE,
+                                    tumor.m = FALSE,
+                                    my.filename = paste0("cc_singlecell_ms_ideal_gene_size_coefs.csv"))
+
+      #Getting the top concordance index from the cross validation and then rounding
+      #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+      #the c_index list with the result
+      current_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+      my_cindices[counter] <- current_cindex
+      counter <- counter + 1
+
+    }
+
+    top_cindex <-max(my_cindices)
+    top_index <- which(my_cindices==top_cindex)
+    print(top_index)
+    print(top_cindex)
+    top_index_used <- top_index[1]
+    top_cindices <- c(top_cindices, top_cindex)
+  }
+
+  write.csv(top_cindices, file = paste0("cc_singlecell_ms_read_df_ideal_gene_size.csv"))
+  write.csv(my_cindices, file = paste0("cc_singlecell_ms_read_df_all_gene_size_data.csv"))
+}
+
+        
+        
+      }
+```
+
+##Step 21d: Finding the best miRNA-miRNA target combo at the ideal gene size determined in 21c for CC Singlecell MS on READ. Its ideal c-index is 0.802 and occurs at the "1000_610" miRNA-miRNA target combo. A higher ideal (0.8283) is found at 600 genes and an miRNA-miRNA target value of "400_410". Need to investigate this more 
+```{r ideal mirna combo for cc singlecell ms on READ}
+combo_used <- c("1000_10", "1000_110", "1000_210", "1000_310", "1000_410", "1000_510", "1000_610", "1000_710", "1000_810", "1000_910", "1000_1010",
+                "900_10", "900_110", "900_210", "900_310", "900_410", "900_510", "900_610", "900_710", "900_810", "900_910", "900_1010")
+
+
+sde.genes <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/sde_colon_and_rectal_cancer.rds")
+cox_df <- readRDS("Data/Reproducible-results/Rmarkdown/Data/coad_df_finished.rds")
+
+alpha_value <- c(0.0,0.5,1.0)
+
+mirna_used <- gsub(combo_used[1], pattern = "_10", replacement = "")
+data_set <- "read"
+
+
+for(a in alpha_value[3]){
+  top_cindices <- c()
+  for(c in combo_used){
+    my_cindices <- rep(0, 11)
+    counter <- 1
+    load(file = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/miRNA_inputs/Inputs/",c,"_targets.RData"), verbose = TRUE)
+    mirna.genes <- mirna.ranking
+    mirna_mad_optimized <- two_weight_optimizer(first.metric = mirna.genes,
+                                                second.metric = mad.genes,
+                                                my.filename = paste0("Optimization_",c,"_targets_cc_singlecell_ms_",a,"_alpha_",data_set,".rds"))
+
+
+
+
+
+
+
+    for(ms in mirna_sde_optimized){
+        cox_model <- cox_model_fitter(my.seed = 1,
+                                    my.alpha = a,
+                                    my.dataset = "READ",
+                                    cox.predictors = ms,
+                                    cox.df = cox_df,
+                                    gene.num = 350,
+                                    tumor.stage = FALSE,
+                                    tumor.n = FALSE,
+                                    tumor.m = FALSE,
+                                    my.filename = paste0("cc_singlecell_ms_ideal_mirna_combo_coefs.csv"))
+
+      #Getting the top concordance index from the cross validation and then rounding
+      #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+      #the c_index list with the result
+      current_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+      my_cindices[counter] <- current_cindex
+      counter <- counter + 1
+
+    }
+
+    top_cindex <-max(my_cindices)
+    top_index <- which(my_cindices==top_cindex)
+    print(top_index)
+    print(top_cindex)
+    top_index_used <- top_index[1]
+    top_cindices <- c(top_cindices, top_cindex)
+  }
+
+  write.csv(top_cindices, file = paste0("cc_singlecell_ms_read_df_ideal_mirna_combo.csv"))
+  write.csv(my_cindices, file = paste0("cc_singlecell_ms_read_df_all_mirna_combo_performance_data.csv"))
+}
+```
+
+
+## Step 21e: CC Singlecell MMS on READ: Its best performance is 0.8283. It occurs at gene size of 600. 
+```{r ideal gene size cc singlecell mms on READ}
+combo_used <- c("1000_10", "1000_110", "1000_210", "1000_310", "1000_410", "1000_510", "1000_610", "1000_710", "1000_810", "1000_910", "1000_1010",
+                "900_10", "900_110", "900_210", "900_310", "900_410", "900_510", "900_610", "900_710", "900_810", "900_910", "900_1010",
+                "600_10", "600_110", "600_210", "600_310", "600_410", "600_510", "600_610", "600_710", "600_810", "600_910", "600_1010",
+                "500_10", "500_110", "500_210", "500_310", "500_410", "500_510", "500_610", "500_710", "500_810", "500_910", "500_1010",
+                "400_10", "400_110", "400_210", "400_310", "400_410", "400_510", "400_610", "400_710", "400_810", "400_910", "400_1010",
+                "300_10", "300_110", "300_210", "300_310", "300_410", "300_510", "300_610", "300_710", "300_810", "300_910", "300_1010",
+                "200_10", "200_110", "200_210", "200_310", "200_410", "200_510", "200_610", "200_710", "200_810", "200_910", "200_1010",
+                "100_10", "100_110", "100_210", "100_310", "100_410", "100_510", "100_610", "100_710", "100_810", "100_910", "100_1010")
+
+
+alpha_value <- c(0.0,0.5,1.0)
+
+mirna_used <- gsub(combo_used[1], pattern = "_10", replacement = "")
+data_set <- "read"
+
+
+for(a in alpha_value[3]){
+  top_cindices <- c()
+  for(c in combo_used){
+    my_cindices <- rep(0, 121)
+    counter <- 1
+    load(file = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-READ/Data/Mirna/Inputs/",c,"_targets.RData"), verbose = TRUE)
+    mirna.genes <- mirna.ranking
+    mirna_mad_sde_optimized <- three_weight_optimizer(first.metric = mirna.genes,
+                                                      second.metric = mad.genes,
+                                                      third.metric = sde.genes,
+                                                      my.filename = paste0("Optimizations/Optimization_",c,"_targets_cc_singlecell_mms_",a,"_alpha_",data_set,".rds"))
+
+
+
+
+
+
+
+    for(mms in mirna_mad_sde_optimized[1:121]){
+      cox_model <- cox_model_fitter(my.seed = 1,
+                                    my.alpha = a,
+                                    my.dataset = "READ",
+                                    cox.predictors = mms,
+                                    cox.df = cox_df,
+                                    gene.num = 350,
+                                    tumor.stage = FALSE,
+                                    tumor.n = FALSE,
+                                    tumor.m = FALSE,
+                                    my.filename = paste0("cc_singlecell_mms_",data_set,"_coefs_genes_",mms,"_index.csv"))
+
+      #Getting the top concordance index from the cross validation and then rounding
+      #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+      #the c_index list with the result
+      current_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+      my_cindices[counter] <- current_cindex
+      counter <- counter + 1
+
+    }
+
+    top_cindex <-max(my_cindices)
+    top_index <- which(my_cindices==top_cindex)
+    print(top_index)
+    print(top_cindex)
+    top_index_used <- top_index[1]
+    top_cindices <- c(top_cindices, top_cindex)
+  }
+
+
+  write.csv(top_cindices, file = paste0("cc_singlecell_mms_read_top_cindex.csv"))
+
+
+
+}
+
+
+```
+
+
+## Step 21f: Figure 2b
 ```{r fig2b data}
 #Data for MAD, SDE, and miRNA high metric, CC Singlecell MS, CC Singlecell MM,
 #CC Singlecell MMS, MAD + SDE, and Random genes
 #First bind the data frames together
 
-mad_cindices_read_df <- read.csv("Data/Reproducible-results/Rmarkdown/Outputs/mad_cindices_read_across_gene_size.csv")
-mad_cindices_read_df <- max(mad_cindices_read_df$c_index)
-sde_cindices_read_df <- read.csv("Data/Reproducible-results/Rmarkdown/Outputs/sde_cindices_read_across_gene_size.csv")
-sde_cindices_read_df <- max(sde_cindices_read_df$c_index)
-mirna_high_cindices_read_df <- read.csv("Data/Reproducible-results/Rmarkdown/Outputs/mirna_high_cindices_read_across_gene_size.csv")
-mirna_high_cindices_read_df <- max(mirna_high_cindices_read_df$c_index)
+# mad_cindices_read_df <- read.csv("Data/Reproducible-results/Rmarkdown/Outputs/mad_cindices_read_across_gene_size.csv")
+# mad_cindices_read_df <- max(mad_cindices_read_df$c_index)
+# sde_cindices_read_df <- read.csv("Data/Reproducible-results/Rmarkdown/Outputs/sde_cindices_read_across_gene_size.csv")
+# sde_cindices_read_df <- max(sde_cindices_read_df$c_index)
+# mirna_high_cindices_read_df <- read.csv("Data/Reproducible-results/Rmarkdown/Outputs/mirna_high_cindices_read_across_gene_size.csv")
+# mirna_high_cindices_read_df <- max(mirna_high_cindices_read_df$c_index)
 
 methods_optimal_gene_read_df <- data.frame(method=c("CC Singlecell MM", 
                                                     "CC Singlecell MS", 
@@ -1994,10 +2216,10 @@ methods_optimal_gene_read_df <- data.frame(method=c("CC Singlecell MM",
                                                     "MAD", "SDE", "miRNA",
                                                     "MAD + SDE", 
                                                     "Random Genes"), 
-                                           c_index=c(0.7742, 0.8283, 0.8283, 
+                                           c_index=c(0.802, 0.8283, 0.8442, 
                                                      0.7543, 0.7716, 0.7512,
                                                      0.8107,
-                                                     0.67085)) 
+                                                     0.64411)) 
 
 
 #Saving the data frame
@@ -2035,71 +2257,430 @@ methods_optimal_gene_read_plot_finished <-methods_optimal_gene_read_plot +
   ggtitle("TCGA-READ")
 
 methods_optimal_gene_read_plot_finished <- methods_optimal_gene_read_plot_finished + coord_cartesian(ylim = c(0.5,0.85))+ 
-  scale_fill_manual(values = c("#FDE725FF","#FDE725FF", "#FDE725FF", "#FDE725FF","#404788FF", "#404788FF","#404788FF", "#404788FF")) 
+  scale_fill_manual(values = c("#FDE725FF","#FDE725FF", "#FDE725FF", "#404788FF","#404788FF", "#404788FF","#404788FF", "#404788FF")) 
 ```
 
 
 ```{r saving fig2b}
 #Saving the finished graph in .svg format
-ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/individual_metrics_read.svg",
+ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/methods_comp_read.svg",
        plot     = print(methods_optimal_gene_read_plot_finished, newpage = FALSE),
        device   = "svg", dpi=300,
        width    = 55, height = 55,
        units    = "cm")
 ```
 
+## Step 21f: Taking top coefficients of CC Singlecell MMS on READ to see if they separate high and low risk groups with KM curves
+```{r cc singlecell mms read km plot (fig2d)}
+cox_df <- readRDS("Data/Reproducible-results/Data/read_df_finished.rds")
 
-```{r mad+sde metric for READ}
-#MAD + SDE metric for READ
-#We first do alpha weight optimization and then fit the elastic-net penalized
-#cox model to every combination of alpha and assess its performance through 
-#10-fold cross-validation
-
-#Weight optimization
-mad_sde_read_optimized <- two_weight_optimizer(first.metric = mad.genes,
-                                               second.metric = sde.genes,
-                                               my.filename = "Data/Reproducible-results/Rmarkdown/Outputs/mad_sde_read_optimized.rds")
-
+fig2d_plot <- risk_score_calculator(my.file = "~/Desktop/All-files-from-paper-draft-update/cc_singlecell_mms_read_coefs_at_top_combo_and_index.csv",
+                                      tumor.data = FALSE, n.data = FALSE,
+                                      set.ci = TRUE,
+                                      cox.df = cox_df, 
+                                      plot.title = "TCGA-READ")
+fig2d_plot$`KM Plot`
 ```
 
 
-```{r ideal gene size for mad+sde on TCGA-READ}
-c_index <- rep(0, 59)
+```{r saving fig2d (cc singlecell mms read km curve)}
+#Saving the KM plot
+ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_read_km_plot.svg",
+       plot     = print(fig2d_plot$`KM Plot`$plot, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 34, height = 34,
+       units    = "cm")
+```
+
+
+## Step 21g: Taking top READ coefficients 
+```{r fig4d}
+read_coef_df <- read.csv("~/Desktop/All-files-from-paper-draft-update/cc_singlecell_mms_read_coefs_at_top_combo_and_index.csv")
+read_coef_df <- read_coef_df[,2:3]
+colnames(read_coef_df) <- c("Gene", "coefs")
+read_coef_df$hazard_ratio <- exp(read_coef_df$coefs)
+
+read_coef_df_sub <- filter(read_coef_df, hazard_ratio >4)
+read_coef_df_sub$log_hazard_ratio <- log10(read_coef_df_sub$hazard_ratio)
+read_coef_df_sub <- filter(read_coef_df_sub, Gene != "TRIM60")
+```
+
+
+```{r fig4d (cc singlecell mms READ coef plot)}
+read_coef_plot <- ggplot(data = read_coef_df_sub, aes(x=Gene, y=log_hazard_ratio,
+                                                      color=Gene, fill=Gene))+
+  geom_col()+
+  theme_bw()+
+  ggtitle("Top READ Coefficients")+
+  ylab("log(Hazard Ratio)")+
+  xlab("Genes")+
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40,
+                                  family = "sans"),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 30, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"))+
+  scale_color_viridis_d(direction = -1)+
+  scale_fill_viridis_d(direction = -1)+
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
+  coord_flip()
+
+
+read_coef_plot
+```
+
+
+```{r saving fig 4d (cc singlecell mms READ coef plot)}
+#Saving the coefficients plot
+ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_read_coef_plot.svg",
+       plot     = print(read_coef_plot, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 40, height = 40,
+       units    = "cm")
+```
+
+
+
+## Step 22a: Now using an unrelated cancer data set (glioblastoma) from the TCGA-GBM project. Because there isn't as many miRNAs for this we don't see big changes in performance between any of our methods.
+```{r gbm dataframe}
+load("~/Desktop/gbm_df.RData", verbose = TRUE)
+```
+
+## Step 22b: GBM single-cell data. We want to subset to just the primary glioblastoma tumors of the 5 patients. It appears that the samples are log2 transformed based on [this]https://www.biostars.org/p/403934/. They have already undergone extensive pre-processing as noted by their authors [here]https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE57872
+```{r gbm single-cell data}
+gbm_fpkm <- read.csv("Data/Reproducible-results/Rmarkdown/Single-cell-data/Other-cancers/GSE57872_GBM_data_matrix.txt", sep = "\t")
+head(gbm_fpkm)
+
+#Subsetting to just the 5 patients
+gbm_fpkm <- gbm_fpkm %>% select(X:MGH31_H12)
+gbm_fpkm_gene_names <- gbm_fpkm$X
+rownames(gbm_fpkm) <- gbm_fpkm$X
+head(gbm_fpkm)
+gbm_fpkm <- gbm_fpkm %>% select(MGH264_A01:MGH31_H12)
+head(gbm_fpkm)
+```
+```{r magic pre-processing step 1 gbm}
+keep_rows <- rowSums(gbm_fpkm > 0) > 10
+table(keep_rows)
+gbm_fpkm <- gbm_fpkm[keep_rows,]
+head(gbm_fpkm)
+```
+
+```{r magic denoising of gbm single-cell data}
+#Denoising the single-cell data and saving the output
+gbm_fpkm <- magic_denoiser(sc.data = gbm_fpkm,
+                                magic.seed = 123, magic.solver = 'approximate')
+```
+
+```{r saving magic denoising of single-cell gbm data outputs}
+saveRDS(gbm_fpkm$denoised_sc_dataframe,
+        file = "Data/Reproducible-results/Rmarkdown/Outputs/denoised-gbm-cell-data.rds")
+
+head(as.data.frame(gbm_fpkm$denoised_sc_dataframe))
+
+saveRDS(gbm_fpkm$cds_gene_names,
+        file = "Data/Reproducible-results/Rmarkdown/Outputs/denoised-gbm-single-cell-data-gene-names.rds")
+
+head(gbm_fpkm$cds_gene_names)
+```
+
+
+## Step 22c: Doing ZEB1 based pseudotime for GBM. Got EMT markers from this [paper]https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4774466/. We will need to undo the log2 (following [this]https://stackoverflow.com/questions/50787776/how-to-inverse-a-log2-transformation) transformation because `Monocle3` has a log transformation step that I cannot turn off
+```{r monocle3 vim pseudotime generation gbm, echo=FALSE}
+#Generating the ZEB1 based pseudotime progression with Monocle3
+#Based on the expression of the ZEB1 graph we select the bottom-rightmost point
+#as the root of our pseudotime as this matches the gradient of ZEB1 expression
+#level
+
+gbm_fpkm$denoised_sc_dataframe <- 2^gbm_fpkm$denoised_sc_dataframe
+
+cds_output <- cell_dataset_builder(vim.genes = c("ZEB1"),
+                                   cell.data = gbm_fpkm$denoised_sc_dataframe,
+                                   norm.flag = "none",
+                                   cell.meta = gbm_fpkm$cds_gene_names,
+                                   my.root = "Y_92",
+                                   my.cds.filename = "Data/Reproducible-results/Rmarkdown/Outputs/cds_ouput_gbm.rds",
+                                   my.monocle.graph = "Data/Reproducible-results/Rmarkdown/Outputs/vim_pseudotime_gbm.svg",
+                                   my.monocle.graph.genes = "Data/Reproducible-results/Rmarkdown/Outputs/vim_genes_gbm.svg",
+                                   my.pt.data.filename = "Data/Reproducible-results/Rmarkdown/Outputs/vim_pseudotime_gbm_data.csv")
+
+cds_output$`PT Graph`
+cds_output$`Cell Progression Graph`
+```
+## Step22d: MAD metric for GBM
+```{r mad metric gbm}
+#MAD metric for gbm cancer
+mad.genes <- mad_calculator(gbm_fpkm$denoised_sc_dataframe)
+saveRDS(mad.genes,
+        file = "Data/Reproducible-results/Rmarkdown/Outputs/mad_gbm_cancer.rds")
+
+head(mad.genes)
+```
+
+## Step 22e: Ideal gene size for MAD metric on GBM. Its top c-index is 0.6489 at a gene size of 200
+```{r ideal gene number for mad on GBM}
+#Getting ideal gene number for MAD metric on TCGA-COAD
 gene_sizes <- seq(100, 3000, 50)
-counter <- 1
+mad_cindices <- rep(0, length(gene_sizes))
 
 for(gs in gene_sizes){
-  for(ms in mad_sde_read_optimized[1:11]){
-    cox_model <- cox_model_fitter(my.seed = 1,
-                                  cox.predictors = ms,
-                                  cox.df = cox_df,
-                                  gene.num = gs,
-                                  tumor.stage = FALSE,
-                                  tumor.n = FALSE,
-                                  tumor.m = FALSE,
-                                  my.filename = paste0("Data/Reproducible-results/Rmarkdown/Outputs/mad_sde_read_coefs_",gs,"_genes_",counter,"_index.csv"))
-    
-    #Getting the top concordance index from the cross validation and then rounding
-    #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
-    #the c_index list with the result
-    top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
-    c_index[which(gene_sizes==gs)] <- top_cindex
-    counter <- counter + 1
-    
-  }
+  cox_model <- cox_model_fitter(my.seed = 1,
+                                cox.predictors = mad.genes,
+                                cox.df = cox_df,
+                                gene.num = gs,
+                                tumor.stage = FALSE,
+                                tumor.n = FALSE,
+                                tumor.m = FALSE,
+                                my.filename = paste0("Data/Reproducible-results/Rmarkdown/Outputs/mad_coad_coefs_",gs,"_genes.csv"))
   
+  #Getting the top concordance index from the cross validation and then rounding
+  #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+  #the mad_cindices list with the result
+  top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+  mad_cindices[which(gene_sizes==gs)] <- top_cindex
   
 }
 
-mad_sde_finished_df <- as.data.frame(cbind(gene_sizes, c_index))
+#Binding the gene size and c-index vectors together to get the finished data
+#frame
+mad_cindices_coad_df <- as.data.frame(cbind(gene_sizes, mad_cindices))
+mad_cindices_coad_df$method <- rep("MAD", nrow(mad_cindices_coad_df))
+colnames(mad_cindices_coad_df)[2] <- "c_index"
+```
+
+## Step 22f: SDE metric for GBM
+```{r sde metric gbm}
+#Switchde metric for gbm cancer
+sde.genes <- switchde_calculator(gbm_fpkm$denoised_sc_dataframe,
+                                 pseudo.time = cds_output$Pseudotime)
+
+saveRDS(sde.genes,
+        file = "Data/Reproducible-results/Rmarkdown/Outputs/sde_gbm_cancer.rds")
+
+
+head(sde.genes)
 ```
 
 
-```{r saving ideal gene size for mad+sde on TCGA-READ}
-write.csv(mad_sde_finished_df, "Data/Reproducible-results/Rmarkdown/Outputs/mad_sde_read_df.csv")
+## Step 22g: Ideal gene size for SDE metric on GBM. It's best c-index is 0.6606 at a gene size of 150. 
+```{r ideal gene number for SDE on GBM}
+#Getting ideal gene number for SDE metric on TCGA-COAD
+gene_sizes <- seq(100, 3000, 50)
+sde_cindices <- rep(0, length(gene_sizes))
+mad.genes <- readRDS("sde_gbm_cancer.rds")
+load("gbm_df.RData", verbose = TRUE)
+
+for(gs in gene_sizes){
+  cox_model <- cox_model_fitter(my.seed = 1,
+                                cox.predictors = sde.genes,
+                                cox.df = cox_df,
+                                gene.num = gs,
+                                tumor.stage = FALSE,
+                                tumor.n = FALSE,
+                                tumor.m = FALSE,
+                                my.filename = paste0("Data/Reproducible-results/Rmarkdown/Outputs/sde_coad_coefs_",gs,"_genes.csv"))
+  
+  #Getting the top concordance index from the cross validation and then rounding
+  #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+  #the mad_cindices list with the result
+  top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+  sde_cindices[which(gene_sizes==gs)] <- top_cindex
+  
+}
+
+#Binding the gene size and c-index vectors together to get the finished data
+#frame
+sde_cindices_gbm_df <- as.data.frame(cbind(gene_sizes, sde_cindices))
+sde_cindices_gbm_df$method <- rep("SDE", nrow(sde_cindices_gbm_df))
+colnames(sde_cindices_gbm_df)[2] <- "c_index"
 ```
 
-## Step Seventeen: Doing grid search for COAD at different values of alpha
+## Step 23: Ideal MAD + SDE c-index on GBM. It's best c-index is 0.7062
+```{r getting ideal MAD + SDE gene performance GBM}
+gene_sizes <- seq(100, 3000, 50)
+sde.genes <- readRDS("sde_gbm_cancer.rds")
+mad.genes <- readRDS("mad_gbm_cancer.rds")
+load("gbm_df.RData", verbose = TRUE)
+
+
+combo_used <- "1000_1010"
+
+alpha_value <- c(0.0,0.5,1.0)
+
+gene_sizes <- seq(100, 3000, 50)
+data_set <- "gbm"
+
+
+for(a in alpha_value[3]){
+  top_cindices <- c()
+  for(c in combo_used[11]){
+    my_cindices <- rep(0, 11)
+    counter <- 1
+    mad_sde_optimized <- two_weight_optimizer(first.metric = mad.genes,
+                                              second.metric = sde.genes,
+                                              my.filename = paste0("Optimizations/Optimization_",c,"_targets_mad_sde",data_set,".rds"))
+    
+    
+    
+    index <- 1
+
+    for(md in mad_sde_optimized[1:11]){
+      for(gs in gene_sizes){
+        cox_model <- cox_model_fitter(my.seed = 1,
+                                    my.alpha = a,
+                                    cox.predictors = md,
+                                    cox.df = cox_df,
+                                    gene.num = gs,
+                                    tumor.stage = FALSE,
+                                    tumor.n = FALSE,
+                                    tumor.m = FALSE,
+                                    my.filename = paste0("mad_sde_gbm_coefs.csv"))
+
+      #Getting the top concordance index from the cross validation and then rounding
+      #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+      #the c_index list with the result
+      current_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+      my_cindices[counter] <- current_cindex
+      counter <- counter + 1
+      index <- index+1
+
+    }
+
+    top_cindex <-max(my_cindices)
+    top_index <- which(my_cindices==top_cindex)
+    print(top_index)
+    print(top_cindex)
+    top_index_used <- top_index[1]
+    top_cindices <- c(top_cindices, top_cindex)
+    index <- index+1
+  }
+
+  write.csv(my_cindices, file = paste0("mad_sde_gbm_df.csv"))
+      }
+      
+}
+
+
+```
+
+##Step 24: High miRNA-high miRNA target on GBM. We find that for GBM best performance occurs at low miRNA number 100 and high target number 1010. It has a c-index of 0.6840
+```{r ideal gene number for high miRNA-miRNA target size on TCGA-GBM}
+#Getting ideal gene number for miRNA metric on TCGA-GBM
+gene_sizes <- seq(100, 3000, 50)
+mirna_high_cindices <- rep(0, length(gene_sizes))
+
+
+#Loading the high miRNA-miRNA target file
+load("Data/Reproducible-results/Rmarkdown/Data/300_1010_targets.RData",
+     verbose = TRUE)
+
+high.mirna.genes <- mirna.ranking
+
+for(gs in gene_sizes){
+  cox_model <- cox_model_fitter(my.seed = 1,
+                                cox.predictors = high.mirna.genes,
+                                cox.df = cox_df,
+                                gene.num = gs,
+                                tumor.stage = FALSE,
+                                tumor.n = FALSE,
+                                tumor.m = FALSE,
+                                my.filename = paste0("Data/Reproducible-results/Rmarkdown/Outputs/high_mirna_gbm_coefs_",gs,"_genes.csv"))
+  
+  #Getting the top concordance index from the cross validation and then rounding
+  #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+  #the mirna_high_cindices list with the result
+  top_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+  mirna_high_cindices[which(gene_sizes==gs)] <- top_cindex
+  
+}
+
+#Binding the gene size and c-index vectors together to get the finished data
+#frame
+mirna_high_cindices_read_df <- as.data.frame(cbind(gene_sizes,
+                                                   mirna_high_cindices))
+
+colnames(mirna_high_cindices_read_df) [2] <- "c_index"
+mirna_high_cindices_read_df$mirna_type <- rep("high",
+                                              nrow(mirna_high_cindices_read_df))
+
+write.csv(mirna_high_cindices_read_df,
+          "Data/Reproducible-results/Rmarkdown/Outputs/mirna_high_cindices_gbm_across_gene_size.csv")
+```
+
+## Step 24b: The performance is 0.6840
+```{r ideal cc singlecell ms gene size GBM}
+combo_used <- c( "100_10", "100_110", "100_210", "100_310", "100_410", "100_510", "100_610", "100_710", "100_810", "100_910", "100_1010")
+
+gene_sizes <- seq(100, 3000, 50)
+sde.genes <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/sde_colon_and_rectal_cancer.rds")
+cox_df <- readRDS("Data/Reproducible-results/Rmarkdown/Data/read_df_finished.rds")
+
+alpha_value <- c(0.0,0.5,1.0)
+
+mirna_used <- gsub(combo_used[1], pattern = "_10", replacement = "")
+data_set <- "gbm"
+
+
+for(a in alpha_value[3]){
+  top_cindices <- c()
+  for(c in combo_used[11]){
+    my_cindices <- rep(0, 11)
+    counter <- 1
+    load(file = paste0("/home/awillems/Projects/CC_Singlecell/TCGA-COAD/Data/Mirna/Inputs/",c,"_targets.RData"), verbose = TRUE)
+    mirna.genes <- mirna.ranking
+    mirna_mad_optimized <- two_weight_optimizer(first.metric = mirna.genes,
+                                                second.metric = sde.genes,
+                                                my.filename = paste0("Optimizations/Optimization_",c,"_targets_cc_singlecell_ms_",a,"_alpha_",data_set,".rds"))
+
+
+
+
+
+
+
+    for(mm in mirna_mad_optimized[1:11]){
+      for(gs in gene_sizes){
+        cox_model <- cox_model_fitter(my.seed = 1,
+                                    my.alpha = a,
+                                    my.dataset = "GBM",
+                                    cox.predictors = mm,
+                                    cox.df = cox_df,
+                                    gene.num = gs,
+                                    tumor.stage = FALSE,
+                                    tumor.n = FALSE,
+                                    tumor.m = FALSE,
+                                    my.filename = paste0("cc_singlecell_ms_ideal_gene_size_coefs.csv"))
+
+      #Getting the top concordance index from the cross validation and then rounding
+      #it to 4 digits to follow cv.glmnet reporting convention. Finally, we update
+      #the c_index list with the result
+      current_cindex <- round(cox_model$CV$cvm[cox_model$CV$index[1]], digits = 4)
+      my_cindices[counter] <- current_cindex
+      counter <- counter + 1
+
+    }
+
+    top_cindex <-max(my_cindices)
+    top_index <- which(my_cindices==top_cindex)
+    print(top_index)
+    print(top_cindex)
+    top_index_used <- top_index[1]
+    top_cindices <- c(top_cindices, top_cindex)
+  }
+
+  write.csv(top_cindices, file = paste0("cc_singlecell_ms_gbm_df_ideal_gene_size.csv"))
+  write.csv(my_cindices, file = paste0("cc_singlecell_ms_gbm_df_all_gene_size_data.csv"))
+}
+
+        
+        
+      }
+```
+
+## Step 25: Doing grid search for COAD at different values of alpha to show that LASSO is best regularization
 ```{r data for miRNA-miRNA target number grid search for COAD at different values of alpha}
 #CC Singlecell MS grid search COAD
 #See server_speedup_coad.R for the code
@@ -3066,7 +3647,7 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_
        units    = "cm")
 
 ```
-## Step Eighteen: Doing a grid search of miRNA metric only. Here we are testing if we have fixed the weird behavior we have seen previously where all results were the same regardless of method used. We believe this was caused by including the 'fold id' argument to glmnet which is only meant to be used to compare alpha values. They state in their help for cv.glmnet: "The function runs glmnet nfolds+1 times; the first to get the lambda sequence, and then the remainder to compute the fit with each of the folds omitted. The error is accumulated, and the average error and standard deviation over the folds is computed. Note that cv.glmnet does NOT search for values for alpha. A specific value should be supplied, else alpha=1 is assumed by default. If users would like to cross-validate alpha as well, they should call cv.glmnet with a pre-computed vector foldid, and then use this same fold vector in separate calls to cv.glmnet with different values of alpha. Note also that the results of cv.glmnet are random, since the folds are selected at random. Users can reduce this randomness by running cv.glmnet many times, and averaging the error curves." We validated for our data that indeed alpha = 1 is the best performing value (i.e., lasso regularization is the best regularization to use compared to ridge and elastic-net regularizations). We now will compare our methods with alpha always set to 1 and no longer pass the foldid argument. 
+## Step 26: Doing a grid search of miRNA metric only. Here we are testing if we have fixed the weird behavior we have seen previously where all results were the same regardless of method used. We believe this was caused by including the 'fold id' argument to glmnet which is only meant to be used to compare alpha values. They state in their help for cv.glmnet: "The function runs glmnet nfolds+1 times; the first to get the lambda sequence, and then the remainder to compute the fit with each of the folds omitted. The error is accumulated, and the average error and standard deviation over the folds is computed. Note that cv.glmnet does NOT search for values for alpha. A specific value should be supplied, else alpha=1 is assumed by default. If users would like to cross-validate alpha as well, they should call cv.glmnet with a pre-computed vector foldid, and then use this same fold vector in separate calls to cv.glmnet with different values of alpha. Note also that the results of cv.glmnet are random, since the folds are selected at random. Users can reduce this randomness by running cv.glmnet many times, and averaging the error curves." We validated for our data that indeed alpha = 1 is the best performing value (i.e., lasso regularization is the best regularization to use compared to ridge and elastic-net regularizations). We now will compare our methods with alpha always set to 1 and no longer pass the foldid argument. 
 
 
 ```{r miRNA only grid search}
@@ -3156,49 +3737,206 @@ ggsave(filename = "~/Documents/PhD Program/Hong Lab/Projects/CC_Singlecell/Data/
 heatmap_coad_ccs_ms_1
 ```
 
-#Step 19: We found the ideal point for CC Singlecell MS on TCGA-READ  (Gene size = 600 with c-index = 0.8283). Just showing the line graph for the 11 combinations of our linear model for brevity and concision.
-```{r concordance index across gene size at ideal gene size for TCGA-READ}
-cc_singlecell_mm_ideal_coad <- read.csv("~/Desktop/top_cindices_alpha_1_cc_singlecell_mm_coad_df_optimal_gene_size.csv")
-cc_singlecell_ms_ideal_read <- read.csv("Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mm_optimal_gene_df_read.csv")
-invisible(which.max(cc_singlecell_ms_ideal_read$c_index))
-cc_singlecell_sub_read <- cc_singlecell_ms_ideal_read[4131:4189,]
-cc_singlecell_sub_read$Dataset <- rep("TCGA-READ", times=nrow(cc_singlecell_sub_read))
-cc_singlecell_mm_ideal_coad$Dataset <- rep("TCGA-COAD", times=nrow(cc_singlecell_mm_ideal_coad))
+
+## Supplemental figures
+
+## Supplement S2: Heatmaps of COAD and READ miRNA-miRNA metric spaces
+```{r fig S2a data}
+#COAD Heatmap
+combo_used <- c("800_10", "800_110", "800_210", "800_310", "800_410", "800_510", "800_610", "800_710", "800_810", "800_910", "800_1010",
+                "700_10", "700_110", "700_210", "700_310", "700_410", "700_510", "700_610", "700_710", "700_810", "700_910", "700_1010",
+                "600_10", "600_110", "600_210", "600_310", "600_410", "600_510", "600_610", "600_710", "600_810", "600_910", "600_1010",
+                "500_10", "500_110", "500_210", "500_310", "500_410", "500_510", "500_610", "500_710", "500_810", "500_910", "500_1010",
+                "400_10", "400_110", "400_210", "400_310", "400_410", "400_510", "400_610", "400_710", "400_810", "400_910", "400_1010",
+                "300_10", "300_110", "300_210", "300_310", "300_410", "300_510", "300_610", "300_710", "300_810", "300_910", "300_1010",
+                "200_10", "200_110", "200_210", "200_310", "200_410", "200_510", "200_610", "200_710", "200_810", "200_910", "200_1010",
+                "100_10", "100_110", "100_210", "100_310", "100_410", "100_510", "100_610", "100_710", "100_810", "100_910", "100_1010")
+
+figs3a_df <- read.csv("~/Desktop/All-files-from-paper-draft-update/cc_singlecell_mms_coad_top_cindex.csv")
+colnames(figs3a_df) <- c("combo_used", "c_index")
+figs3a_df$combo_used <- combo_used
+figs3a_df$mirna_num <- rep(seq(800,100, -100), each = 11)
+figs3a_df$mirna_target <- rep(seq(10,1010,by=100), times = 8)
 ```
 
-
-```{r plot for concordance index across gene size at ideal gene size for TCGA-READ}
-#Plot of the ideal gene size
-cc_singlecell_ms_optimal_gene_read_plot <- ggplot(data = cc_singlecell_sub,
-                                         aes(x=gene_size, y=c_index))
-
-#Making the plot much nicer
-cc_singlecell_ms_optimal_gene_read_plot_finished <-cc_singlecell_ms_optimal_gene_read_plot +
-  geom_line(size=2.5, color="#FDE725FF") + geom_point(size=3.0, color="#FDE725FF")+
+```{r fig S2a plot}
+heatmap_figs3a<- ggplot(data = figs3a_df, aes(x=mirna_num, y=mirna_target, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white", size=8, fontface="bold")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MMS COAD",
+       fill = "Concordance Index")+
   theme(panel.background = element_blank(),
-        plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
-        axis.title = element_text(size = 40, face = "bold"),
-        legend.title = element_text(size = 30, face = "bold"),
-        legend.position = "bottom", 
-        legend.text = element_text(size = 35, face = "plain"),
-        axis.text=element_text(size=25, face="bold"))+
-  xlab("Gene Size")+ ylab("Mean Concordance Index")+
-  ylim(0.5,0.85)+
-  ggtitle("CC Singlecell MS Optimal Gene Number \n TCGA-READ")
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.5,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_figs3a_finished <- heatmap_figs3a + scale_fill_viridis_c()
+heatmap_figs3a_finished
 ```
 
 
-```{r saving plot for concordance index across gene size at ideal gene size for TCGA-READ}}
-#Saving the finished graph in .svg format
-setwd("~/Documents/Work/PhD Program/Hong Lab/Projects/CC-Singlecell/Data/Reproducible-results/Rmarkdown/Outputs")
-ggsave(filename = "cc_singlecell_ms_optimal_gene_size_read.svg",
-       plot     = print(cc_singlecell_ms_optimal_gene_read_plot_finished, newpage = FALSE),
+```{r saving fig S2a plot}
+ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_grid_search_coad.svg",
+       device = "svg", units = "cm", dpi = 300, width = 40, height = 40,
+       plot = heatmap_figs3a_finished)
+```
+
+
+```{r fig S2b data}
+#READ Heatmap. Had to go back and get the 700 and 600 miRNA data range because
+#I forgot to include it in the initial pass. Hence why I load both of my raw 
+#data frames here. They were combined in excel into a finished data frame. 
+combo_used <- c("1000_10", "1000_110", "1000_210", "1000_310", "1000_410", "1000_510", "1000_610", "1000_710", "1000_810", "1000_910", "1000_1010",
+                "900_10", "900_110", "900_210", "900_310", "900_410", "900_510", "900_610", "900_710", "900_810", "900_910", "900_1010",
+                "800_10", "800_110", "800_210", "800_310", "800_410", "800_510", "800_610", "800_710", "800_810", "800_910", "800_1010",
+                "700_10", "700_110", "700_210", "700_310", "700_410", "700_510", "700_610", "700_710", "700_810", "700_910", "700_1010",
+                "600_10", "600_110", "600_210", "600_310", "600_410", "600_510", "600_610", "600_710", "600_810", "600_910", "600_1010",
+                "500_10", "500_110", "500_210", "500_310", "500_410", "500_510", "500_610", "500_710", "500_810", "500_910", "500_1010",
+                "400_10", "400_110", "400_210", "400_310", "400_410", "400_510", "400_610", "400_710", "400_810", "400_910", "400_1010",
+                "300_10", "300_110", "300_210", "300_310", "300_410", "300_510", "300_610", "300_710", "300_810", "300_910", "300_1010",
+                "200_10", "200_110", "200_210", "200_310", "200_410", "200_510", "200_610", "200_710", "200_810", "200_910", "200_1010",
+                "100_10", "100_110", "100_210", "100_310", "100_410", "100_510", "100_610", "100_710", "100_810", "100_910", "100_1010")
+
+figs3b_df_initial_df <- read.csv("~/Desktop/All-files-from-paper-draft-update/cc_singlecell_mms_read_top_cindex.csv")
+figs3b_df_continued_df <- read.csv("~/Desktop/All-files-from-paper-draft-update/cc_singlecell_mms_read_top_cindex_800_700_mirna_range.csv")
+colnames(figs3b_df) <- c("combo_used", "c_index")
+figs3b_df$combo_used <- combo_used
+#write.csv(figs3b_df, file("~/Desktop/All-files-from-paper-draft-update/read_grid_search_data.csv"))
+figs3b_df_done <- read.csv("~/Desktop/All-files-from-paper-draft-update/read_grid_search_data.csv")
+figs3b_df_done$mirna_num <- rep(seq(1000,100,-100),each = 11)
+figs3b_df_done$mirna_target <- rep(seq(10, 1010, by=100), times = 10)
+```
+
+```{r fig S2b plot}
+heatmap_figs3b<- ggplot(data = figs3b_df_done, aes(x=mirna_num, y=mirna_target, fill=c_index))+
+  geom_tile()+
+  scale_fill_gradient(low = "white", high = "red")+
+  geom_text(aes(label = round(c_index, 4)), color = "white", size=8, fontface="bold")+ 
+  coord_fixed()+
+  labs(x ="# of miRNAs",
+       y = "# of miRNA Targets",
+       title = "CC Singlecell MMS READ",
+       fill = "Concordance Index")+
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 40, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"),
+        legend.position = "bottom",
+        legend.key.width = unit(2.5,"cm"))
+
+#Changing to color-blind friendly palette
+heatmap_figs3b_finished <- heatmap_figs3b + scale_fill_viridis_c()
+heatmap_figs3b_finished
+```
+### Saving fig S2b plot
+```{r saving fig S2b plot}
+ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_grid_search_read.svg",
+       device = "svg", units = "cm", dpi = 300, width = 40, height = 40,
+       plot = heatmap_figs3b_finished)
+```
+
+## S3: Active gene size graph
+```{r fig S3a coad active gene data}
+coad_active_coef_df <- data.frame(coef_num=c(191,255, 211, 208, 184),
+                                  method=c("CC Singlecell MMS", "scDD", 
+                                           "DEsingle","DESeq2", "edgeR"))
+```
+
+
+```{r fig S3a coad active gene plot}
+coad_active_gene_plot <- ggplot(data = coad_active_coef_df,
+                                aes(x=method, y=coef_num,
+                                    color=method, fill=method))+
+  geom_col()+
+  theme_bw()+
+  ggtitle("COAD")+
+  ylab("Active Gene Set Size")+
+  xlab("Methods")+
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40,
+                                  family = "sans"),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 30, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"))+
+  scale_color_viridis_d(direction = -1)+
+  scale_fill_viridis_d(direction = -1)+
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
+  coord_flip()
+
+coad_active_gene_plot
+```
+
+```{r fig S3a saving coad active gene plot}
+ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/active_gene_set_coad.svg",
+       plot     = print(coad_active_gene_plot, newpage = FALSE),
        device   = "svg", dpi=300,
-       width    = 34, height = 34,
+       width    = 40, height = 40,
        units    = "cm")
-
 ```
 
+
+```{r fig S3b read active gene data}
+read_active_coef_df <- data.frame(coef_num=c(52,6,4, 59, 61), 
+                                  method=c("CC Singlecell MMS", "scDD",
+                                           "DEsingle", "DESeq2", "edgeR"))
+```
+
+
+```{r fig S3b read active gene plot}
+read_active_gene_plot <- ggplot(data = read_active_coef_df,
+                                aes(x=method, y=coef_num,
+                                    color=method, fill=method))+
+  geom_col()+
+  theme_bw()+
+  ggtitle("READ")+
+  ylab("Active Gene Set Size")+
+  xlab("Methods")+
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 40,
+                                  family = "sans"),
+        axis.title.x = element_text(size = 40, family = "sans", face = "bold"),
+        axis.title.y = element_text(size = 40, family = "sans", face = "bold"),
+        axis.text.x = element_text(size = 30, family = "sans"),
+        axis.text.y = element_text(size = 30, family = "sans"),
+        legend.text = element_text(size = 25, family = "sans"),
+        legend.title = element_text(size = 40, family = "sans"))+
+  scale_color_viridis_d(direction = -1)+
+  scale_fill_viridis_d(direction = -1)+
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
+  coord_flip()
+
+read_active_gene_plot
+```
+
+```{r fig S3b saving active read gene plot}
+ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/active_gene_set_read.svg",
+       plot     = print(read_active_gene_plot, newpage = FALSE),
+       device   = "svg", dpi=300,
+       width    = 40, height = 40,
+       units    = "cm")
+```
+
+
+
+## Step 28: Figure 3
 Now making a combined data frame that is used by many of the other methods to get a concordance index. Some use the FPKM variety and some, e.g. DESeq2 and scDD use the same file but of the COUNT variety
 ```{r other methods data prep}
 #Loading needed functions for tidying the gene names
@@ -3535,7 +4273,7 @@ saveRDS(my_cindices, file = "Data/Reproducible-results/Rmarkdown/Outputs/read_sc
 ```
 
 
-## Step 21: DESeq2 Performance on READ
+## Step 29: DESeq2 Performance on READ
 ```{r deseq2 performance on READ}
 #Making a summarizedExperiment object from the combined data frame
 counts_df_ds2 <- apply(counts_df$denoised_sc_dataframe, c(1,2), as.integer)
@@ -3623,7 +4361,7 @@ write.csv(max(my_cindices), file = "Data/Reproducible-results/Rmarkdown/Outputs/
 saveRDS(my_cindices, file = "Data/Reproducible-results/Rmarkdown/Outputs/read_deseq2_top_cindex.rds")
 ```
 
-## Step 22: edgeR for READ
+## Step 30: edgeR for READ
 ```{r edgeR for READ}
 #edgeR
 dge <- DGEList(assay(zinb_data))
@@ -3681,7 +4419,7 @@ write.csv(max(my_cindices), file = "Data/Reproducible-results/Rmarkdown/Outputs/
 saveRDS(my_cindices, file = "Data/Reproducible-results/Rmarkdown/Outputs/read_edger_top_cindex.rds")
 ```
 
-## Step 23: DEsingle for READ
+## Step 31: DEsingle for READ
 ```{r DEsingle for READ}
 #Run on lab server using this same code. Modified slightly for server. Code is in file: desingle_server.R
 all_tumor_cells_fpkm <- subset(all_tumor_cells_fpkm, select=c(RHC3546__Tcell__.C6E879:RHC6041__Macrophage__.FFFF55))
@@ -3801,7 +4539,7 @@ ggsave(filename = "Outputs/single_cell_library_histogram_pre_process_step_1_dese
 ```
 
 
-## Step 24: Making barchart of results from all of these different methods compared to our best performing varient of CC Singlecell (Currently CC Singlecell MS) for TCGA-READ (fig3b)
+## Step 32: Making barchart of results from all of these different methods compared to our best performing varient of CC Singlecell (Currently CC Singlecell MS) for TCGA-READ (fig3b)
 ```{r fig3b data}
 #ggplot2 bar chart for the comparison of different methods to our method
 edger_read_max <- readRDS(file = "Data/Reproducible-results/Rmarkdown/Outputs/read_edger_top_cindex.rds")
@@ -3810,9 +4548,9 @@ scdd_read_max <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/read_scdd_
 des_read_max <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/des_results_read.rds")
 
 
-read_other_methods_df <- data.frame(method=c("CC Singlecell MS", "CC Singlecell MM", "CC Singlecell MMS","DESeq2",
+read_other_methods_df <- data.frame(method=c("CC Singlecell MMS","DESeq2",
                                              "edgeR", "scDD", "DEsingle"), 
-                                    c_index=c(0.8283,0.7742 ,0.8283, max(deseq2_read_max),
+                                    c_index=c(0.8442 , max(deseq2_read_max),
                                               max(edger_read_max), 
                                               max(scdd_read_max),
                                               max(deseq2_read_max)))
@@ -3826,13 +4564,13 @@ write.csv(read_other_methods_df, file = "Data/Reproducible-results/Rmarkdown/Out
 
 
 ```{r fig3b plot}
-color_map <- c("Single-cell"="#FDE725FF", "Bulk"="#39568CFF")
+color_map <- c("Single-cell"="#FDE725FF","Bulk"="#39568CFF")
 
-read_other_methods_df$rna_type <- c("Single-cell", "Single-cell", "Single-cell",
-                                    "Bulk", "Bulk", "Single-cell", "Single-cell")
+read_other_methods_df$rna_type <- c("Single-cell", "Bulk",
+                                    "Bulk", "Single-cell", "Single-cell")
 
 read_other_methods_df$method <- factor(read_other_methods_df$method,
-                                       levels = c("CC Singlecell MS", "CC Singlecell MM", "CC Singlecell MMS", "scDD",
+                                       levels = c("CC Singlecell MMS", "scDD",
                                                   "DEsingle", "DESeq2",
                                                   "edgeR"))
 
@@ -3858,7 +4596,7 @@ cc_singlecell_ms_vs_others_read <- ggplot(data = read_other_methods_df,
 
 
 ```{r saving fig3b}
-ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_comparison_vs_others_read.svg",
+ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_comparison_vs_others_read.svg",
        plot     = print(cc_singlecell_ms_vs_others_read,
                         newpage = FALSE),
        device   = "svg", dpi=300,
@@ -3867,9 +4605,9 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_
 ```
 
 
-## Step 25: scDD Performance on COAD
+## Step 33: scDD Performance on COAD
 ```{r scDD performance on COAD}
-#For finding the optimal number of genes
+#For finding the optimal number of genes. Note the scdd file comes from single cell data that is the same for both read and coad
 gene_sizes <- seq(100, 3000, 50)
 scdd_res <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/scdd_res_read.rds")
 cox_df <-readRDS("Data/Reproducible-results/Rmarkdown/Data/coad_df_finished.rds")
@@ -3901,7 +4639,7 @@ saveRDS(my_cindices, file = "Data/Reproducible-results/Rmarkdown/Outputs/coad_sc
 
 ```
 
-## Step 26: DEsingle on COAD. We use the same DEsingle object that we generated before we just swap out the cox model data frame
+## Step 34: DEsingle on COAD. We use the same DEsingle object that we generated before we just swap out the cox model data frame
 ```{r DEsingle on COAD}
 #For finding the optimal number of genes
 des_results <- readRDS(file = "Data/Reproducible-results/Rmarkdown/Outputs/des_results_read.rds")
@@ -3936,7 +4674,7 @@ write.csv(max(my_cindices), file = "Data/Reproducible-results/Rmarkdown/Outputs/
 saveRDS(my_cindices, file = "Data/Reproducible-results/Rmarkdown/Outputs/coad_desingle_top_cindex.rds")
 ```
 
-## Step 27: DESeq2 for COAD. Using previous DESeq2 generated data frame. Just swapping the Cox model data frame
+## Step 35: DESeq2 for COAD. Using previous DESeq2 generated data frame. Just swapping the Cox model data frame
 ```{r deseq2 on COAD}
 deseq2_genes <- readRDS(file = "Data/Reproducible-results/Rmarkdown/Outputs/deseq2_top_genes.rds")
 
@@ -3971,7 +4709,7 @@ saveRDS(my_cindices, file = "Data/Reproducible-results/Rmarkdown/Outputs/coad_de
 
 ```
 
-#Step 28: edgeR for COAD
+#Step 36: edgeR for COAD
 ```{r edgeR on COAD}
 edger_genes <- readRDS(file = "Data/Reproducible-results/Rmarkdown/Outputs/edgeR_1927_genes.rds")
 
@@ -4007,11 +4745,11 @@ saveRDS(my_cindices, file = "Data/Reproducible-results/Rmarkdown/Outputs/coad_ed
 ```
 
 
-Step 29: Barchart of all of the methods vs. CC Singlecell for COAD (Fig 3a)
+Step 37: Barchart of all of the methods vs. CC Singlecell for COAD (Fig 3a)
 ```{r fig3a data}
 #For finding the optimal number of genes
 gene_sizes <- seq(100, 1930, 50)
-cox_df <-readRDS("Data/Reproducible-results/Data/read_df_finished.rds")
+cox_df <-readRDS("Data/Reproducible-results/Data/coad_df_finished.rds")
 my_cindices <- rep(0, length(gene_sizes))
 counter <- 1
 
@@ -4020,7 +4758,7 @@ for(gs in gene_sizes){
                                   gene.num = gs, tumor.m = FALSE,
                                   tumor.n = FALSE, tumor.stage = FALSE,
                                   cox.predictors = rownames(finished_edger)[1:gs],
-                                  my.dataset = "READ",
+                                  my.dataset = "COAD",
                                   my.filename = "Data/Reproducible-results/Rmarkdown/Outputs/edger_coefs.csv")
   
   my_cindices[counter] <- round(current_cox$CV$cvm[current_cox$CV$index[1]],
@@ -4048,9 +4786,9 @@ scdd_coad_max <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/coad_scdd_
 des_coad_max <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/coad_desingle_top_cindex.rds")
 
 
-coad_other_methods_df <- data.frame(method=c("CC Singlecell MS", "CC Singlecell MM","CC Singlecell MMS","DESeq2",
+coad_other_methods_df <- data.frame(method=c("CC Singlecell MMS","DESeq2",
                                              "edgeR", "scDD", "DEsingle"), 
-                                    c_index=c(0.7532,0.7609, 0.7609,max(deseq2_coad_max),
+                                    c_index=c(0.7491,max(deseq2_coad_max),
                                               max(edger_coad_max), 
                                               max(scdd_coad_max),
                                               max(deseq2_coad_max)))
@@ -4065,11 +4803,11 @@ write.csv(coad_other_methods_df, file = "Data/Reproducible-results/Rmarkdown/Out
 ```{r fig3a plot}
 color_map <- c("Single-cell"="#FDE725FF", "Bulk"="#39568CFF")
 
-coad_other_methods_df$rna_type <- c("Single-cell", "Single-cell", "Single-cell",
+coad_other_methods_df$rna_type <- c("Single-cell",
                                     "Bulk", "Bulk", "Single-cell", "Single-cell")
 
 coad_other_methods_df$method <- factor(coad_other_methods_df$method,
-                                       levels = c("CC Singlecell MS","CC Singlecell MM", "CC Singlecell MMS",
+                                       levels = c("CC Singlecell MMS",
                                                   "scDD", "DEsingle", 
                                                   "DESeq2",
                                                   "edgeR"))
@@ -4094,8 +4832,8 @@ cc_singlecell_ms_vs_others_coad <- ggplot(data = coad_other_methods_df,
 ```
 
 ```{r saving fig3a plot}
-ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_comparison_vs_others_coad.svg",
-       plot     = print(cc_singlecell_ms_vs_others_coad,
+ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_mms_comparison_vs_others_coad.svg",
+       plot     = print(cc_singlecell_mms_vs_others_coad,
                         newpage = FALSE),
        device   = "svg", dpi=300,
        width    = 56, height = 56,
@@ -4105,14 +4843,10 @@ ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_
 
 Top coeffs for top performer for READ. (CC Singlecell MS) (fig 4d)
 ```{r fig4d data}
-#For plotting the READ coefficients
 read_coef_df <- read.csv("~/Desktop/top_coefs_read.csv")
 read_coef_df <- read_coef_df[,2:3]
 colnames(read_coef_df) <- c("Gene", "coefs")
 read_coef_df$hazard_ratio <- exp(read_coef_df$coefs)
-read_coef_df$effect_size <- ifelse(read_coef_df$hazard_ratio>1,
-                                   abs(1- read_coef_df$hazard_ratio)*100,
-                                   (1 - read_coef_df$hazard_ratio)*100)
 
 read_coef_df_sub <- filter(read_coef_df, hazard_ratio >4)
 read_coef_df_sub <- filter(read_coef_df_sub, Gene != "TRIM60")
@@ -4151,11 +4885,9 @@ read_coef_plot <- ggplot(data = read_coef_df_sub, aes(x=Gene, y=hazard_ratio,
 
 
 ```{r saving fig4d plot}
-#Saving the KM plot to .svg format
 ggsave(filename = "Data/Reproducible-results/Rmarkdown/Outputs/cc_singlecell_ms_read_coef_plot.svg",
        plot     = print(read_coef_plot, newpage = FALSE),
        device   = "svg", dpi=300,
        width    = 40, height = 40,
        units    = "cm")
 ```
-
