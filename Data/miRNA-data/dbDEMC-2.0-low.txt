@@ -1,0 +1,756 @@
+miRNA_ID	miRBase_update	Cancer_Type	Cancer_Subtype_or_Cell_Line	Design	Platform	Status	PubMed_ID
+hsa-miR-103	hsa-miR-103a-3p	esophageal cancer	esophageal squamous cell carcinoma	cancer vs normal	quantitative RT-PCR	down	18172293
+hsa-miR-107	hsa-miR-107	esophageal cancer	esophageal squamous cell carcinoma	cancer vs normal	quantitative RT-PCR	down	18172293
+hsa-miR-20a	hsa-miR-20a-5p	colon cancer		cancer vs normal	quantitative RT-PCR	up	18230780
+hsa-miR-21	hsa-miR-21-5p	colon cancer		cancer vs normal	quantitative RT-PCR	up	18230780
+hsa-miR-106a	hsa-miR-106a-5p	colon cancer		cancer vs normal	quantitative RT-PCR	up	18230780
+hsa-miR-181b	hsa-miR-181a-3p	colon cancer		cancer vs normal	quantitative RT-PCR	up	18230780
+hsa-miR-203	hsa-miR-203a-3p	colon cancer		cancer vs normal	quantitative RT-PCR	up	18230780
+hsa-miR-1	hsa-miR-1-3p	colon cancer	metastatic colonrectal cancer	cancer vs normal	northern blot	down	19843336
+hsa-miR-126	hsa-miR-126-3p	colon cancer	metastatic colonrectal cancer	cancer vs normal	northern blot	down	19843336
+hsa-miR-145	hsa-miR-145-5p	colon cancer	metastatic colonrectal cancer	cancer vs normal	northern blot	down	19843336
+hsa-miR-30b	hsa-miR-30b-5p	colon cancer	metastatic colonrectal cancer	cancer vs normal	northern blot	down	19843336
+hsa-miR-194	hsa-miR-194-5p	colon cancer	metastatic colonrectal cancer	cancer vs normal	northern blot	down	19843336
+hsa-miR-143	hsa-miR-143-3p	colon cancer	metastatic colonrectal cancer	cancer vs normal	northern blot	down	19843336
+hsa-miR-26a	hsa-miR-26a-5p	colon cancer	metastatic colonrectal cancer	cancer vs normal	northern blot	down	19843336
+hsa-miR-7	hsa-miR-7-5p	colon cancer	metastatic colonrectal cancer	cancer vs normal	northern blot	up	19843336
+hsa-miR-20a	hsa-miR-20a-5p	colon cancer	metastatic colonrectal cancer	cancer vs normal	northern blot	up	19843336
+hsa-miR-125b	hsa-miR-125b-5p	colon cancer	metastatic colonrectal cancer	cancer vs normal	northern blot	down	19843336
+hsa-miR-175p	hsa-miR-175p	kidney cancer	wilms tumor	cancer vs normal	quantitative RT-PCR	up	18519660
+hsa-miR-18a	hsa-miR-18a-5p	kidney cancer	wilms tumor	cancer vs normal	quantitative RT-PCR	up	18519660
+hsa-miR-19b	hsa-miR-19b-3p	kidney cancer	wilms tumor	cancer vs normal	quantitative RT-PCR	up	18519660
+hsa-miR-20a	hsa-miR-20a-5p	kidney cancer	wilms tumor	cancer vs normal	quantitative RT-PCR	up	18519660
+hsa-miR-92	hsa-miR-92a-3p	kidney cancer	wilms tumor	cancer vs normal	quantitative RT-PCR	up	18519660
+hsa-miR-21	hsa-miR-21-5p	head and neck cancer		cancer vs normal	quantitative RT-PCR	up	19351747
+hsa-miR-18a	hsa-miR-18a-5p	head and neck cancer		cancer vs normal	quantitative RT-PCR	up	19351747
+hsa-miR-221	hsa-miR-221-3p	head and neck cancer		cancer vs normal	quantitative RT-PCR	up	19351747
+hsa-miR-375	hsa-miR-375	head and neck cancer		cancer vs normal	quantitative RT-PCR	down	19351747
+hsa-miR-16	hsa-miR-16-5p	prostate cancer		cancer vs normal	quantitative RT-PCR	down	19676045
+hsa-miR-31	hsa-miR-31-5p	prostate cancer		cancer vs normal	quantitative RT-PCR	down	19676045
+hsa-miR-125b	hsa-miR-125b-5p	prostate cancer		cancer vs normal	quantitative RT-PCR	down	19676045
+hsa-miR-145	hsa-miR-145-5p	prostate cancer		cancer vs normal	quantitative RT-PCR	down	19676045
+hsa-miR-149	hsa-miR-149-5p	prostate cancer		cancer vs normal	quantitative RT-PCR	down	19676045
+hsa-miR-181b	hsa-miR-181a-3p	prostate cancer		cancer vs normal	quantitative RT-PCR	down	19676045
+hsa-miR-184	hsa-miR-184	prostate cancer		cancer vs normal	quantitative RT-PCR	down	19676045
+hsa-miR-205	hsa-miR-205-5p	prostate cancer		cancer vs normal	quantitative RT-PCR	down	19676045
+hsa-miR-221	hsa-miR-221-3p	prostate cancer		cancer vs normal	quantitative RT-PCR	down	19676045
+hsa-miR-222	hsa-miR-222-3p	prostate cancer		cancer vs normal	quantitative RT-PCR	down	19676045
+hsa-miR-96	hsa-miR-96-5p	prostate cancer		cancer vs normal	quantitative RT-PCR	up	19676045
+hsa-miR-182	hsa-miR-182-3p	prostate cancer		cancer vs normal	quantitative RT-PCR	up	19676045
+hsa-miR-182*	hsa-miR-182-3p	prostate cancer		cancer vs normal	quantitative RT-PCR	up	19676045
+hsa-miR-183	hsa-miR-183-5p	prostate cancer		cancer vs normal	quantitative RT-PCR	up	19676045
+hsa-miR-375	hsa-miR-375	prostate cancer		cancer vs normal	quantitative RT-PCR	up	19676045
+hsa-let-7a-1	hsa-let-7a-1	uterus cancer	uterine leiomyoma	cancer vs normal	quantitative RT-PCR	up	17243163
+hsa-let-7c	hsa-let-7c-5p	uterus cancer	uterine leiomyoma	cancer vs normal	quantitative RT-PCR	up	17243163
+hsa-miR-23b	hsa-miR-23b-3p	uterus cancer	uterine leiomyoma	cancer vs normal	quantitative RT-PCR	up	17243163
+hsa-miR-29b	hsa-miR-29b-3p	uterus cancer	uterine leiomyoma	cancer vs normal	quantitative RT-PCR	down	17243163
+hsa-miR-154	hsa-miR-154-5p	uterus cancer	uterine leiomyoma	cancer vs normal	quantitative RT-PCR	down	17243163
+hsa-miR-212	hsa-miR-212-3p	uterus cancer	uterine leiomyoma	cancer vs normal	quantitative RT-PCR	down	17243163
+hsa-let-7b	hsa-let-7b-5p	uterus cancer	uterine leiomyoma	cancer vs normal	northern blot	up	17243163
+hsa-miR-21	hsa-miR-21-5p	uterus cancer	uterine leiomyoma	cancer vs normal	northern blot	up	17243163
+hsa-miR-199	hsa-miR-199a-5p	uterus cancer	uterine leiomyoma	cancer vs normal	northern blot	up	17243163
+hsa-miR-23b	hsa-miR-23b-3p	uterus cancer	uterine leiomyoma	cancer vs normal	northern blot	up	17243163
+hsa-miR-335	hsa-miR-335-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-98	hsa-miR-98-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-181a	hsa-miR-181a-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-19b	hsa-miR-19b-3p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-let-7d	hsa-let-7d-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-let-7g	hsa-let-7g-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-100	hsa-miR-100-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-125a	hsa-miR-125a-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-103	hsa-miR-103a-3p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-370	hsa-miR-370-3p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-106b	hsa-miR-106b-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-106a	hsa-miR-106a-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-125b	hsa-miR-125b-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-let-7b	hsa-let-7b-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-26a	hsa-miR-26a-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-23b	hsa-miR-23b-3p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-29a	hsa-miR-29a-3p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	up	19703993
+hsa-miR-200a	hsa-miR-200a	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	down	19703993
+hsa-miR-373*	hsa-miR-373-5p	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	down	19703993
+hsa-miR-575	hsa-miR-575	brain cancer	meningioma	cancer vs normal	quantitative RT-PCR	down	19703993
+hsa-let-7a*	hsa-let-7a-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-let-7b*	hsa-let-7b-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-let-7d*	hsa-let-7d-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-let-7e*	hsa-let-7e-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-let-7f*	hsa-let-7f*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-let-7g*	hsa-let-7g-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-let-7i*	hsa-let-7i-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-22*	hsa-miR-22-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-26a*	hsa-miR-26a*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-26b*	hsa-miR-26b-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-29c*	hsa-miR-29c-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-30b	hsa-miR-30b-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-30c	hsa-miR-30c-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-31*	hsa-miR-31-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-98*	hsa-miR-98*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-103*	hsa-miR-103*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-107*	hsa-miR-107*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-124a*	hsa-miR-124a*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-125a*	hsa-miR-125a*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-127*	hsa-miR-127*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-128a*	hsa-miR-128a*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-128b*	hsa-miR-128b*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-129	hsa-miR-129-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-132*	hsa-miR-132-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-133b	hsa-miR-133b	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-134*	hsa-miR-134*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-138*	hsa-miR-138*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-143*	hsa-miR-143-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-145*	hsa-miR-145-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-149*	hsa-miR-149-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-150	hsa-miR-150-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-153	hsa-miR-153-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-154	hsa-miR-154-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-181b*	hsa-miR-181b*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-181c*	hsa-miR-181c-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-190	hsa-miR-190a-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-191	hsa-miR-191-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-192	hsa-miR-192-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-194	hsa-miR-194-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-212*	hsa-miR-212*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-219	hsa-miR-219a-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-320	hsa-miR-320a	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-323	hsa-miR-323a-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-324-3p	hsa-miR-324-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-324-5p	hsa-miR-324-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-326	hsa-miR-326	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-328	hsa-miR-328-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-330	hsa-miR-330-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-331	hsa-miR-331-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-346	hsa-miR-346	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-370	hsa-miR-370-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-381*	hsa-miR-381*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-382*	hsa-miR-382*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-383	hsa-miR-383-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-425	hsa-miR-425-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-7	hsa-miR-7-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-29a*	hsa-miR-29a-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-29b	hsa-miR-29b-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-187	hsa-miR-187-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-9*	hsa-miR-9-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-125b*	hsa-miR-125b*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-135a	hsa-miR-135a-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-155*	hsa-miR-155-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-203	hsa-miR-203a-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-221*	hsa-miR-221-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-361	hsa-miR-361-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-372*	hsa-miR-372*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	down	18973228
+hsa-miR-17-5p*	hsa-miR-17-5p*	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	up	18973228
+hsa-miR-148a	hsa-miR-148a-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	up	18973228
+hsa-miR-199b	hsa-miR-199b-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	up	18973228
+hsa-miR-18a*	hsa-miR-18a-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	up	18973228
+hsa-miR-19a*	hsa-miR-19a-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	up	18973228
+hsa-miR-20a*	hsa-miR-20a-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	up	18973228
+hsa-miR-21*	hsa-miR-21-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	up	18973228
+hsa-miR-25*	hsa-miR-25-5p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	up	18973228
+hsa-miR-106a*	hsa-miR-106a-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	up	18973228
+hsa-miR-106b*	hsa-miR-106b-3p	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	up	18973228
+hsa-miR-137	hsa-miR-137	brain cancer	medulloblastoma	cancer vs normal	quantitative RT-PCR	up	18973228
+hsa-miR-125b	hsa-miR-125b-5p	lymphoma	RIVA,  Oci-Ly3,  Oci-Ly10,  HBL1,  and U2932, Oci-Ly7,  Oci-Ly19,  and SUDHL-6	cancer vs normal	Real-Time Polymerase Chain Reaction (PCR)	down	19047678
+hsa-miR-223	hsa-miR-223-3p	lymphoma	RIVA,  Oci-Ly3,  Oci-Ly10,  HBL1,  and U2932, Oci-Ly7,  Oci-Ly19,  and SUDHL-6	cancer vs normal	Real-Time Polymerase Chain Reaction (PCR)	down	19047678
+hsa-miR-125b	hsa-miR-125b-5p	prostate cancer		cancer vs normal	RT-qPCR	down	19676045
+hsa-miR-31	hsa-miR-31-5p	prostate cancer		cancer vs normal	RT-qPCR	down	19676045
+hsa-miR-16	hsa-miR-16-5p	prostate cancer		cancer vs normal	RT-qPCR	down	19676045
+hsa-miR-145	hsa-miR-145-5p	prostate cancer		cancer vs normal	RT-qPCR	down	19676045
+hsa-miR-149	hsa-miR-149-5p	prostate cancer		cancer vs normal	RT-qPCR	down	19676045
+hsa-miR-181b	hsa-miR-181a-3p	prostate cancer		cancer vs normal	RT-qPCR	down	19676045
+hsa-miR-184	hsa-miR-184	prostate cancer		cancer vs normal	RT-qPCR	down	19676045
+hsa-miR-205	hsa-miR-205-5p	prostate cancer		cancer vs normal	RT-qPCR	down	19676045
+hsa-miR-221	hsa-miR-221-3p	prostate cancer		cancer vs normal	RT-qPCR	down	19676045
+hsa-miR-222	hsa-miR-222-3p	prostate cancer		cancer vs normal	RT-qPCR	down	19676045
+hsa-miR-96	hsa-miR-96-5p	prostate cancer		cancer vs normal	RT-qPCR	up	19676045
+hsa-miR-182	hsa-miR-182-3p	prostate cancer		cancer vs normal	RT-qPCR	up	19676045
+hsa-miR-182	hsa-miR-182-3p	prostate cancer		cancer vs normal	RT-qPCR	up	19676045
+hsa-miR-183	hsa-miR-183-5p	prostate cancer		cancer vs normal	RT-qPCR	up	19676045
+hsa-miR-375	hsa-miR-375	prostate cancer		cancer vs normal	RT-qPCR	up	19676045
+hsa-miR-210	hsa-miR-210-3p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+hsa-miR-200c	hsa-miR-200c-3p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+hsa-miR-17-5p	hsa-miR-17-5p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+hsa-miR-20a	hsa-miR-20a-5p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+hsa-miR-203	hsa-miR-203a-3p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+hsa-miR-125a	hsa-miR-125a-5p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	down	19584273
+hsa-let-7e	hsa-let-7e-5p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	down	19584273
+hsa-miR-200a	hsa-miR-200a-3p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+hsa-miR-106b	hsa-miR-106b-5p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+hsa-miR-93	hsa-miR-93-5p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+hsa-miR-182	hsa-miR-182-3p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+hsa-miR-183	hsa-miR-183-5p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+hsa-miR-106a	hsa-miR-106a-5p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+hsa-miR-20b	hsa-miR-20b-5p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+hsa-miR-224	hsa-miR-224-5p	lung cancer	squamous cell carcinoma	cancer vs normal	Quantitative RT-PCR (qPCR)	up	19584273
+has-hsa-miR-200a	has-hsa-miR-200a	brain cancer	SF4068 and SF4433	cancer vs normal	quantitative RT-PCR (qRT-PCR)	down	19703993
+hsa-miR-215	hsa-miR-215-5p	esophageal cancer	Barrett's carcinogenesis	cancer vs normal	qRT-PCR	up	21128279
+hsa-miR-560	hsa-miR-560	esophageal cancer	Barrett's carcinogenesis	cancer vs normal	qRT-PCR	up	21128279
+hsa-miR-615-3p	hsa-miR-615-3p	esophageal cancer	Barrett's carcinogenesis	cancer vs normal	qRT-PCR	down	21128279
+hsa-miR-192	hsa-miR-192-5p	esophageal cancer	Barrett's carcinogenesis	cancer vs normal	qRT-PCR	down	21128279
+hsa-miR-326	hsa-miR-326	esophageal cancer	Barrett's carcinogenesis	cancer vs normal	qRT-PCR	down	21128279
+hsa-miR-219	hsa-miR-219a-5p	hepatocellular carcinoma		metastasis	qRT-PCR	up	18176954
+hsa-miR-338	hsa-miR-338-3p	hepatocellular carcinoma		metastasis	qRT-PCR	up	18176954
+hsa-miR-30c	hsa-miR-30c-5p	hepatocellular carcinoma		metastasis	qRT-PCR	down	18176954
+hsa-miR-148a	hsa-miR-148a-3p	hepatocellular carcinoma		metastasis	qRT-PCR	down	18176954
+hsa-miR-224	hsa-miR-224-5p	prostate cancer	Perineural invasion (PNI)	poor outcome vs good outcome	qRT-PCR	up	18459106
+hsa-miR-10b	hsa-miR-10b-5p	prostate cancer	Perineural invasion (PNI)	poor outcome vs good outcome	qRT-PCR	up	18459106
+hsa-miR-125b	hsa-miR-125b-5p	prostate cancer	Perineural invasion (PNI)	poor outcome vs good outcome	qRT-PCR	up	18459106
+hsa-miR-30c	hsa-miR-30c-5p	prostate cancer	Perineural invasion (PNI)	poor outcome vs good outcome	qRT-PCR	up	18459106
+hsa-miR-100	hsa-miR-100-5p	prostate cancer	Perineural invasion (PNI)	poor outcome vs good outcome	qRT-PCR	up	18459106
+hsa-miR-20a	hsa-miR-20a-5p	colon cancer	colon adenocarcinoma tumors/colon adenomas	cancer vs normal	qRT-PCR	up	18230780
+hsa-miR-21	hsa-miR-21-5p	colon cancer	colon adenocarcinoma tumors/colon adenomas	cancer vs normal	qRT-PCR	up	18230780
+hsa-miR-106a	hsa-miR-106a-5p	colon cancer	colon adenocarcinoma tumors/colon adenomas	cancer vs normal	qRT-PCR	up	18230780
+hsa-miR-181b	hsa-miR-181a-3p	colon cancer	colon adenocarcinoma tumors/colon adenomas	cancer vs normal	qRT-PCR	up	18230780
+hsa-miR-203	hsa-miR-203a-3p	colon cancer	colon adenocarcinoma tumors/colon adenomas	cancer vs normal	qRT-PCR	up	18230780
+hsa-miR-342	hsa-miR-342-3p	breast cancer	PR-negative, PR-positive(Within the tumour)	subtype1 vs subtype2	RQ-PCR	up	19432961
+hsa-miR-342	hsa-miR-342-3p	breast cancer		cancer vs normal	RQ-PCR	up	19432961
+hsa-miR-520g	hsa-miR-520g-3p	breast cancer		cancer vs normal	RQ-PCR	up	19432961
+hsa-miR-520g	hsa-miR-520g-3p	breast cancer	PR-negative, PR-positive(Within the tumour)	subtype1 vs subtype2	RQ-PCR	up	19432961
+hsa-miR-99b	hsa-miR-99b-5p	lymphoma	multiple myeloma(TC4)	subtype1 vs subtype2	Quantitative RT-PCR	up	19846888
+hsa-miR-582-5p	hsa-miR-582-5p	lymphoma	multiple myeloma(TC1 )	subtype1 vs subtype2	Quantitative RT-PCR	up	19846888
+hsa-miR-155	hsa-miR-155-5p	lymphoma	multiple myeloma(TC5)	subtype1 vs subtype2	Quantitative RT-PCR	up	19846888
+hsa-miR-30e*	hsa-miR-30e-3p	lymphoma	multiple myeloma(TC1)	subtype1 vs subtype2	Quantitative RT-PCR	up	19846888
+hsa-miR-125b	hsa-miR-125b-5p	lymphoma	multiple myeloma(TC5)	subtype1 vs subtype2	Quantitative RT-PCR	up	19846888
+hsa-miR-133b	hsa-miR-133b	lymphoma	multiple myeloma(TC5)	subtype1 vs subtype2	Quantitative RT-PCR	up	19846888
+hsa-miR-221	hsa-miR-221-3p	lymphoma	multiple myeloma(TC5)	subtype1 vs subtype2	Quantitative RT-PCR	up	19846888
+hsa-miR-222	hsa-miR-222-3p	lymphoma	multiple myeloma(TC4)	subtype1 vs subtype2	Quantitative RT-PCR	up	19846888
+hsa-miR-125a-5p	hsa-miR-125a-5p	lymphoma	multiple myeloma(TC4)	subtype1 vs subtype2	Quantitative RT-PCR	up	19846888
+hsa-miR-99a	hsa-miR-99a-5p	lymphoma	multiple myeloma(TC5)	subtype1 vs subtype2	Quantitative RT-PCR	up	19846888
+hsa-miR-193b	hsa-miR-193b-3p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-5	metastatic 	Real-time PCR	down	20304954
+hsa-miR-205	hsa-miR-205-5p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-6	metastatic 	Real-time PCR	down	20304954
+hsa-miR-200c	hsa-miR-200c-3p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-7	metastatic 	Real-time PCR	down	20304954
+hsa-miR-768-3p	hsa-miR-768-3p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-8	metastatic 	Real-time PCR	down	20304954
+hsa-miR-211	hsa-miR-211-5p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-9	metastatic 	Real-time PCR	down	20304954
+hsa-miR-203	hsa-miR-203a-3p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-10	metastatic 	Real-time PCR	down	20304954
+hsa-miR-204	hsa-miR-204-5p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-11	metastatic 	Real-time PCR	down	20304954
+hsa-miR-200b	hsa-miR-200b-3p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-12	metastatic 	Real-time PCR	down	20304954
+hsa-miR-125b	hsa-miR-125b-5p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-13	metastatic 	Real-time PCR	down	20304954
+hsa-miR-214	hsa-miR-214-3p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-14	metastatic 	Real-time PCR	down	20304954
+hsa-miR-21	hsa-miR-21-5p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-15	metastatic 	Real-time PCR	up	20304954
+hsa-miR-22	hsa-miR-22-3p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-16	metastatic 	Real-time PCR	up	20304954
+hsa-miR-106b	hsa-miR-106b-5p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-17	metastatic 	Real-time PCR	up	20304954
+hsa-miR-17-5p	hsa-miR-17-5p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-18	metastatic 	Real-time PCR	up	20304954
+hsa-miR-16	hsa-miR-16-5p	melanoma	Malme-3M,  SKMEL-28,  and SKMEL-19	metastatic 	Real-time PCR	up	20304954
+hsa-miR-31	hsa-miR-31-5p	colon cancer		cancer vs normal	qRT-PCR	down	19922656
+hsa-miR-135b	hsa-miR-135b-5p	colon cancer		cancer vs normal	qRT-PCR	down	19922656
+hsa-miR-552	hsa-miR-552-3p	colon cancer		cancer vs normal	qRT-PCR	down	19922656
+hsa-miR-592	hsa-miR-592	colon cancer		cancer vs normal	qRT-PCR	down	19922656
+hsa-miR-503	hsa-miR-503-5p	colon cancer		cancer vs normal	qRT-PCR	down	19922656
+hsa-miR-1	hsa-miR-1-3p	colon cancer		cancer vs normal	qRT-PCR	down	19922656
+hsa-miR-622	hsa-miR-622	colon cancer		cancer vs normal	qRT-PCR	down	19922656
+hsa-miR-10b	hsa-miR-10b-5p	colon cancer		cancer vs normal	qRT-PCR	down	19922656
+hsa-miR-147	hsa-miR-147a	colon cancer		cancer vs normal	qRT-PCR	down	19922656
+hsa-miR-33b	hsa-miR-33b-5p	colon cancer		cancer vs normal	qRT-PCR	down	19922656
+hsa-miR-143	hsa-miR-143-3p	colon cancer		cancer vs normal	qRT-PCR	up	19922656
+hsa-miR-21	hsa-miR-21-5p	colon cancer		cancer vs normal	qRT-PCR	up	19922656
+hsa-miR-486-5p	hsa-miR-486-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-375	hsa-miR-375	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-574	hsa-miR-574-3p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-32*	hsa-miR-32-3p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-33b	hsa-miR-33b-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-195*	hsa-miR-195-3p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-500	hsa-miR-500a-3p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-199b	hsa-miR-199b-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-195	hsa-miR-195-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-10a	hsa-miR-10a-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-455-3p	hsa-miR-455-3p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-214	hsa-miR-214-3p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-199a-5p	hsa-miR-199a-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-497	hsa-miR-497-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-139-5p	hsa-miR-139-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-30a	hsa-miR-30a-3p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-145	hsa-miR-145-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-125b	hsa-miR-125b-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-99a	hsa-miR-99a-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-100	hsa-miR-100-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	down	20484036
+hsa-miR-503	hsa-miR-503-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	up	20484036
+hsa-miR-483-3p	hsa-miR-483-3p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	up	20484036
+hsa-miR-433	hsa-miR-433-3p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	up	20484036
+hsa-miR-431	hsa-miR-431-5p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	up	20484036
+hsa-miR-410	hsa-miR-410-3p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	up	20484036
+hsa-miR-431*	hsa-miR-431-3p	adrenocortical cancer	adrenocortical tumors	cancer vs normal	RT-qPCR	up	20484036
+hsa-miR-122	hsa-miR-122-5p	hepatocellular carcinoma		cancer vs normal	qPCR	up	20739924
+hsa-miR-375	hsa-miR-375	prostate cancer	prostate cancer	cancer vs normal	qRT-PCR	up	21400514
+hsa-miR-200c	hsa-miR-200c-3p	prostate cancer	prostate cancer	cancer vs normal	qRT-PCR	up	21400514
+hsa-miR-145	hsa-miR-145-5p	prostate cancer	prostate cancer	cancer vs normal	qRT-PCR	down	21400514
+hsa-miR-143	hsa-miR-143-3p	prostate cancer	prostate cancer	cancer vs normal	qRT-PCR	down	21400514
+hsa-let-7d	hsa-let-7d-5p	brain cancer	schwannomas	cancer vs normal	qRT-PCR	up	21156648
+hsa-miR-451	hsa-miR-451a	brain cancer	schwannomas	cancer vs normal	qRT-PCR	up	21156648
+hsa-miR-23b	hsa-miR-23b-3p	brain cancer	schwannomas	cancer vs normal	qRT-PCR	up	21156648
+hsa-miR-29	hsa-miR-29a-3p	brain cancer	schwannomas	cancer vs normal	qRT-PCR	up	21156648
+hsa-miR-30a	hsa-miR-30a-3p	brain cancer	schwannomas	cancer vs normal	qRT-PCR	up	21156648
+hsa-miR-221	hsa-miR-221-3p	brain cancer	schwannomas	cancer vs normal	qRT-PCR	up	21156648
+hsa-miR-21	hsa-miR-21-5p	brain cancer	schwannomas	cancer vs normal	qRT-PCR	up	21156648
+hsa-miR-321	hsa-miR-321	brain cancer	schwannomas	cancer vs normal	qRT-PCR	down	21156648
+hsa-miR-7	hsa-miR-7-5p	brain cancer	schwannomas	cancer vs normal	qRT-PCR	down	21156648
+hsa-miR-373*	hsa-miR-373-5p	brain cancer	schwannomas	cancer vs normal	qRT-PCR	down	21156648
+hsa-miR-638	hsa-miR-638	brain cancer	schwannomas	cancer vs normal	qRT-PCR	down	21156648
+hsa-let-7a	hsa-let-7a-5p	lymphoma	Gastric lymphoma	high-grade vs low-grade	RT-PCR	down	21460242
+hsa-miR-34a	hsa-miR-34a-5p	lymphoma	Gastric lymphoma	high-grade vs low-grade	RT-PCR	down	21460242
+hsa-miR-193b	hsa-miR-193b-3p	melanoma	Malme-3M,  MeWo,  SK-MEL-2,  and SK-MEL-28	cancer vs normal	Real-Time PCR	up	21893020
+hsa-miR-17-5p	hsa-miR-17-5p	breast cancer	subtype1: LP(low proliferative ),  subtype2: HP(highly proliferative )	subtype1 vs subtype2	Quantitative  RT-PCR	up	21364938
+hsa-miR-18a	hsa-miR-18a-5p	breast cancer	subtype1: LP(low proliferative ),  subtype2: HP(highly proliferative )	subtype1 vs subtype2	Quantitative  RT-PCR	down	21364938
+hsa-miR-18b	hsa-miR-18b-5p	breast cancer	subtype1: LP(low proliferative ),  subtype2: HP(highly proliferative )	subtype1 vs subtype2	Quantitative  RT-PCR	down	21364938
+hsa-miR-19a	hsa-miR-19a-3p	breast cancer	subtype1: LP(low proliferative ),  subtype2: HP(highly proliferative )	subtype1 vs subtype2	Quantitative  RT-PCR	down	21364938
+hsa-miR-29c	hsa-miR-29c-3p	breast cancer	subtype1: LP(low proliferative ),  subtype2: HP(highly proliferative )	subtype1 vs subtype2	Quantitative  RT-PCR		21364938
+hsa-miR-34c-5p	hsa-miR-34c-5p	breast cancer	subtype1: LP(low proliferative ),  subtype2: HP(highly proliferative )	subtype1 vs subtype2	Quantitative  RT-PCR	up	21364938
+hsa-miR-142-3p	hsa-miR-142-3p	breast cancer	subtype1: LP(low proliferative ),  subtype2: HP(highly proliferative )	subtype1 vs subtype2	Quantitative  RT-PCR	down	21364938
+hsa-miR-150	hsa-miR-150-5p	breast cancer	subtype1: LP(low proliferative ),  subtype2: HP(highly proliferative )	subtype1 vs subtype2	Quantitative  RT-PCR	down	21364938
+hsa-miR-449a	hsa-miR-449a	breast cancer	subtype1: LP(low proliferative ),  subtype2: HP(highly proliferative )	subtype1 vs subtype2	Quantitative  RT-PCR	up	21364938
+hsa-miR-375	hsa-miR-375	hepatocellular carcinoma	hepatoma cell lines	cancer vs normal	qRT-PCR	down	22056881
+hsa-miR-221	hsa-miR-221-3p	hepatocellular carcinoma	PHHC-3	cancer vs normal	qRT-PCR	up	22056881
+hsa-miR-96	hsa-miR-96-5p	hepatocellular carcinoma		cancer vs normal	Taqman RT-PCR	up	21298008
+hsa-miR-148a	hsa-miR-148a-3p	gastric cancer		cancer vs normal	qRT-PCR	down	21703006
+hsa-miR-23a	hsa-miR-23a-3p	lymphoma	Burkitt lymphoma(BL)/diffuse large B-cell lymphoma (DLBCL)	subtype1 vs subtype2	real-time RT-PCR	down	21701491
+hsa-miR-26a	hsa-miR-26a-5p	lymphoma	Burkitt lymphoma(BL)/diffuse large B-cell lymphoma (DLBCL)	subtype1 vs subtype2	real-time RT-PCR	down	21701491
+hsa-miR-29b	hsa-miR-29b-3p	lymphoma	Burkitt lymphoma(BL)/diffuse large B-cell lymphoma (DLBCL)	subtype1 vs subtype2	real-time RT-PCR	down	21701491
+hsa-miR-30d	hsa-miR-30d-5p	lymphoma	Burkitt lymphoma(BL)/diffuse large B-cell lymphoma (DLBCL)	subtype1 vs subtype2	real-time RT-PCR	down	21701491
+hsa-miR-146a	hsa-miR-146a-5p	lymphoma	Burkitt lymphoma(BL)/diffuse large B-cell lymphoma (DLBCL)	subtype1 vs subtype2	real-time RT-PCR	down	21701491
+hsa-miR-146b-5p	hsa-miR-146b-5p	lymphoma	Burkitt lymphoma(BL)/diffuse large B-cell lymphoma (DLBCL)	subtype1 vs subtype2	real-time RT-PCR	down	21701491
+hsa-miR-155	hsa-miR-155-5p	lymphoma	Burkitt lymphoma(BL)/diffuse large B-cell lymphoma (DLBCL)	subtype1 vs subtype2	real-time RT-PCR	down	21701491
+hsa-miR-221	hsa-miR-221-3p	lymphoma	Burkitt lymphoma(BL)/diffuse large B-cell lymphoma (DLBCL)	subtype1 vs subtype2	real-time RT-PCR	down	21701491
+hsa-miR-9	hsa-miR-9-5p	lymphoma	Burkitt lymphoma(BL)/diffuse large B-cell lymphoma (DLBCL)	subtype1 vs subtype2	real-time RT-PCR	up	21701491
+hsa-miR-23b	hsa-miR-23b-3p	lymphoma	Burkitt lymphoma(BL)/diffuse large B-cell lymphoma (DLBCL)	subtype1 vs subtype2	real-time RT-PCR	NS	21701491
+hsa-miR-141	hsa-miR-141-3p	ovarian cancer		cancer vs normal	qPCR	up	21811625
+hsa-miR-205	hsa-miR-205-5p	ovarian cancer		cancer vs normal	qPCR	up	21811625
+hsa-miR-429	hsa-miR-429	ovarian cancer		cancer vs normal	qPCR	up	21811625
+hsa-miR-320	hsa-miR-320a	ovarian cancer		cancer vs normal	qPCR	down	21811625
+hsa-miR-383	hsa-miR-383-5p	ovarian cancer		cancer vs normal	qPCR	down	21811625
+hsa-miR-486	hsa-miR-486-5p	gastric cancer	YCC3,  AGS,  and SCH	cancer vs normal	qRT-PCR	up	21415212
+hsa-miR-221	hsa-miR-221-3p	lymphoma	Nodal marginal zone lymphoma(NMZL)/lymphoid hyperplasia(RLN)	subtype1 vs subtype2	quantitative RT-PCR	up	22110251
+hsa-miR-223	hsa-miR-223-3p	lymphoma	Nodal marginal zone lymphoma(NMZL)/lymphoid hyperplasia(RLN)	subtype1 vs subtype2	quantitative RT-PCR	up	22110251
+hsa-let-7f	hsa-let-7f-5p	lymphoma	Nodal marginal zone lymphoma(NMZL)/lymphoid hyperplasia(RLN)	subtype1 vs subtype2	quantitative RT-PCR	up	22110251
+hsa-miR-494	hsa-miR-494-3p	lymphoma	Nodal marginal zone lymphoma(NMZL)/lymphoid hyperplasia(RLN)	subtype1 vs subtype2	quantitative RT-PCR	down	22110251
+hsa-miR-210	hsa-miR-210-3p	pancreatic cancer	Pancreatic ductal adenocarcinoma	cancer vs normal	qRT-PCR	up	21953293
+hsa-miR-135b	hsa-miR-135b-5p	pancreatic cancer	Pancreatic ductal adenocarcinoma	cancer vs normal	qRT-PCR	up	21953293
+hsa-miR-425	hsa-miR-425-3p	pancreatic cancer	Pancreatic ductal adenocarcinoma	cancer vs normal	qRT-PCR	up	21953293
+hsa-miR-194	hsa-miR-194-5p	pancreatic cancer	Pancreatic ductal adenocarcinoma	cancer vs normal	qRT-PCR	up	21953293
+hsa-miR-429	hsa-miR-429	pancreatic cancer	Pancreatic ductal adenocarcinoma	cancer vs normal	qRT-PCR	up	21953293
+hsa-miR-199b-5p	hsa-miR-199b-5p	pancreatic cancer	Pancreatic ductal adenocarcinoma	cancer vs normal	qRT-PCR	down	21953293
+hsa-miR-451	hsa-miR-451a	pancreatic cancer	Pancreatic ductal adenocarcinoma	cancer vs normal	qRT-PCR	down	21953293
+hsa-miR-145	hsa-miR-145-5p	pancreatic cancer	Pancreatic ductal adenocarcinoma	cancer vs normal	qRT-PCR	down	21953293
+hsa-miR-100	hsa-miR-100-5p	pancreatic cancer	Pancreatic ductal adenocarcinoma	cancer vs normal	qRT-PCR	down	21953293
+hsa-miR-148a	hsa-miR-148a-3p	pancreatic cancer	Pancreatic ductal adenocarcinoma	cancer vs normal	qRT-PCR	down	21953293
+hsa-miR-211	hsa-miR-211-5p	melanoma		cancer vs normal	qRT-PCR	up	21435193
+hsa-miR-196a	hsa-miR-196a-5p	gastrointestinal stromal tumor		cancer vs normal	Quantitative RT-PCR	up	22258453
+hsa-miR-1238	hsa-miR-1238-3p	colorectal cancer		cancer vs normal	qRT-PCR	up	21844009
+hsa-miR-622	hsa-miR-622	colorectal cancer		cancer vs normal	qRT-PCR	up	21844009
+hsa-miR-938	hsa-miR-938	colorectal cancer		cancer vs normal	qRT-PCR	up	21844009
+hsa-miR-155	hsa-miR-155-5p	lymphoma	extranodal nasal-type natural killer/T-cell lymphoma, NK cell lines and NKTL FFPE	cancer vs normal	RT-PCR	up	21921041
+hsa-miR-378	hsa-miR-378a-5p	lymphoma	extranodal nasal-type natural killer/T-cell lymphoma, NK cell lines and NKTL FFPE	cancer vs normal	RT-PCR	up	21921041
+hsa-miR-342-5p	hsa-miR-342-5p	lymphoma	extranodal nasal-type natural killer/T-cell lymphoma, NK cell lines and NKTL FFPE	cancer vs normal	RT-PCR	down	21921041
+hsa-miR-26b	hsa-miR-26b-5p	lymphoma	extranodal nasal-type natural killer/T-cell lymphoma, NK cell lines and NKTL FFPE	cancer vs normal	RT-PCR	down	21921041
+hsa-miR-363	hsa-miR-363-3p	lymphoma	extranodal nasal-type natural killer/T-cell lymphoma, NK cell lines and NKTL FFPE	cancer vs normal	RT-PCR	down	21921041
+hsa-miR-150	hsa-miR-150-5p	lymphoma	extranodal nasal-type natural killer/T-cell lymphoma, NK cell lines and NKTL FFPE	cancer vs normal	RT-PCR	down	21921041
+hsa-miR-28-5p	hsa-miR-28-5p	lymphoma	extranodal nasal-type natural killer/T-cell lymphoma, NK cell lines and NKTL FFPE	cancer vs normal	RT-PCR	down	21921041
+hsa-miR-22*	hsa-miR-22-5p	lymphoma	extranodal nasal-type natural killer/T-cell lymphoma, NK cell lines and NKTL FFPE	cancer vs normal	RT-PCR	down	21921041
+hsa-miR-181a-2*	hsa-miR-181a-2-3p	lymphoma	extranodal nasal-type natural killer/T-cell lymphoma, NK cell lines and NKTL FFPE	cancer vs normal	RT-PCR	down	21921041
+hsa-miR-26a	hsa-miR-26a-5p	lymphoma	extranodal nasal-type natural killer/T-cell lymphoma, NK cell lines and NKTL FFPE	cancer vs normal	RT-PCR	down	21921041
+hsa-miR-101	hsa-miR-101-3p	lymphoma	extranodal nasal-type natural killer/T-cell lymphoma, NK cell lines and NKTL FFPE	cancer vs normal	RT-PCR	down	21921041
+hsa-miR-612	hsa-miR-612	hepatocellular carcinoma		metastasis	real-time PCR	down	23478189
+hsa-miR-31	hsa-miR-31-5p	leukemia	T cell leukemia	cancer vs normal	quantitative RT-PCR	down	22264793
+hsa-miR-10b	hsa-miR-10b-5p	breast cancer		cancer vs normal	RT-PCR	down	22438871
+hsa-miR-668	hsa-miR-668-3p	breast cancer		cancer vs normal	RT-PCR	down	22438871
+hsa-miR-136*	hsa-miR-136-3p	breast cancer		cancer vs normal	RT-PCR	down	22438871
+hsa-miR-129-3p	hsa-miR-129-2-3p	breast cancer		cancer vs normal	RT-PCR	down	22438871
+hsa-miR-488	hsa-miR-488-5p	breast cancer		cancer vs normal	RT-PCR	down	22438871
+hsa-miR-99a	hsa-miR-99a-5p	breast cancer		cancer vs normal	RT-PCR	down	22438871
+hsa-miR-27a	hsa-miR-27a-3p	breast cancer		cancer vs normal	RT-PCR	down	22438871
+hsa-miR-206	hsa-miR-206	breast cancer		cancer vs normal	RT-PCR	down	22438871
+hsa-miR-21	hsa-miR-21-5p	breast cancer		cancer vs normal	RT-PCR	up	22438871
+hsa-miR-25	hsa-miR-25-3p	colorectal cancer		cancer vs normal	qRT-PCR	up	22452939
+hsa-miR-92a	hsa-miR-92a-3p	colorectal cancer		cancer vs normal	qRT-PCR	up	22452939
+has-miR-145	has-miR-145	esophageal cancer	Barrett's oesophagus	cancer vs normal	qRT-PCR	up	22504665
+hsa-miR-155	hsa-miR-155-5p	sarcoma	Liposarcoma	cancer vs normal	qRT-PCR	up	22350414
+hsa-miR-10b	hsa-miR-10b-5p	sarcoma	Liposarcoma	cancer vs normal	qRT-PCR	down	22350414
+hsa-miR-126	hsa-miR-126-3p	sarcoma	Liposarcoma	cancer vs normal	qRT-PCR	down	22350414
+hsa-miR-512-5p	hsa-miR-512-5p	lung cancer	non-small cell lung cancer	poor outcome vs good outcome	Quantitative real-time PCR	up	22331473
+hsa-miR-425	hsa-miR-425-3p	lung cancer	non-small cell lung cancer	poor outcome vs good outcome	Quantitative real-time PCR	up	22331473
+hsa-miR-615-5p	hsa-miR-615-5p	lung cancer	non-small cell lung cancer	poor outcome vs good outcome	Quantitative real-time PCR	up	22331473
+hsa-miR-668	hsa-miR-668-3p	lung cancer	non-small cell lung cancer	poor outcome vs good outcome	Quantitative real-time PCR	up	22331473
+has-hsa-miR-888	has-hsa-miR-888	lung cancer	non-small cell lung cancer	poor outcome vs good outcome	Quantitative real-time PCR	up	22331473
+hsa-miR-34b	hsa-miR-34b-5p	lung cancer	non-small cell lung cancer	poor outcome vs good outcome	Quantitative real-time PCR	up	22331473
+hsa-miR-34b*	hsa-miR-34b-5p	lung cancer	non-small cell lung cancer	poor outcome vs good outcome	Quantitative real-time PCR	up	22331473
+hsa-miR-34c-3p	hsa-miR-34c-3p	lung cancer	non-small cell lung cancer	poor outcome vs good outcome	Quantitative real-time PCR	up	22331473
+hsa-miR-34c-5p	hsa-miR-34c-5p	lung cancer	non-small cell lung cancer	poor outcome vs good outcome	Quantitative real-time PCR	up	22331473
+hsa-miR-200b	hsa-miR-200b-3p	breast cancer		metastasis vs non-metastasis	real-time PCR	up	22294488
+hsa-miR-141	hsa-miR-141-3p	breast cancer		metastasis vs non-metastasis	real-time PCR	up	22294488
+hsa-miR-9	hsa-miR-9-5p	breast cancer		metastasis vs non-metastasis	real-time PCR	up	22294488
+hsa-miR-219-5p	hsa-miR-219a-5p	breast cancer		metastasis vs non-metastasis	real-time PCR	up	22294488
+hsa-miR-20a	hsa-miR-20a-5p	lymphoma	follicular lymphoma tumor(FH B cells,  and OCI-Ly8)	subtype1 vs subtype2	Quantitative real-time PCR	up	22102710
+hsa-miR-20b	hsa-miR-20b-5p	lymphoma	follicular lymphoma tumor(FH B cells,  and OCI-Ly9)	subtype1 vs subtype2	Quantitative real-time PCR	up	22102710
+hsa-miR-194	hsa-miR-194-5p	lymphoma	follicular lymphoma tumor(FH B cells,  and OCI-Ly10)	subtype1 vs subtype2	Quantitative real-time PCR	down	22102710
+hsa-miR-9	hsa-miR-9-5p	cervical cancer	cervical carcinogenesis(CIN2-3/SCC),  subtype1:gain of 1q,  subtype2:normal	subtype1 vs subtype2	qRT-PCR	up	22330141
+hsa-miR-15b	hsa-miR-15b-5p	cervical cancer	cervical carcinogenesis(CIN2-3/SCC),  subtype1:gain of 3q,  subtype 3:normal	subtype1 vs subtype2	qRT-PCR	up	22330141
+hsa-miR-28-5p	hsa-miR-28-5p	cervical cancer	cervical carcinogenesis(CIN2-3/SCC),  subtype1:gain of 3q,  subtype 4:normal	subtype1 vs subtype2	qRT-PCR	up	22330141
+hsa-miR-100	hsa-miR-100-5p	cervical cancer	cervical carcinogenesis(CIN2-3/SCC),  subtype1:loss of 11q,  subtype 5:normal	subtype1 vs subtype2	qRT-PCR	down	22330141
+hsa-miR-125b	hsa-miR-125b-5p	cervical cancer	cervical carcinogenesis(CIN2-3/SCC),  subtype1:loss of 11q,  subtype 6:normal	subtype1 vs subtype2	qRT-PCR	down	22330141
+hsa-miR-101	hsa-miR-101-3p	gastric cancer		cancer vs normal	real-time PCR	down	22450781
+hsa-miR-708	hsa-miR-708-5p	lung cancer	lung adenocarcinomas	cancer vs normal	RT-qPCR	up	22573352
+hsa-miR-9*	hsa-miR-9-3p	oral cancer	oral squamous cell carcinoma(subtype1: keratinizing,  subtype2: non-keratinizing )	subtype1 vs subtype2	qRT-PCR	up	22761427
+hsa-miR-424	hsa-miR-424-5p	oral cancer	oral squamous cell carcinoma(subtype1: keratinizing,  subtype3: non-keratinizing )	subtype1 vs subtype2	qRT-PCR	up	22761427
+hsa-miR-7-1*	hsa-miR-7-1*	oral cancer	oral squamous cell carcinoma(subtype1: keratinizing,  subtype4: non-keratinizing )	subtype1 vs subtype2	qRT-PCR	up	22761427
+hsa-miR-15b	hsa-miR-15b-5p	oral cancer	oral squamous cell carcinoma(subtype1: keratinizing,  subtype5: non-keratinizing )	subtype1 vs subtype2	qRT-PCR	up	22761427
+hsa-miR-7	hsa-miR-7-5p	oral cancer	oral squamous cell carcinoma(subtype1: keratinizing,  subtype6: non-keratinizing )	subtype1 vs subtype2	qRT-PCR	up	22761427
+hsa-miR-21	hsa-miR-21-5p	oral cancer	oral squamous cell carcinoma(subtype1: keratinizing,  subtype7: non-keratinizing )	subtype1 vs subtype2	qRT-PCR	up	22761427
+hsa-miR-9	hsa-miR-9-5p	oral cancer	oral squamous cell carcinoma(subtype1: keratinizing,  subtype8: non-keratinizing )	subtype1 vs subtype2	qRT-PCR	up	22761427
+hsa-miR-155	hsa-miR-155-5p	oral cancer	oral squamous cell carcinoma(subtype1: keratinizing,  subtype9: non-keratinizing )	subtype1 vs subtype2	qRT-PCR	up	22761427
+hsa-miR-196a	hsa-miR-196a-5p	oral cancer	oral squamous cell carcinoma(subtype1: keratinizing,  subtype10: non-keratinizing )	subtype1 vs subtype2	qRT-PCR	up	22761427
+hsa-miR-486-5p	hsa-miR-486-5p	oral cancer	oral squamous cell carcinoma(subtype1: keratinizing,  subtype11: non-keratinizing )	subtype1 vs subtype2	qRT-PCR	down	22761427
+hsa-miR-96	hsa-miR-96-5p	lung cancer	non-small cell lung cancer()	cancer vs normal	quantitative RT-PCR	up	22046296
+hsa-miR-141	hsa-miR-141-3p	liver cancer	Intrahepatic cholangiocellular carcinoma(subtype1: HpSC-ICC,  subtype2:MH-ICC.  ),  HpSC: hepatic stem cell-like,  ICC: intrahepatic cholangiocarcinoma,  MH:mature hepatocyte-like	subtype1 vs subtype2	qRT-PCR	down	22707408
+hsa-miR-200c	hsa-miR-200c-3p	liver cancer	Intrahepatic cholangiocellular carcinoma(subtype1: HpSC-ICC,  subtype 3:MH-ICC.  ),  HpSC: hepatic stem cell-like,  ICC: intrahepatic cholangiocarcinoma,  MH:mature hepatocyte-like	subtype1 vs subtype2	qRT-PCR	down	22707408
+hsa-miR-145	hsa-miR-145-5p	liver cancer		cancer vs normal	QRT-PCR	down	23499894
+hsa-miR-492	hsa-miR-492	colorectal cancer		cancer vs normal	semi-qRT-PCR	up	22850566
+hsa-miR-223	hsa-miR-223-3p	colorectal cancer		cancer vs normal	semi-qRT-PCR	up	22850566
+hsa-miR-135b	hsa-miR-135b-5p	colorectal cancer		cancer vs normal	semi-qRT-PCR	up	22850566
+hsa-miR-375	hsa-miR-375	colorectal cancer		cancer vs normal	semi-qRT-PCR	down	22850566
+hsa-miR-195	hsa-miR-195-5p	colorectal cancer		cancer vs normal	semi-qRT-PCR	down	22850566
+hsa-miR-378	hsa-miR-378a-5p	colorectal cancer		cancer vs normal	semi-qRT-PCR	down	22850566
+hsa-miR-215	hsa-miR-215-5p	colorectal cancer		cancer vs normal	semi-qRT-PCR	down	22850566
+hsa-miR-143	hsa-miR-143-3p	colorectal cancer		cancer vs normal	semi-qRT-PCR	down	22850566
+hsa-miR-145	hsa-miR-145-5p	colorectal cancer		cancer vs normal	semi-qRT-PCR	down	22850566
+hsa-miR-29c	hsa-miR-29c-3p	colorectal cancer		cancer vs normal	semi-qRT-PCR	down	22850566
+hsa-miR-143	hsa-miR-143-3p	kidney cancer	papillary renal cell carcinoma	cancer vs normal	qRT-PCR	down	23799849
+hsa-miR-145	hsa-miR-145-5p	kidney cancer	papillary renal cell carcinoma	cancer vs normal	qRT-PCR	down	23799849
+hsa-miR-200c	hsa-miR-200c-3p	kidney cancer	papillary renal cell carcinoma	cancer vs normal	qRT-PCR	down	23799849
+hsa-miR-502-3p	hsa-miR-502-3p	kidney cancer	papillary renal cell carcinoma	cancer vs normal	qRT-PCR	down	23799849
+hsa-miR-10b	hsa-miR-10b-5p	kidney cancer	papillary renal cell carcinoma	cancer vs normal	qRT-PCR	down	23799849
+hsa-let-7c	hsa-let-7c-5p	kidney cancer	papillary renal cell carcinoma	cancer vs normal	qRT-PCR	down	23799849
+hsa-miR-93	hsa-miR-93-5p	kidney cancer	papillary renal cell carcinoma	cancer vs normal	qRT-PCR	down	23799849
+hsa-miR-15a	hsa-miR-15a-5p	kidney cancer	papillary renal cell carcinoma	cancer vs normal	qRT-PCR	down	23799849
+hsa-miR-210	hsa-miR-210-3p	kidney cancer	papillary renal cell carcinoma	cancer vs normal	qRT-PCR	up	23799849
+hsa-miR-1	hsa-miR-1-3p	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	down	23133552
+hsa-miR-9	hsa-miR-9-5p	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	down	23133552
+hsa-miR-18a	hsa-miR-18a-5p	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	down	23133552
+hsa-miR-18b	hsa-miR-18b-5p	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	down	23133552
+hsa-miR-19b	hsa-miR-19b-3p	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	NS	23133552
+hsa-miR-29b	hsa-miR-29b-3p	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	NS	23133552
+hsa-miR-126	hsa-miR-126-3p	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	down	23133552
+hsa-miR-133b	hsa-miR-133b	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	down	23133552
+hsa-miR-142-3p	hsa-miR-142-3p	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	NS	23133552
+hsa-miR-144#	hsa-miR-144-3p	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	down	23133552
+hsa-miR-195	hsa-miR-195-5p	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	down	23133552
+hsa-miR-223	hsa-miR-223-3p	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	down	23133552
+hsa-miR-451	hsa-miR-451a	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	down	23133565
+hsa-miR-497#	hsa-miR-497-5p	sarcoma	osteosarcoma	cancer vs normal	qRT-PCR	down	23133565
+hsa-miR-425	hsa-miR-425	breast cancer		cancer vs normal	RT-qPCR	up	23125021
+hsa-miR-454	hsa-miR-454	breast cancer		cancer vs normal	RT-qPCR	up	23125021
+hsa-miR-301a	hsa-miR-301a	breast cancer		cancer vs normal	RT-qPCR	up	23125021
+hsa-miR-10b*	hsa-miR-10b*	breast cancer		cancer vs normal	RT-qPCR	down	23125021
+has-miR-139-5p	has-miR-139-5p	breast cancer		cancer vs normal	RT-qPCR	down	23125021
+hsa-miR-21	hsa-miR-21-5p	melanoma	cutaneous malignant melanoma	cancer vs normal	qRT-PCR	up	23111773
+hsa-miR-142-3p	hsa-miR-142-3p	melanoma	cutaneous malignant melanoma	cancer vs normal	qRT-PCR	up	23111773
+hsa-miR-155	hsa-miR-155-5p	melanoma	cutaneous malignant melanoma	cancer vs normal	qRT-PCR	up	23111773
+hsa-miR-223	hsa-miR-223-3p	melanoma	cutaneous malignant melanoma	cancer vs normal	qRT-PCR	up	23111773
+hsa-miR-301a	hsa-miR-301a-3p	melanoma	cutaneous malignant melanoma	cancer vs normal	qRT-PCR	up	23111773
+hsa-miR-141	hsa-miR-141-3p	melanoma	cutaneous malignant melanoma	cancer vs normal	qRT-PCR	down	23111773
+hsa-miR-149	hsa-miR-149-5p	melanoma	cutaneous malignant melanoma	cancer vs normal	qRT-PCR	down	23111773
+hsa-miR-200b	hsa-miR-200b-3p	melanoma	cutaneous malignant melanoma	cancer vs normal	qRT-PCR	down	23111773
+hsa-miR-204	hsa-miR-204-5p	melanoma	cutaneous malignant melanoma	cancer vs normal	qRT-PCR	down	23111773
+hsa-miR-455-3p	hsa-miR-455-3p	melanoma	cutaneous malignant melanoma	cancer vs normal	qRT-PCR	down	23111773
+hsa-miR-211	hsa-miR-211-5p	pancreatic cancer		cancer vs normal	Taqman RT-PCR	down	23155457
+hsa-miR-4321	hsa-miR-4321	pancreatic cancer		cancer vs normal	Taqman RT-PCR	up	23155457
+hsa-miR-378	hsa-miR-378a-5p	colorectal cancer		cancer vs normal	qRT-PCR	down	23028787
+hsa-miR-375	hsa-miR-375	colorectal cancer		cancer vs normal	qRT-PCR	down	23028787
+hsa-miR-21*	hsa-miR-21-3p	colorectal cancer		cancer vs normal	qRT-PCR	up	23028787
+hsa-miR-145	hsa-miR-145-5p	colorectal cancer		cancer vs normal	qRT-PCR	down	23028787
+hsa-miR-96	hsa-miR-96-5p	colorectal cancer		cancer vs normal	qRT-PCR	up	23028787
+hsa-miR-21	hsa-miR-21-5p	colorectal cancer		cancer vs normal	qRT-PCR	up	23028787
+hsa-miR-147b	hsa-miR-147b	colorectal cancer		cancer vs normal	qRT-PCR	down	23028787
+hsa-miR-143	hsa-miR-143-3p	colorectal cancer		cancer vs normal	qRT-PCR	down	23028787
+hsa-miR-93	hsa-miR-93-5p	colorectal cancer		cancer vs normal	qRT-PCR	up	23028787
+hsa-miR-886-5p	hsa-miR-886-5p	colorectal cancer		cancer vs normal	qRT-PCR	up	23028787
+hsa-miR-886-3p	hsa-miR-886-3p	colorectal cancer		cancer vs normal	qRT-PCR	up	23028787
+hsa-miR-497	hsa-miR-497-5p	colorectal cancer		cancer vs normal	qRT-PCR	down	23028787
+hsa-miR-30a	hsa-miR-30a-3p	colorectal cancer		cancer vs normal	qRT-PCR	down	23028787
+hsa-miR-182	hsa-miR-182-3p	colorectal cancer		cancer vs normal	qRT-PCR	up	23028787
+hsa-miR-139-5p	hsa-miR-139-5p	colorectal cancer		cancer vs normal	qRT-PCR	down	23028787
+hsa-miR-136	hsa-miR-136-5p	colorectal cancer		cancer vs normal	qRT-PCR	down	23028787
+hsa-miR-218	hsa-miR-218-5p	colorectal cancer		cancer vs normal	qRT-PCR	down	23028787
+hsa-miR-302a	hsa-miR-302a-3p	colorectal cancer		cancer vs normal	qRT-PCR	down	23028787
+hsa-miR-138	hsa-miR-138-5p	brain cancer	malignant glioma	cancer vs normal	qRT-PCR	up	22921398
+hsa-miR-21	hsa-miR-21-5p	colorectal cancer		cancer vs normal	qRT-PCR	up	22703586
+hsa-miR-223	hsa-miR-223-3p	colorectal cancer		cancer vs normal	qRT-PCR	up	22703586
+hsa-miR-224	hsa-miR-224-5p	colorectal cancer		cancer vs normal	qRT-PCR	up	22703586
+hsa-miR-29a	hsa-miR-29a-3p	colorectal cancer		cancer vs normal	qRT-PCR	up	22703586
+hsa-miR-29b	hsa-miR-29b-3p	colorectal cancer		cancer vs normal	qRT-PCR	up	22703586
+hsa-miR-27a	hsa-miR-27a-3p	colorectal cancer		cancer vs normal	qRT-PCR	up	22703586
+hsa-miR-31	hsa-miR-31-5p	prostate cancer		cancer vs normal	qPCR	down	23233736
+hsa-miR-96	hsa-miR-96-5p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases 	metastases	QRT-PCR/	up	23328977
+hsa-miR-182	hsa-miR-182-3p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases and  liver metastases	metastases	QRT-PCR	up	23328977
+hsa-miR-196a	hsa-miR-196a-5p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases and  liver metastases	metastases	QRT-PCR	up	23328977
+hsa-miR-200a	hsa-miR-200a-3p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases and  liver metastases	metastases	QRT-PCR	up	23328977
+hsa-miR-183	hsa-miR-183-5p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases and  liver metastases	metastases	QRT-PCR	up	23328977
+hsa-miR-31	hsa-miR-31-5p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases and  liver metastases	metastases	QRT-PCR	down	23328977
+hsa-miR-129-5p	hsa-miR-129-5p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases and  liver metastases	metastases	QRT-PCR	down	23328977
+hsa-miR-133a	hsa-miR-133a-3p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases and  liver metastases	metastases	QRT-PCR	down	23328977
+hsa-miR-215	hsa-miR-215-5p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases and  liver metastases	metastases	QRT-PCR	down	23328977
+hsa-miR-31	hsa-miR-31-5p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases	metastases	Northern blot	down	23328977
+hsa-miR-133a	hsa-miR-133a-3p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases	metastases	Northern blot	down	23328977
+hsa-miR-182	hsa-miR-182-3p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases	metastases	Northern blot	up	23328977
+hsa-miR-183	hsa-miR-183-5p	small intestinal neuroendocrine tumor	primary tumors,  mesentery metastases	metastases	Northern blot	down	23328977
+hsa-miR-31	hsa-miR-31-5p	small intestinal neuroendocrine tumor	primary tumors,  liver metastases	metastases	Northern blot	down	23328977
+hsa-miR-133a	hsa-miR-133a-3p	small intestinal neuroendocrine tumor	primary tumors,  liver metastases	metastases	Northern blot	down	23328977
+hsa-miR-182	hsa-miR-182-3p	small intestinal neuroendocrine tumor	primary tumors,  liver metastases	metastases	Northern blot	up	23328977
+hsa-miR-183	hsa-miR-183-5p	small intestinal neuroendocrine tumor	primary tumors,  liver metastases	metastases	Northern blot	up	23328977
+hsa-miR-182	hsa-miR-182-3p	prostate cancer	Pca(prostate cancer antigen) 	cancer vs normal	qRT-PCR	up	24518785
+hsa-miR-187	hsa-miR-187-3p	prostate cancer	Pca(prostate cancer antigen) 	cancer vs normal	qRT-PCR	down	24518785
+hsa-miR-214	hsa-miR-214-3p	hepatocellular carcinoma		cancer vs normal	RT-PCR	down	22613005
+hsa-miR-18b	hsa-miR-18b-5p	hepatocellular carcinoma	well differentiation, moderately differentiation	high grade vs low grade	Real-time qPCR	down	23496901
+hsa-miR-18b	hsa-miR-18b-5p	hepatocellular carcinoma	well differentiation, poorly differentiation	high grade vs low grade	Real-time qPCR	down	23496901
+hsa-miR-18b	hsa-miR-18b-5p	hepatocellular carcinoma	moderately differentiation, poorly differentiation	high grade vs low grade	Real-time qPCR	down	23496901
+hsa-miR-155	hsa-miR-155-5p	leukemia	subtype1: Primary plasma cell leukemia(pPCL) , subtype2: multiple myeloma	subtype1 vs subtype2	qRT-PCR	up	23613318
+hsa-miR-21	hsa-miR-21-5p	leukemia	subtype1: Primary plasma cell leukemia(pPCL) , subtype 2: multiple myeloma	subtype1 vs subtype2	qRT-PCR	up	23613318
+hsa-miR-142-3p	hsa-miR-142-3p	leukemia	subtype1: Primary plasma cell leukemia(pPCL) , subtype 2: multiple myeloma	subtype1 vs subtype2	qRT-PCR	up	23613318
+hsa-miR-142-5p	hsa-miR-142-5p	leukemia	subtype1: Primary plasma cell leukemia(pPCL) , subtype 2: multiple myeloma	subtype1 vs subtype2	qRT-PCR	up	23613318
+hsa-miR-103	hsa-miR-103a-3p	leukemia	subtype1: Primary plasma cell leukemia(pPCL) , subtype 2: multiple myeloma	subtype1 vs subtype2	qRT-PCR	up	23613318
+hsa-miR-200b	hsa-miR-200b-3p	liver cancer	cholangiocarcinoma	cancer vs normal	RT-qPCR/northern blotting	down	24169343
+hsa-miR-200c	hsa-miR-200c-3p	liver cancer	cholangiocarcinoma	cancer vs normal	RT-qPCR/northern blotting	down	24169343
+hsa-miR-429	hsa-miR-429	liver cancer	cholangiocarcinoma	cancer vs normal	RT-qPCR/northern blotting	down	24169343
+hsa-miR-137	hsa-miR-137	pheochromocytoma	tumors with germline mutations in SDHD,  SDHB,  VHL,  RET,  NF1, TMEM128	cancer vs normal	qRT-PCR	up	23660872
+hsa-miR-382	hsa-miR-382-5p	pheochromocytoma	tumors with germline mutations in SDHD,  SDHB,  VHL,  RET,  NF1, TMEM129	cancer vs normal	qRT-PCR	up	23660872
+hsa-miR-210	hsa-miR-210-3p	pheochromocytoma	tumors with germline mutations in SDHB	cancer vs normal	qRT-PCR	up	23660872
+hsa-miR-210	hsa-miR-210-3p	pheochromocytoma	tumors with germline mutations in VHL	cancer vs normal	qRT-PCR	up	23660872
+hsa-miR-133b	hsa-miR-133b	pheochromocytoma	tumors with germline mutations in VHL	cancer vs normal	qRT-PCR	up	23660872
+hsa-miR-183	hsa-miR-183-5p	pheochromocytoma	tumors with germline mutations in SDHB	cancer vs normal	qRT-PCR	up	23660872
+hsa-miR-488	hsa-miR-488-5p	pheochromocytoma	tumors with germline mutations in RET	cancer vs normal	qRT-PCR	up	23660872
+hsa-miR-885-5p	hsa-miR-885-5p	pheochromocytoma	tumors with germline mutations in RET	cancer vs normal	qRT-PCR	up	23660872
+hsa-miR-96	hsa-miR-96-5p	pheochromocytoma	tumors with germline mutations in SDHB	cancer vs normal	qRT-PCR	up	23660872
+hsa-miR-196b	hsa-miR-196b-5p	gastric cancer		cancer vs normal	qRT-PCR	up	24222951
+hsa-miR-135b	hsa-miR-135b-5p	gastric cancer		cancer vs normal	qRT-PCR	NS	24222951
+hsa-miR-30c-2-3p	hsa-miR-30c-2-3p	kidney cancer	H1H2/H2 tumors	cancer vs normal	quantitative PCR	down	24189146
+hsa-miR-30a-3p	hsa-miR-30a-3p	kidney cancer	H1H2/H3 tumors	cancer vs normal	quantitative PCR	down	24189146
+hsa-miR-206	hsa-miR-206	mesothelioma	malignant pleural mesothelioma	cancer vs normal	qRT-PCR	down	23828229
+hsa-miR-1	hsa-miR-1-3p	mesothelioma	malignant pleural mesothelioma	cancer vs normal	qRT-PCR	down	23828229
+hsa-miR-483-5p	hsa-miR-483-5p	mesothelioma	malignant pleural mesothelioma	cancer vs normal	qRT-PCR	down	23828229
+hsa-miR-155*	hsa-miR-155-3p	mesothelioma	malignant pleural mesothelioma	cancer vs normal	qRT-PCR	up	23828229
+hsa-miR-21-5p	hsa-miR-21-5p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-203	hsa-miR-203a-3p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-1246	hsa-miR-1246	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-20a-5p	hsa-miR-20a-5p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-17-5p	hsa-miR-17-5p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-103a-3p	hsa-miR-103a-3p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-221-3p	hsa-miR-221-3p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-373-3p	hsa-miR-373-3p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-223-5p	hsa-miR-223-5p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-20b-5p	hsa-miR-20b-5p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-106b-5p	hsa-miR-106b-5p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-27a-3p	hsa-miR-27a-3p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-200a-3p	hsa-miR-200a-3p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-4732-5p	hsa-miR-4732-5p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-183-3p	hsa-miR-183-3p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-620	hsa-miR-620	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-92a-3p	hsa-miR-92a-3p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-3175	hsa-miR-3175	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-429	hsa-miR-429	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-4485	hsa-miR-4485-3p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-591	hsa-miR-591	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-3663-3p	hsa-miR-3663-3p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-181b-5p	hsa-miR-181b-5p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+has-miR-510	has-miR-510	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-19a-3p	hsa-miR-19a-3p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-142-5p	hsa-miR-142-5p	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-595	hsa-miR-595	colon cancer		cancer vs normal	qRT-PCR	up	24239208
+hsa-miR-143-5p	hsa-miR-143-5p	colon cancer		cancer vs normal	qRT-PCR	down	24239208
+has-miR-29c-3p	has-miR-29c-3p	colon cancer		cancer vs normal	qRT-PCR	down	24239208
+hsa-miR-34a-5p	hsa-miR-34a-5p	colon cancer		cancer vs normal	qRT-PCR	down	24239208
+hsa-miR-215	hsa-miR-215-5p	colon cancer		cancer vs normal	qRT-PCR	down	24239208
+hsa-miR-625-3p	hsa-miR-625-3p	colon cancer		cancer vs normal	qRT-PCR	down	24239208
+hsa-miR-320a	hsa-miR-320a	colon cancer		cancer vs normal	qRT-PCR	down	24239208
+hsa-miR-145-5p	hsa-miR-145-5p	colon cancer		cancer vs normal	qRT-PCR	down	24239208
+hsa-miR-4787-5p	hsa-miR-4787-5p	colon cancer		cancer vs normal	qRT-PCR	down	24239208
+hsa-miR-200c*	hsa-miR-200c-5p	colon cancer	highly invasive colon cancer cell line	cancer vs normal	qRT-PCR	up	22362069
+hsa-miR-143*	hsa-miR-143-5p	colon cancer	highly invasive colon cancer cell line	cancer vs normal	qRT-PCR	up	22362069
+hsa-miR-424*	hsa-miR-424-3p	colon cancer	highly invasive colon cancer cell line	cancer vs normal	qRT-PCR	up	22362069
+hsa-miR-150	hsa-miR-150-5p	colorectal cancer		metastases 	qRT-PCR	down	23987127
+hsa-miR-150	hsa-miR-150-5p	colorectal cancer		cancer vs normal	qRT-PCR	down	23987127
+hsa-miR-10b	hsa-miR-10b-5p	colorectal cancer		metastases 	qRT-PCR	down	23987127
+hsa-miR-10b	hsa-miR-10b-5p	colorectal cancer		cancer vs normal	qRT-PCR	down	23987127
+hsa-miR-146a	hsa-miR-146a-5p	colorectal cancer		metastases 	qRT-PCR	down	23987127
+hsa-miR-210	hsa-miR-210-3p	colorectal cancer		metastases 	qRT-PCR	up	23987127
+hsa-miR-211	hsa-miR-211-5p	colorectal cancer		metastases 	qRT-PCR	up	23987127
+hsa-miR-150	hsa-miR-150-5p	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	down	24121164
+hsa-miR-29b	hsa-miR-29b-3p	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	down	24121164
+hsa-miR-29a	hsa-miR-29a-3p	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	down	24121164
+hsa-miR-142-3p	hsa-miR-142-3p	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	down	24121164
+hsa-miR-142-5p	hsa-miR-142-5p	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	down	24121164
+hsa-miR-145	hsa-miR-145-5p	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	down	24121164
+hsa-miR-143	hsa-miR-143-3p	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	down	24121164
+hsa-miR-195	hsa-miR-195-5p	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	down	24121164
+hsa-miR-497	hsa-miR-497-5p	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	down	24121164
+hsa-miR-494	hsa-miR-494-3p	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	up	24121164
+hsa-miR-638	hsa-miR-638	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	up	24121164
+hsa-miR-21	hsa-miR-21-5p	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	up	24121164
+hsa-miR-155	hsa-miR-155-5p	lymphoma	diffuse large B-cell lymphoma/LNs	metastases 	RT-qPCR	up	24121164
+hsa-miR-103	hsa-miR-103a-3p	lymphoma	diffuse large B-cell lymphoma, subtype1: de vo,  subtype2: transformed  DLBCLs	subtype1 vs subtype2	RT-qPCR	down	24121164
+hsa-miR-107	hsa-miR-107	lymphoma	diffuse large B-cell lymphoma, subtype1: de vo,  subtype 3: transformed  DLBCLs	subtype1 vs subtype2	RT-qPCR	down	24121164
+hsa-miR-146a	hsa-miR-146a-5p	lymphoma	diffuse large B-cell lymphoma, subtype1: de vo,  subtype 4: transformed  DLBCLs	subtype1 vs subtype2	RT-qPCR	down	24121164
+hsa-miR-140	hsa-miR-140-5p	lymphoma	diffuse large B-cell lymphoma, subtype1: de vo,  subtype 5: transformed  DLBCLs	subtype1 vs subtype2	RT-qPCR	up	24121164
+hsa-let-7i	hsa-let-7i-5p	lymphoma	diffuse large B-cell lymphoma, subtype1: de vo,  subtype 6: transformed  DLBCLs	subtype1 vs subtype2	RT-qPCR	down	24121164
+hsa-miR-155	hsa-miR-155-5p	lymphoma	diffuse large B-cell lymphoma, subtype1: de vo,  subtype 7: transformed  DLBCLs	subtype1 vs subtype2	RT-qPCR	down	24121164
+hsa-miR-142-5p	hsa-miR-142-5p	lymphoma	diffuse large B-cell lymphoma, subtype1: de vo,  subtype 8: transformed  DLBCLs	subtype1 vs subtype2	RT-qPCR	down	24121164
+hsa-miR-125b	hsa-miR-125b-5p	breast cancer		cancer vs normal	qRT-PCR	down	24098452
+hsa-miR-134	hsa-miR-134-5p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype2: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	down	24512620
+hsa-miR-141-3p	hsa-miR-141-3p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype 3: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-182-5p	hsa-miR-182-5p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype 4: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-200a-3p	hsa-miR-200a-3p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype 5: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-200a-5p	hsa-miR-200a-5p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype 6: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-200b-3p	hsa-miR-200b-3p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype 7: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-200c-3p	hsa-miR-200c-3p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype 8: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-202-3p	hsa-miR-202-3p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype 9: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	down	24512620
+hsa-miR-205-5p	hsa-miR-205-5p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype10: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-383	hsa-miR-383-5p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype11: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	down	24512620
+hsa-miR-424-5p	hsa-miR-424-5p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype12: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	down	24512620
+miR-509-5p	has-miR-509-5p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype13: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	down	24512620
+miR-509-3-5p	has-miR-509-3p	ovarian cancer	subtype1: high-grade serous ovarian carcinoma (HGSC),  subtype14: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	down	24512620
+hsa-miR-141-3p	hsa-miR-141-3p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype1: ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-182-5p	hsa-miR-182-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype2 :ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-200a-3p	hsa-miR-200a-3p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype 3 :ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-200a-5p	hsa-miR-200a-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype 4 :ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-200b-3p	hsa-miR-200b-3p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype 5 :ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-200c-3p	hsa-miR-200c-3p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype 6 :ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-383	hsa-miR-383-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype 7 :ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	down	24512620
+hsa-miR-424-5p	hsa-miR-424-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype 8 :ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	down	24512620
+hsa-miR-508-5p	hsa-miR-508-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype 9 :ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-509-3p	hsa-miR-509-3p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype10 :ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-510	hsa-miR-510-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype11 :ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-513a-5p	hsa-miR-513a-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype12 :ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-514b-5p	hsa-miR-514b-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC),  subtype13 :ovarian surface epithelium (OSE)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-134	hsa-miR-134-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC), subtype2 :high-grade serous ovarian carcinoma (HGSC)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-202-3p	hsa-miR-202-3p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC), subtype 3 :high-grade serous ovarian carcinoma (HGSC)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-205-5p	hsa-miR-205-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC), subtype 4 :high-grade serous ovarian carcinoma (HGSC)	subtype1 vs subtype2	RT-qPCR	down	24512620
+hsa-miR-383	hsa-miR-383-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC), subtype 5 :high-grade serous ovarian carcinoma (HGSC)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-424-5p	hsa-miR-424-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC), subtype 6 :high-grade serous ovarian carcinoma (HGSC)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-508-5p	hsa-miR-508-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC), subtype 7 :high-grade serous ovarian carcinoma (HGSC)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-509-3p	hsa-miR-509-3p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC), subtype 8 :high-grade serous ovarian carcinoma (HGSC)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-509-5p	hsa-miR-509-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC), subtype 9 :high-grade serous ovarian carcinoma (HGSC)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-509-3-5p	hsa-miR-509-3-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC), subtype10 :high-grade serous ovarian carcinoma (HGSC)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-510	hsa-miR-510-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC), subtype11 :high-grade serous ovarian carcinoma (HGSC)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-513a-5p	hsa-miR-513a-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC), subtype12 :high-grade serous ovarian carcinoma (HGSC)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-514b-5p	hsa-miR-514b-5p	ovarian cancer	subtype1: clear cell ovarian carcinoma (CCC), subtype13 :high-grade serous ovarian carcinoma (HGSC)	subtype1 vs subtype2	RT-qPCR	up	24512620
+hsa-miR-483-5p	hsa-miR-483-5p	kidney cancer	wilms' tumor	cancer vs normal	qRT-PCR	up	24298054
+hsa-miR-509-5p	hsa-miR-509-5p	leukemia		cancer vs normal	qRT-PCR	up	25368993
+hsa-miR-509-3p	hsa-miR-509-3p	leukemia		cancer vs normal	qRT-PCR	up	25368993
+hsa-miR-135b	hsa-miR-135b-5p	colorectal cancer		cancer vs normal	RT-PCR	up	26069251
+hsa-miR-210	hsa-miR-210-3p	colorectal cancer		cancer vs normal	RT-PCR	up	26069251
+hsa-miR-218	hsa-miR-218-5p	colorectal cancer		cancer vs normal	RT-PCR	down	26069251
+hsa-miR-196	hsa-miR-196a-5p	head and neck cancer	head and neck cancers	cancer vs normal	qRT-PCR	up	24209638
+hsa-miR-10b	hsa-miR-10b-5p	head and neck cancer	head and neck cancers	cancer vs normal	qRT-PCR	down	24209638
+hsa-let-7b	hsa-let-7b-5p	breast cancer	triple negative breast cancer	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-let-7c	hsa-let-7c-5p	breast cancer	triple negative breast cancer	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-miR-100	hsa-miR-100-5p	breast cancer	triple negative breast cancer	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-miR-130a	hsa-miR-130a-3p	breast cancer	triple negative breast cancer	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-miR-210	hsa-miR-210-3p	breast cancer	triple negative breast cancer	cancer vs normal	Semi-quantitative real-time PCR	up	24479446
+hsa-let-7a-3	hsa-let-7a-3	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-let-7b	hsa-let-7b-5p	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-let-7a-2	hsa-let-7a-2	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-miR-100	hsa-miR-100-5p	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-miR-195	hsa-miR-195-5p	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-miR-497	hsa-miR-497-5p	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-miR-199a	hsa-miR-199a-5p	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-miR-214	hsa-miR-214-3p	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-miR-101	hsa-miR-101-3p	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	NS	24479446
+hsa-miR-26a	hsa-miR-26a-5p	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-miR-26b	hsa-miR-26b-5p	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-miR-29c	hsa-miR-29c-3p	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	NS	24479446
+hsa-miR-130a	hsa-miR-130a-3p	breast cancer	invasive ductal carcinomas 	cancer vs normal	Semi-quantitative real-time PCR	down	24479446
+hsa-miR-375	hsa-miR-375	thyroid cancer	medullary thyroid carcinomas	cancer vs normal	qPCR	up	27036030
+hsa-miR-451	hsa-miR-451a	thyroid cancer	medullary thyroid carcinomas	cancer vs normal	qPCR	down	27036030
+hsa-miR-155-5p	hsa-miR-155-5p	brain cancer	glioma	treatment ( hsa-miR-155-5p inhibitor)	qRT-PCR	down	24519663
+hsa-miR-124-3p	hsa-miR-124-3p	brain cancer	glioma	treatment( hsa-miR-124-3p mimic )	qRT-PCR	up	24519663
+hsa-miR-198	hsa-miR-198	brain cancer	glioma, human glioma stem cells (hGSCs), normal human neural stem cells (hNSCs) 	cancer vs normal	qRT-PCR	up	24519663
+hsa-miR-137	hsa-miR-137	brain cancer	glioma, human glioma stem cells (hGSCs), normal human neural stem cells (hNSCs) 	cancer vs normal	qRT-PCR	down	24519663
+hsa-miR-653	hsa-miR-653-5p	brain cancer	glioma, human glioma stem cells (hGSCs), normal human neural stem cells (hNSCs) 	cancer vs normal	qRT-PCR	down	24519663
+hsa-miR-146b-5p	hsa-miR-146b-5p	brain cancer	glioma, human glioma stem cells (hGSCs), normal human neural stem cells (hNSCs) 	cancer vs normal	qRT-PCR	up	24519663
+hsa-miR-152	hsa-miR-152-3p	brain cancer	glioma, human glioma stem cells (hGSCs), normal human neural stem cells (hNSCs) 	cancer vs normal	qRT-PCR	up	24519663
+hsa-miR-125a-3p	hsa-miR-125a-3p	brain cancer	glioma, human glioma stem cells (hGSCs), normal human neural stem cells (hNSCs) 	cancer vs normal	qRT-PCR	up	24519663
+hsa-miR-93	hsa-miR-93-5p	nasopharyngeal carcinoma	NPC cell lines	cancer vs normal	qRT-PCR	up	24606633
+hsa-miR-142-3p	hsa-miR-142-3p	breast cancer	formalin-fixed paraffin-embedded (FFPE) tumor, subtype1: BRCA1/4 mutation carriers,  subtype2: Noncarriers	subtype1 vs subtype2	qRT-PCR	up	24917463
+hsa-miR-505*	hsa-miR-505-5p	breast cancer	formalin-fixed paraffin-embedded (FFPE) tumor, subtype1: BRCA1/4 mutation carriers,  subtype 3: Noncarriers	subtype1 vs subtype2	qRT-PCR	up	24917463
+hsa-miR-1248	hsa-miR-1248	breast cancer	formalin-fixed paraffin-embedded (FFPE) tumor, subtype1: BRCA1/4 mutation carriers,  subtype 4: Noncarriers	subtype1 vs subtype2	qRT-PCR	up	24917463
+hsa-miR-628-3p	hsa-miR-628-3p	breast cancer	formalin-fixed paraffin-embedded (FFPE) tumor, subtype1: BRCA1/4 mutation carriers,  subtype 5: Noncarriers	subtype1 vs subtype2	qRT-PCR	up	24917463
+hsa-miR-103	hsa-miR-103a-3p	breast cancer	formalin-fixed paraffin-embedded (FFPE) tumor, subtype1: BRCA1/4 mutation carriers,  subtype 6: Noncarriers	subtype1 vs subtype2	qRT-PCR	up	24917463
+hsa-miR-574-3p	hsa-miR-574-3p	breast cancer	formalin-fixed paraffin-embedded (FFPE) tumor, subtype1: BRCA1/4 mutation carriers,  subtype 7: Noncarriers	subtype1 vs subtype2	qRT-PCR	up	24917463
+hsa-miR-27a	hsa-miR-27a-3p	breast cancer	formalin-fixed paraffin-embedded (FFPE) tumor, subtype1: BRCA1/4 mutation carriers,  subtype 8: Noncarriers	subtype1 vs subtype2	qRT-PCR	up	24917463
+hsa-miR-107	hsa-miR-107	breast cancer	formalin-fixed paraffin-embedded (FFPE) tumor, subtype1: BRCA1/4 mutation carriers,  subtype 9: Noncarriers	subtype1 vs subtype2	qRT-PCR	up	24917463
+hsa-miR-138-1*	hsa-miR-138-1-3p	breast cancer	formalin-fixed paraffin-embedded (FFPE) tumor, subtype1: BRCA1/4 mutation carriers,  subtype10: Noncarriers	subtype1 vs subtype2	qRT-PCR	up	24917463
+hsa-miR-25*	hsa-miR-25-5p	breast cancer	formalin-fixed paraffin-embedded (FFPE) tumor, subtype1: BRCA1/4 mutation carriers,  subtype11: Noncarriers	subtype1 vs subtype2	qRT-PCR	up	24917463
+hsa-miR-181a-2*	hsa-miR-181a-2-3p	breast cancer	formalin-fixed paraffin-embedded (FFPE) tumor, subtype1: BRCA1/4 mutation carriers,  subtype12: Noncarriers	subtype1 vs subtype2	qRT-PCR	up	24917463
+hsa-miR-340*	hsa-miR-340-3p	breast cancer	formalin-fixed paraffin-embedded (FFPE) tumor, subtype1: BRCA1/4 mutation carriers,  subtype13: Noncarriers	subtype1 vs subtype2	qRT-PCR	up	24917463
+hsa-miR-329	hsa-miR-329-3p	oral cancer	oral squamous cell carcinoma	cancer vs normal	qRT-PCR	down	25351956
+hsa-miR-410	hsa-miR-410-3p	oral cancer	oral squamous cell carcinoma	cancer vs normal	qRT-PCR	down	25351956
+hsa-miR-27a	hsa-miR-27a-3p	sarcoma	Myxoid liposarcoma	cancer vs normal	RT-PCR	down	24375455
+hsa-miR-17	hsa-miR-17-3p	sarcoma	Round cell liposarcoma	cancer vs normal	RT-PCR	up	24375455
+hsa-miR-195	hsa-miR-195-5p	sarcoma	Well differentiated liposarcoma	cancer vs normal	RT-PCR	down	24375455
+hsa-miR-21	hsa-miR-21-5p	sarcoma	Dedifferentiated liposarcoma	cancer vs normal	RT-PCR	up	24375455
+hsa-miR-30a	hsa-miR-30a-3p	sarcoma	Pleomorphic liposarcoma	cancer vs normal	RT-PCR	down	24375455
+hsa-miR-135b	hsa-miR-135b-5p	cholangiocarcinoma		cancer vs normal	qPCR	up	25017828
+hsa-miR-141	hsa-miR-141-3p	cholangiocarcinoma		cancer vs normal	qPCR	up	25017828
+hsa-miR-200c	hsa-miR-200c-3p	cholangiocarcinoma		cancer vs normal	qPCR	up	25017828
+hsa-miR-21	hsa-miR-21-5p	cholangiocarcinoma		cancer vs normal	qPCR	down	25017828
+hsa-miR-221	hsa-miR-221-3p	cholangiocarcinoma		cancer vs normal	qPCR	up	25017828
+hsa-miR-222	hsa-miR-222-3p	cholangiocarcinoma		cancer vs normal	qPCR	up	25017828
+hsa-miR-21	hsa-miR-21-5p	colon cancer	colonic adenocarcinomas	cancer vs normal	qRT-PCR	up	24921248
+hsa-miR-31	hsa-miR-31-5p	colon cancer	colonic adenocarcinomas	cancer vs normal	qRT-PCR	up	24921248
+hsa-miR-93	hsa-miR-93-5p	colon cancer	colonic adenocarcinomas	cancer vs normal	qRT-PCR	up	24921248
+hsa-miR-103	hsa-miR-103a-3p	colon cancer	colonic adenocarcinomas	cancer vs normal	qRT-PCR	up	24921248
+hsa-miR-566	hsa-miR-566	colon cancer	colonic adenocarcinomas	cancer vs normal	qRT-PCR	down	24921248
+hsa-miR-93	hsa-miR-93-5p	colon cancer	colonic adenocarcinomas	metastasis	qRT-PCR	up	24921248
+hsa-miR-31	hsa-miR-31-5p	colon cancer	colonic adenocarcinomas	metastasis	qRT-PCR	up	24921248
+hsa-miR-372	hsa-miR-372-3p	oropharyngeal cancers	SCC089,  SCC003 (tonsil),  SCC099 (floor of mouth) and SCC029b (oral cavity)	cancer vs normal	QRT-PCR	up	26867589
+hsa-miR-499	hsa-miR-499a-5p	oropharyngeal cancers	SCC089,  SCC003 (tonsil),  SCC099 (floor of mouth) and SCC030b (oral cavity)	cancer vs normal	QRT-PCR	up	26867589
+hsa-miR-21	hsa-miR-21-5p	oropharyngeal cancers	SCC089,  SCC003 (tonsil),  SCC099 (floor of mouth) and SCC031b (oral cavity)	cancer vs normal	QRT-PCR	up	26867589
+hsa-let-7c	hsa-let-7c-5p	oropharyngeal cancers	SCC089,  SCC003 (tonsil),  SCC099 (floor of mouth) and SCC032b (oral cavity)	cancer vs normal	QRT-PCR	down	26867589
+hsa-let-7e	hsa-let-7e-5p	lung cancer	Lung Adenocarcinoma	blood cancer vs normal	RT-PCR	up	23029380
+hsa-miR-22	hsa-miR-22-3p	lung cancer	Lung Adenocarcinoma	blood cancer vs normal	RT-PCR	up	23029380
+hsa-miR-30a-5p	hsa-miR-30a-5p	lung cancer	Lung Adenocarcinoma	blood cancer vs normal	RT-PCR	down	23029380
+hsa-miR-185	hsa-miR-185-5p	lung cancer	Lung Adenocarcinoma	blood cancer vs normal	RT-PCR	down	23029380
+hsa-miR-210	hsa-miR-210-3p	lung cancer	Lung Adenocarcinoma	blood cancer vs normal	RT-PCR	down	23029380
+hsa-miR-423-5p	hsa-miR-423-5p	lung cancer	Lung Adenocarcinoma	blood cancer vs normal	RT-PCR	down	23029380
+hsa-miR-202	hsa-miR-202-3p	breast cancer		cancer vs normal	RT-qPCR	up	22242178
+hsa-miR-718	hsa-miR-718	breast cancer		cancer vs normal	RT-qPCR	down	22242178
+hsa-miR-216a	hsa-miR-216a-5p	ovarian cancer	lymphoblastoid cell line	cancer vs normal	Real-time quantitative PCR	up	22235027
+hsa-miR-588	hsa-miR-588	ovarian cancer	lymphoblastoid cell line	cancer vs normal	Real-time quantitative PCR	up	22235027
+hsa-miR-92b	hsa-miR-92b-3p	ovarian cancer	lymphoblastoid cell line	cancer vs normal	Real-time quantitative PCR	down	22235027
+hsa-miR-629*	hsa-miR-629-3p	ovarian cancer	lymphoblastoid cell line	cancer vs normal	Real-time quantitative PCR	down	22235027
+hsa-miR-520d-3p	hsa-miR-520d-3p	kidney cancer	wilms tumor	cancer vs normal	qRT-PCR	up	22871070
+hsa-miR-197	hsa-miR-197-3p	kidney cancer	wilms tumor	cancer vs normal	qRT-PCR	up	22871070
+hsa-miR-224	hsa-miR-224-5p	kidney cancer	wilms tumor	cancer vs normal	qRT-PCR	up	22871070
+hsa-miR-20a	hsa-miR-20a-5p	kidney cancer	wilms tumor	cancer vs normal	qRT-PCR	down	22871070
+hsa-miR-126	hsa-miR-126-3p	kidney cancer	wilms tumor	cancer vs normal	qRT-PCR	down	22871070
+hsa-miR-144*	hsa-miR-144-5p	kidney cancer	wilms tumor	cancer vs normal	qRT-PCR	down	22871070
+hsa-miR-150	hsa-miR-150-5p	colorectal cancer		cancer vs normal	RT-PCR	down	23758639
+hsa-miR-193a-3p	hsa-miR-193a-3p	colorectal cancer		cancer vs normal	RT-PCR	up	23758639
+hsa-miR-23a	hsa-miR-23a-3p	colorectal cancer		cancer vs normal	RT-PCR	up	23758639
+hsa-miR-23b	hsa-miR-23b-3p	colorectal cancer		cancer vs normal	RT-PCR	up	23758639
+hsa-miR-338-5p	hsa-miR-338-5p	colorectal cancer		cancer vs normal	RT-PCR	up	23758639
+hsa-miR-342-3p	hsa-miR-342-3p	colorectal cancer		cancer vs normal	RT-PCR	down	23758639
+hsa-miR-483-3p	hsa-miR-483-3p	colorectal cancer		blood	RT-PCR	up	23758639
+hsa-miR-193a-3p	hsa-miR-193a-3p	colorectal cancer		blood	RT-PCR	up	23758639
+hsa-miR-23a	hsa-miR-23a-3p	colorectal cancer		blood	RT-PCR	up	23758639
+hsa-miR-23b	hsa-miR-23b-3p	colorectal cancer		blood	RT-PCR	up	23758639
+hsa-miR-338-5p	hsa-miR-338-5p	colorectal cancer		blood	RT-PCR	up	23758639
+hsa-miR-483-3p	hsa-miR-483-3p	colorectal cancer		blood	RT-PCR	up	23758639
+hsa-miR-17	hsa-miR-17-3p	retinoblastoma		blood	qRT-PCR	up	23400111
+hsa-miR-18a	hsa-miR-18a-5p	retinoblastoma		blood	qRT-PCR	up	23400111
+hsa-miR-20a	hsa-miR-20a-5p	retinoblastoma		blood	qRT-PCR	up	23400111
+hsa-miR-19b-1	hsa-miR-19b-1	retinoblastoma		blood	qRT-PCR	NS	23400111
+hsa-miR-92a-1	hsa-miR-92a-1	retinoblastoma		blood	qRT-PCR	up	23400111
+hsa-miR-1	hsa-miR-1-3p	breast cancer		cancer vs normal	LNA RT-PCR	up	23797906
+hsa-miR-92a	hsa-miR-92a-3p	breast cancer		cancer vs normal	LNA RT-PCR	up	23797906
+hsa-miR-133a	hsa-miR-133a-3p	breast cancer		cancer vs normal	LNA RT-PCR	up	23797906
+hsa-miR-133b	hsa-miR-133b	breast cancer		cancer vs normal	LNA RT-PCR	up	23797906
+hsa-miR-205-5p-5p	hsa-miR-205-5p	sarcoma	osteosarcoma	cancer vs normal	qPCR	down	25784290
+hsa-miR-214	hsa-miR-214-3p	sarcoma	osteosarcoma	cancer vs normal	qPCR	up	25784290
+hsa-miR-335-5p	hsa-miR-335-5p	sarcoma	osteosarcoma	cancer vs normal	qPCR	up	25784290
+hsa-miR-574-3p	hsa-miR-574-3p	sarcoma	osteosarcoma	cancer vs normal	qPCR	up	25784290
+hsa-miR-142-3p	hsa-miR-142-3p	pancreatic cancer	MIA PaCa-2 and S2-013 cells, Capan-1 cells	cancer vs normal	real-time PCR	up	23635652
+hsa-miR-21	hsa-miR-21-5p	pancreatic cancer	pancreatic ductal adenocarcinoma (PDAC)	cancer vs normal	western blot	up	24120476
+hsa-miR-23a	hsa-miR-23a-3p	pancreatic cancer	pancreatic ductal adenocarcinoma (PDAC)	cancer vs normal	western blot	up	24120476
+hsa-miR-27a	hsa-miR-27a-3p	pancreatic cancer	pancreatic ductal adenocarcinoma (PDAC)	cancer vs normal	western blot	up	24120476
+hsa-miR-99b-3p	hsa-miR-99b-3p	gastric cancer	subtype1: Helicobacter  pylori-positive cancer,  subtype2: Helicobacter pylori-negative cancer 	subtype1 vs subtype2	TaqMan Universal PCR	up	25167801
+hsa-miR-564	hsa-miR-564	gastric cancer	subtype1: Helicobacter  pylori-positive cancer,  subtype2: Helicobacter pylori-negative cancer 	subtype1 vs subtype2	TaqMan Universal PCR	up	25167801
+hsa-miR-638	hsa-miR-638	gastric cancer	subtype1: Helicobacter  pylori-positive cancer,  subtype2: Helicobacter pylori-negative cancer 	subtype1 vs subtype2	TaqMan Universal PCR	up	25167801
+hsa-miR-204-5p	hsa-miR-204-5p	gastric cancer	subtype1: Helicobacter  pylori-positive cancer,  subtype2: Helicobacter pylori-negative cancer 	subtype1 vs subtype2	TaqMan Universal PCR	down	25167801
+hsa-miR-338-5p	hsa-miR-338-5p	gastric cancer	subtype1: Helicobacter  pylori-positive cancer,  subtype2: Helicobacter pylori-negative cancer 	subtype1 vs subtype2	TaqMan Universal PCR	down	25167801
+hsa-miR-375	hsa-miR-375	gastric cancer	subtype1: Helicobacter  pylori-positive cancer,  subtype2: Helicobacter pylori-negative cancer 	subtype1 vs subtype2	TaqMan Universal PCR	down	25167801
+hsa-miR-548c-3p	hsa-miR-548c-3p	gastric cancer	subtype1: Helicobacter  pylori-positive cancer,  subtype2: Helicobacter pylori-negative cancer 	subtype1 vs subtype2	TaqMan Universal PCR	down	25167801
