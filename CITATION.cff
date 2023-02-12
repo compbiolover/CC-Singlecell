@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this in your own work, please cite it as below."
+authors:
+  - family-names: Willems
+    given-names: Andrew
+    orcid: https://orcid.org/0000-0002-7927-0745
+  - family-names: Panchy
+    given-names: Nicholas
+    orcid: https://orcid.org/0000-0002-1551-3517
+  - family-names: Hong
+    given-names: Tian
+title: "Using Single-Cell RNA Sequencing and MicroRNA Targeting Data to Improve Colorectal Cancer Survival Prediction"
+doi:  10.3390/cells12020228
+date-published: 2023-01-05
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Willems"
+    given-names: "Andrew"
+    orcid: https://orcid.org/0000-0002-7927-0745
+  - family-names: "Panchy"
+    given-names: "Nicholas"
+    orcid: https://orcid.org/0000-0002-1551-3517
+  - family-names: Hong
+    given-names: Tian
+  doi:  10.3390/cells12020228
+  journal: "Cells"
+  month: 1
+  start: 228
+  title: "Using Single-Cell RNA Sequencing and MicroRNA Targeting Data to Improve Colorectal Cancer Survival Prediction"
+  issue: 2
+  volume: 12
+  year: 2023
