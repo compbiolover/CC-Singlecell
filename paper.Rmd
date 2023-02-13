@@ -14,6 +14,26 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This document encompasses all steps, code, and data used for the CC Singlecell paper
 
+## Step 0: Install needed packages
+```{r install needed packages}
+bioc_pkgs <- c(
+  "BiocParallel", "biomaRt", "DESeq2", "DEsingle", "edgeR", "scDD", "scde",
+  "scran", "SingleCellExperiment", "SummarizedExperiment",
+  "TCGAbiolinks", "zinbwave", "BiocGenerics", "DelayedArray", "DelayedMatrixStats",
+  "limma", "lme4", "S4Vectors", "SingleCellExperiment",
+  "SummarizedExperiment", "batchelor", "HDF5Array",
+  "terra", "ggrastr"
+)
+BiocManager::install(bioc_pkgs)
+install.packages(c(
+  "data.table", "extrafont", "ggbreak", "ggpubr", "igraph", "tidyverse", "gt", "phateR", "survival",
+  "survminer", "svglite", "viridis", "devtools", "RColorBrewer", "Rmagic", "scales"
+))
+
+devtools::install_github("cole-trapnell-lab/monocle3")
+```
+
+
 
 ## Step 1: Loading needed packages
 ```{r loading needed packages, message=FALSE, echo=FALSE}
@@ -40,7 +60,6 @@ library(scDD)
 library(scde)
 library(scran)
 library(SingleCellExperiment)
-library(stringr)
 library(SummarizedExperiment)
 library(survival)
 library(survminer)
