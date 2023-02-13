@@ -3761,11 +3761,11 @@ mirna_genes <- mirna_calculator(print.ts.targets = TRUE, max.mirnas = 10, max.mi
 
 figs1a <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/figs1a_smaller_matrix.rds")
 
-#figs1a <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/figs1_mirna_score_matrix.rds")
+# figs1a <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/figs1_mirna_score_matrix.rds")
 
 
 svg(filename = "~/Desktop/figs1a.svg", width = 8, height = 8)
-figs1a_p <- heatmap(as.matrix(figs1a), Rowv = NA, Colv = NA, main = "miRNA Interaction Map", margins = c(10,5), xlab = "miRNAs", ylab = "Genes", col = c("#ffffbf", "#ef8a62"))
+figs1a_p <- heatmap(as.matrix(figs1a), Rowv = NA, Colv = NA, main = "miRNA Interaction Map", margins = c(10, 5), xlab = "miRNAs", ylab = "Genes", col = c("#ffffbf", "#ef8a62"))
 dev.off()
 ```
 
@@ -6161,7 +6161,7 @@ p1 <- ggplot(data = mad_genes_df, aes(x = mad_genes)) +
   xlab("Scores") +
   ylab("Count") +
   scale_y_continuous(expand = c(0, 0)) +
-  scale_x_continuous(expand = c(0, 0), labels = label_number(), limits = c(0,0.00020))
+  scale_x_continuous(expand = c(0, 0), labels = label_number(), limits = c(0, 0.00020))
 
 p2 <- ggplot(data = sde_genes_df, aes(x = sde_genes)) +
   geom_histogram() +
@@ -6327,7 +6327,7 @@ random_genes_e <- read.csv("Data/Reproducible-results/Rmarkdown/Outputs/tian_emt
 cds_output <- cell_dataset_builder(
   vim.genes = random_genes_e$Gene[1:30],
   cell.data = my_sc_df,
-  cell.meta = my_sc_df_names, 
+  cell.meta = my_sc_df_names,
   my.monocle.plot.dpi = 600,
   my.root = "Y_7",
   point.size = 2.5,
@@ -6346,7 +6346,7 @@ cds_output$`Cell Progression Graph`
 random_genes_m <- read.csv("Data/Reproducible-results/Rmarkdown/Outputs/tian_emt_genes_m_set_randomly_selected.csv")
 cds_output <- cell_dataset_builder(
   vim.genes = random_genes_m$Gene[1:30],
-  #vim.genes = c("VIM", "VIMP", "CDH1", "ZEB1"),
+  # vim.genes = c("VIM", "VIMP", "CDH1", "ZEB1"),
   cell.data = my_sc_df,
   cell.meta = my_sc_df_names,
   my.root = "Y_7",
@@ -6357,7 +6357,7 @@ cds_output <- cell_dataset_builder(
   norm.flag = "log",
   my.cds.filename = "Data/Reproducible-results/Rmarkdown/Outputs/cds_ouput_test5.rds",
   my.monocle.graph = "Data/Reproducible-results/Rmarkdown/Outputs/vim_pseudotime_test5.svg",
-  #my.monocle.graph.genes = "Data/Reproducible-results/Rmarkdown/Outputs/hallmark_emt_genes_expression_profile_updated_600_dpi.svg",
+  # my.monocle.graph.genes = "Data/Reproducible-results/Rmarkdown/Outputs/hallmark_emt_genes_expression_profile_updated_600_dpi.svg",
   my.monocle.graph.genes = "Data/Reproducible-results/Rmarkdown/Outputs/30_m_emt_genes_expression_profile_updated_600_dpi.svg",
   my.pt.data.filename = "Data/Reproducible-results/Rmarkdown/Outputs/vim_pseudotime_data_test5.csv"
 )
@@ -6413,7 +6413,7 @@ e_files <- list.files(path = "Data/Reproducible-results/Rmarkdown/Outputs/e-gene
 all_cors <- c(rep(0, length(tian_emt_genes_e$Gene)))
 counter <- 1
 for (f in e_files) {
-  current_file <- read.csv(paste0("Data/Reproducible-results/Rmarkdown/Outputs/e-genes-corr-matricies/",f))
+  current_file <- read.csv(paste0("Data/Reproducible-results/Rmarkdown/Outputs/e-genes-corr-matricies/", f))
   current_corr <- current_file$Expr[2]
   all_cors[counter] <- current_corr
   counter <- counter + 1
@@ -6444,12 +6444,12 @@ e_hist
 
 ```{r saving e genes histogram}
 ggsave(
-    filename = "Data/Reproducible-results/Rmarkdown/Outputs/e_correlation_histogram.svg",
-    plot = print(e_hist, newpage = FALSE),
-    device = "svg", dpi = 600,
-    width = 7.8, height = 7.8,
-    units = "in"
-  )
+  filename = "Data/Reproducible-results/Rmarkdown/Outputs/e_correlation_histogram.svg",
+  plot = print(e_hist, newpage = FALSE),
+  device = "svg", dpi = 600,
+  width = 7.8, height = 7.8,
+  units = "in"
+)
 ```
 ```{r vim and other canidate markers pseudotime (using vim pseudotime root for m gene analysis)}
 for (g in tian_emt_genes_m$Gene) {
@@ -6477,7 +6477,7 @@ m_files <- list.files(path = "Data/Reproducible-results/Rmarkdown/Outputs/m-gene
 all_cors <- c(rep(0, length(tian_emt_genes_m$Gene)))
 counter <- 1
 for (f in m_files) {
-  current_file <- read.csv(paste0("Data/Reproducible-results/Rmarkdown/Outputs/m-gene-corr-matricies/",f))
+  current_file <- read.csv(paste0("Data/Reproducible-results/Rmarkdown/Outputs/m-gene-corr-matricies/", f))
   current_corr <- current_file$Expr[2]
   all_cors[counter] <- current_corr
   counter <- counter + 1
@@ -6508,12 +6508,12 @@ m_hist
 
 ```{r saving m genes histogram}
 ggsave(
-    filename = "Data/Reproducible-results/Rmarkdown/Outputs/m_correlation_histogram.svg",
-    plot = print(m_hist, newpage = FALSE),
-    device = "svg", dpi = 600,
-    width = 7.8, height = 7.8,
-    units = "in"
-  )
+  filename = "Data/Reproducible-results/Rmarkdown/Outputs/m_correlation_histogram.svg",
+  plot = print(m_hist, newpage = FALSE),
+  device = "svg", dpi = 600,
+  width = 7.8, height = 7.8,
+  units = "in"
+)
 ```
 
 ```{r test of metric integration}
@@ -6522,4 +6522,3 @@ sde_genes <- readRDS("Data/Reproducible-results/Rmarkdown/Outputs/sde_colon_and_
 load(file = "Data/Reproducible-results/Rmarkdown/Data/700_810_targets.RData", verbose = TRUE)
 mirna_genes <- mirna.ranking
 ```
-
