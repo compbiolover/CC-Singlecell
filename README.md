@@ -7,7 +7,7 @@ If you find our work helpful please use the citation below:
 ## Project Organization
 
 ```bash
-CCsinglecell/
+CC-Singlecell/
 ├── R/                        # Refactored, optimized R package code
 │   ├── cell_dataset_builder.R
 │   ├── cox_model.R
