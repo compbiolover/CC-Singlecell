@@ -71,6 +71,9 @@ calculate_mad <- function(expression_matrix, parallel = FALSE, n_cores = NULL, n
         # Extract the normalized MAD values as a named vector
         mad_ranking <- ranked_mads$mad_normalized
         names(mad_ranking) <- ranked_mads$gene
+        # Extract the normalized MAD values as a named vector
+        mad_ranking <- ranked_mads$mad_normalized
+        names(mad_ranking) <- ranked_mads$gene
     } else {
         ranked_mads <- gene_mads %>%
             tibble::enframe(name = "gene", value = "mad") %>%
@@ -80,7 +83,9 @@ calculate_mad <- function(expression_matrix, parallel = FALSE, n_cores = NULL, n
         # Extract the un-normalized MAD values as a named vector
         mad_ranking <- ranked_mads$mad_unnormalized
         names(mad_ranking) <- ranked_mads$gene
-
-        return(mad_ranking)
     }
+
+
+
+    return(mad_ranking)
 }
