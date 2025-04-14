@@ -17,8 +17,12 @@
 #' }
 calculate_mad <- function(expression_matrix, parallel = FALSE, n_cores = NULL, normalize = TRUE) {
     # Input validation
-    if (!is.matrix(expression_matrix) && !is.data.frame(expression_matrix)) {
-        stop("expression_matrix must be a matrix or data frame")
+    if (!is.matrix(expression_matrix)) {
+        stop("expression_matrix must be a matrix")
+    }
+
+    if (length(expression_matrix) == 0) {
+        stop("expression_matrix must not be empty")
     }
 
     # Set up parallel processing if requested
@@ -75,4 +79,3 @@ calculate_mad <- function(expression_matrix, parallel = FALSE, n_cores = NULL, n
 
     return(mad_ranking)
 }
-x

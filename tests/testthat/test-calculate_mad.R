@@ -12,8 +12,7 @@ test_matrix_large <- matrix(
     nrow = 10,
     dimnames = list(paste0("gene", 1:10), paste0("cell", 1:10))
 )
-# Create a data frame for testing data frame input
-test_df <- as.data.frame(test_matrix_small)
+
 test_that("calculate_mad produces correct output format", {
     # Test with matrix input
     result <- calculate_mad(test_matrix_small)
@@ -29,13 +28,6 @@ test_that("calculate_mad produces correct output format", {
     expect_true(all(result >= 0 & result <= 1))
     # Check that values sum to 1
     expect_equal(sum(result), 1)
-})
-test_that("calculate_mad works with data frame input", {
-    # Test with data frame input
-    result_df <- calculate_mad(test_df)
-    result_matrix <- calculate_mad(test_matrix_small)
-    # Results should be identical regardless of input type
-    expect_equal(result_df, result_matrix)
 })
 test_that("calculate_mad performs correct calculation", {
     # Manually calculate expected result for small test matrix
@@ -62,7 +54,7 @@ test_that("calculate_mad handles edge cases correctly", {
         nrow = 1,
         dimnames = list("gene1", paste0("cell", 1:5))
     )
-    single_result <- calculate_mad(single_row)
+    single_result <- unname(calculate_mad(single_row))
     expect_length(single_result, 1)
     expect_equal(single_result, 1) # The only MAD value normalized
     # Constant values in a row (MAD = 0)
