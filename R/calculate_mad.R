@@ -67,15 +67,20 @@ calculate_mad <- function(expression_matrix, parallel = FALSE, n_cores = NULL, n
             tibble::enframe(name = "gene", value = "mad") %>%
             dplyr::arrange(dplyr::desc(mad)) %>%
             dplyr::mutate(mad_normalized = abs(mad) / sum(abs(mad)))
+
+        # Extract the normalized MAD values as a named vector
+        mad_ranking <- ranked_mads$mad_normalized
+        names(mad_ranking) <- ranked_mads$gene
     } else {
         ranked_mads <- gene_mads %>%
             tibble::enframe(name = "gene", value = "mad") %>%
-            dplyr::arrange(dplyr::desc(mad))
+            dplyr::arrange(dplyr::desc(mad)) %>%
+            dplyr::mutate(mad_unnormalized = mad)
+
+        # Extract the un-normalized MAD values as a named vector
+        mad_ranking <- ranked_mads$mad_unnormalized
+        names(mad_ranking) <- ranked_mads$gene
+
+        return(mad_ranking)
     }
-
-    # Extract the normalized MAD values as a named vector
-    mad_ranking <- ranked_mads$mad_normalized
-    names(mad_ranking) <- ranked_mads$gene
-
-    return(mad_ranking)
 }
