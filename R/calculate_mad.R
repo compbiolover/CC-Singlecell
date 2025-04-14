@@ -8,7 +8,7 @@
 #' @param n_cores Number of cores to use for parallel processing (default: NULL, uses available cores - 1)
 #' @param normalize Whether to normalize the scores of our ranked list of genes (default: TRUE)
 #'
-#' @return A named numeric vector of normalized MAD values sorted in decreasing order
+#' @return A named numeric vector of normalized or un-normalized MAD values sorted in decreasing order
 #' @export
 #'
 #' @examples
