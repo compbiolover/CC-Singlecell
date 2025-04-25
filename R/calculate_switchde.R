@@ -23,13 +23,15 @@
 #' \dontrun{
 #' sde_genes <- switchde_calculator(denoised_sc = expression_matrix, pseudo_time = pseudotime_data, normalize = TRUE)
 #' }
-switchde_calculator <- function(denoised_sc,
-                                pseudo_time,
-                                zero_inflated = FALSE,
-                                q_threshold = 0.05,
-                                parallel = FALSE,
-                                n_cores = NULL,
-                                normalize = TRUE) {
+switchde_calculator <- function(
+    denoised_sc,
+    pseudo_time,
+    zero_inflated = FALSE,
+    q_threshold = 0.05,
+    parallel = FALSE,
+    n_cores = NULL,
+    normalize = TRUE
+) {
     # Input validation
     if (!is.matrix(denoised_sc)) {
         stop("denoised_sc must be a matrix")
@@ -41,15 +43,22 @@ switchde_calculator <- function(denoised_sc,
 
     if (!is.numeric(pseudo_time)) {
         # Check if pseudo_time is a dataframe with a Pseudotime column
-        if (is.data.frame(pseudo_time) && "Pseudotime" %in% colnames(pseudo_time)) {
+        if (
+            is.data.frame(pseudo_time) &&
+                "Pseudotime" %in% colnames(pseudo_time)
+        ) {
             pseudo_time <- as.numeric(pseudo_time$Pseudotime)
         } else {
-            stop("pseudo_time must be a numeric vector or a dataframe with a 'Pseudotime' column")
+            stop(
+                "pseudo_time must be a numeric vector or a dataframe with a 'Pseudotime' column"
+            )
         }
     }
 
     if (length(pseudo_time) != ncol(denoised_sc)) {
-        stop("Length of pseudo_time must match the number of cells (columns) in denoised_sc")
+        stop(
+            "Length of pseudo_time must match the number of cells (columns) in denoised_sc"
+        )
     }
 
     # Check for required packages
@@ -63,17 +72,23 @@ switchde_calculator <- function(denoised_sc,
 
     # Set up parallel processing if requested
     if (parallel) {
-        if (!requireNamespace("future", quietly = TRUE) ||
-            !requireNamespace("furrr", quietly = TRUE)) {
-            warning("Packages 'future' and 'furrr' are required for parallel processing.
-              Falling back to sequential processing.")
+        if (
+            !requireNamespace("future", quietly = TRUE) ||
+                !requireNamespace("furrr", quietly = TRUE)
+        ) {
+            warning(
+                "Packages 'future' and 'furrr' are required for parallel processing.
+              Falling back to sequential processing."
+            )
             parallel <- FALSE
         } else {
             # Determine number of cores to use
             if (is.null(n_cores)) {
                 if (!requireNamespace("parallel", quietly = TRUE)) {
-                    warning("Package 'parallel' is required for auto-detecting cores.
-                  Using 2 cores.")
+                    warning(
+                        "Package 'parallel' is required for auto-detecting cores.
+                  Using 2 cores."
+                    )
                     n_cores <- 2
                 } else {
                     n_cores <- max(1, parallel::detectCores() - 1)
@@ -88,11 +103,18 @@ switchde_calculator <- function(denoised_sc,
     # Calculate switchde values
     if (parallel) {
         # Not implementing parallel version yet as it would require restructuring switchde internals
-        warning("Parallel processing for switchde is not yet implemented. Using sequential processing.")
+        warning(
+            "Parallel processing for switchde is not yet implemented. Using sequential processing."
+        )
     }
 
     # Run switchde analysis
-    sde <- switchde::switchde(denoised_sc, pseudo_time, verbose = TRUE, zero_inflated = zero_inflated)
+    sde <- switchde::switchde(
+        denoised_sc,
+        pseudo_time,
+        verbose = TRUE,
+        zero_inflated = zero_inflated
+    )
 
     # Filter by q-value threshold
     sde_filtered <- dplyr::filter(sde, qval < q_threshold)

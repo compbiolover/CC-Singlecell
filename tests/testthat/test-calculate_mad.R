@@ -50,7 +50,8 @@ test_that("calculate_mad handles edge cases correctly", {
     empty_matrix <- matrix(0, nrow = 0, ncol = 0)
     expect_error(calculate_mad(empty_matrix))
     # Single row
-    single_row <- matrix(1:5,
+    single_row <- matrix(
+        1:5,
         nrow = 1,
         dimnames = list("gene1", paste0("cell", 1:5))
     )
@@ -58,8 +59,10 @@ test_that("calculate_mad handles edge cases correctly", {
     expect_length(single_result, 1)
     expect_equal(single_result, 1) # The only MAD value normalized
     # Constant values in a row (MAD = 0)
-    constant_matrix <- matrix(rep(5, 15),
-        nrow = 3, ncol = 5,
+    constant_matrix <- matrix(
+        rep(5, 15),
+        nrow = 3,
+        ncol = 5,
         dimnames = list(paste0("gene", 1:3), paste0("cell", 1:5))
     )
     const_result <- calculate_mad(constant_matrix)

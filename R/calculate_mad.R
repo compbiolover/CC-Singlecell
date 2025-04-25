@@ -15,7 +15,12 @@
 #' \dontrun{
 #' mad_genes <- calculate_mad(expression_matrix)
 #' }
-calculate_mad <- function(expression_matrix, parallel = FALSE, n_cores = NULL, normalize = TRUE) {
+calculate_mad <- function(
+    expression_matrix,
+    parallel = FALSE,
+    n_cores = NULL,
+    normalize = TRUE
+) {
     # Input validation
     if (!is.matrix(expression_matrix)) {
         stop("expression_matrix must be a matrix")
@@ -27,10 +32,14 @@ calculate_mad <- function(expression_matrix, parallel = FALSE, n_cores = NULL, n
 
     # Set up parallel processing if requested
     if (parallel) {
-        if (!requireNamespace("future", quietly = TRUE) ||
-            !requireNamespace("furrr", quietly = TRUE)) {
-            warning("Packages 'future' and 'furrr' are required for parallel processing.
-              Falling back to sequential processing.")
+        if (
+            !requireNamespace("future", quietly = TRUE) ||
+                !requireNamespace("furrr", quietly = TRUE)
+        ) {
+            warning(
+                "Packages 'future' and 'furrr' are required for parallel processing.
+              Falling back to sequential processing."
+            )
             parallel <- FALSE
         } else {
             # Determine number of cores to use
@@ -84,8 +93,6 @@ calculate_mad <- function(expression_matrix, parallel = FALSE, n_cores = NULL, n
         mad_ranking <- ranked_mads$mad_unnormalized
         names(mad_ranking) <- ranked_mads$gene
     }
-
-
 
     return(mad_ranking)
 }
